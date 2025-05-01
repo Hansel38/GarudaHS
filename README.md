@@ -14,7 +14,7 @@ Garuda Hack Shiled Untuk Ragnarok rAthena
 | ✅ Thread Watcher      | Deteksi thread hijack dari modul tidak dikenal                         |
 | ✅ Anti-Debug          | Deteksi debugger attach & remote debugger                             |
 | ✅ DLL Injection Scan  | Scan semua DLL loaded & validasi whitelist                             |
-| ✅ File Integrity      | Cek MD5 `RRO.exe` dan `Republic.grf` untuk modifikasi ilegal           |
+| ✅ File Integrity      | Cek MD5 `ragexe.exe` dan `file.grf` untuk modifikasi ilegal           |
 | ✅ HWID System         | Fingerprint PC berdasarkan MAC + HDD Serial                            |
 | ✅ Overlay Scanner     | Deteksi jendela overlay mencurigakan (ESP, wallhack GUI, dsb)          |
 | ✅ IAT Hook Scanner    | Validasi pointer API untuk mendeteksi hook dari cheat                  |
