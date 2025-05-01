@@ -21,49 +21,23 @@ Garuda Hack Shiled Untuk Ragnarok rAthena
 | ✅ Thread Protector    | Auto-resume anti-cheat thread jika disuspend cheat                     |
 
 ---
-🧠 Next Project :
-🔁 1. Real-Time CRC Validator (GRF, .LUB, .LUA, .DLL)
-- Cek CRC/MD5 tiap frame/battle
-- Deteksi delay hack (skillinfo.lub), aura disable, GRF decrypt
-- Bisa bind sama patcher untuk validasi file saat game jalan
-Anti : GRF edit, delay cheat, visual spam
+Garuda V.0.1.9
+🔍 Scan overlay (ESP)
+🔐 File checker CRC
+🧠 Memory scanner (heuristic string scan)
+🧬 HWID system
+🕵️‍♂️ Hijacked Thread & IAT Hook scan
+🔌 DLL injection detect
+🛡️ Server-side verification
 
-🧠 2. Memory Signature Scanner
-- Scan memory untuk byte pattern cheat (signature CE, Mono, RCX)
-- Bisa cari Cheat Engine AOB, GH Injector, Form1, dsb
-- Compare ke database pattern
-Anti : Cheat stealth, non-injector memory hack
-
-🧬 3. Syscall Tracer (Advanced Anti-Debug)
-- Hook ke syscall NtReadVirtualMemory, NtQueryInformationProcess, dll
-- Deteksi cheat yang pakai detour internal
-- Bisa alert atau auto-kill
-Anti: dnSpy, internal C++ cheat, VEH hook
-
-4. Encrypted Config + Integrity
-Encrypt:
-- Server IP
-- HWID Auth token
-- Scan interval
-- Anti modifikasi DLL + config
-Anti : Prevent bypass lewat modifikasi file
-
-🪪 5. Server-Side Enforcement (Auto-ban / Disconnect)
-- Kalau DLL_INJECTED, HASH MISMATCH, atau HWID NOT WHITELISTED
-   Kirim command ke game-server via rAthena:
-   @kick <player>
-   @ban <account>
-- Atau disconnect langsung via socket relay
-Eksekusi real-time dari log anti-cheat
-
-🧪 6. Virtual Machine / Sandbox Detection
-Deteksi user jalanin di:
-- VMware, VirtualBox, Sandboxie
-- Pakai API:
-- IsDebuggerPresent()
-- CPUID vendor ID
-- MAC Address OUI
-Prevent cheat testing di lingkungan aman
+🚀 Next Suggestions (Optional Advanced):
+Fitur	Tujuan
+🔐 AES encrypted config	agar client config (seperti port/IP) tidak bisa didecode mudah
+📦 Integrasi launcher auto update (dengan Thor patcher / patch list)	
+🛑 Auto-kick user dari login-server kalau tidak melewati scan	
+🔄 Komunikasi Anti-Cheat → Auth/Login Server	
+📁 Enkripsi file critical (*.dll, .grf)	
+🧪 AI Log Analyzer → Monitoring realtime behavior pattern (future scope)
 
 ## 🛠️ Teknologi
 
