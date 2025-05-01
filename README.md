@@ -1,150 +1,122 @@
-# GarudaHS
-Garuda Hack Shiled Untuk Ragnarok rAthena
-# 🛡️ GarudaHS Versi 0.1.2 Anti-Cheat System for Ragnarok Online (rAthena)
+# 🛡️ GarudaHS - Ragnarok Anti-Cheat System
 
-**GarudaHS** adalah sistem anti-cheat modular dan real-time berbasis C++ & DLL injection yang dibuat khusus untuk private server Ragnarok Online berbasis `rAthena`.
+GarudaHS adalah anti-cheat modular untuk Private Server Ragnarok Online (`rAthena` / `Hercules`), dibuat untuk memproteksi client dari cheat, modifikasi file, dan injeksi program jahat secara real-time. Fokus pada performa ringan, deteksi mendalam, dan kompatibel dengan Thor Patcher.
 
 ---
 
-## 🎯 Fitur Utama
+## 🎯 Fitur Utama (v2 - Implementasi Saat Ini)
 
-| Modul                  | Fungsi                                                                 |
-|------------------------|------------------------------------------------------------------------|
-| ✅ Process Watcher     | Deteksi proses mencurigakan (e.g. cheatengine.exe, x64dbg.exe)         |
-| ✅ Thread Watcher      | Deteksi thread hijack dari modul tidak dikenal                         |
-| ✅ Anti-Debug          | Deteksi debugger attach & remote debugger                             |
-| ✅ DLL Injection Scan  | Scan semua DLL loaded & validasi whitelist                             |
-| ✅ File Integrity      | Cek MD5 `ragexe.exe` dan `file.grf` untuk modifikasi ilegal           |
-| ✅ HWID System         | Fingerprint PC berdasarkan MAC + HDD Serial                            |
-| ✅ Overlay Scanner     | Deteksi jendela overlay mencurigakan (ESP, wallhack GUI, dsb)          |
-| ✅ IAT Hook Scanner    | Validasi pointer API untuk mendeteksi hook dari cheat                  |
-| ✅ Thread Protector    | Auto-resume anti-cheat thread jika disuspend cheat                     |
-
----
-🧠 Next Project :
-🔁 1. Real-Time CRC Validator (GRF, .LUB, .LUA, .DLL)
-- Cek CRC/MD5 tiap frame/battle
-- Deteksi delay hack (skillinfo.lub), aura disable, GRF decrypt
-- Bisa bind sama patcher untuk validasi file saat game jalan
-Anti : GRF edit, delay cheat, visual spam
-
-🧠 2. Memory Signature Scanner
-- Scan memory untuk byte pattern cheat (signature CE, Mono, RCX)
-- Bisa cari Cheat Engine AOB, GH Injector, Form1, dsb
-- Compare ke database pattern
-Anti : Cheat stealth, non-injector memory hack
-
-🧬 3. Syscall Tracer (Advanced Anti-Debug)
-- Hook ke syscall NtReadVirtualMemory, NtQueryInformationProcess, dll
-- Deteksi cheat yang pakai detour internal
-- Bisa alert atau auto-kill
-Anti: dnSpy, internal C++ cheat, VEH hook
-
-4. Encrypted Config + Integrity
-Encrypt:
-- Server IP
-- HWID Auth token
-- Scan interval
-- Anti modifikasi DLL + config
-Anti : Prevent bypass lewat modifikasi file
-
-🪪 5. Server-Side Enforcement (Auto-ban / Disconnect)
-- Kalau DLL_INJECTED, HASH MISMATCH, atau HWID NOT WHITELISTED
-   Kirim command ke game-server via rAthena:
-   @kick <player>
-   @ban <account>
-- Atau disconnect langsung via socket relay
-Eksekusi real-time dari log anti-cheat
-
-🧪 6. Virtual Machine / Sandbox Detection
-Deteksi user jalanin di:
-- VMware, VirtualBox, Sandboxie
-- Pakai API:
-- IsDebuggerPresent()
-- CPUID vendor ID
-- MAC Address OUI
-Prevent cheat testing di lingkungan aman
-
-## 🛠️ Teknologi
-
-- Bahasa: **C++ (x86)**
-- Compiler: **Visual Studio 2022**
-- Arsitektur: **Client-side DLL + Server-side TCP listener**
-- Injection: **DLL Inject ke `RRO.exe`**
-- Komunikasi: **Raw TCP Socket (port 4000)**
+| Fitur                     | Deskripsi                                                                 |
+|--------------------------|--------------------------------------------------------------------------|
+| ✅ Process Watcher        | Deteksi proses cheat engine, trainer, debugger                          |
+| ✅ Thread Watcher         | Deteksi hijacked / rogue thread                                          |
+| ✅ Overlay Scanner        | Deteksi overlay/ESP seperti wallhack                                     |
+| ✅ DLL Injection Scanner  | Deteksi DLL asing yang di-inject ke client                               |
+| ✅ IAT Hook Scanner       | Validasi hook pada Import Address Table                                  |
+| ✅ HWID System            | Kirim hash CPU, Disk, MAC address                                        |
+| ✅ File CRC Checker       | Validasi `RRO.exe` dan `Republic.grf` pakai CRC32                        |
+| ✅ Memory Signature Scan  | Scan memory untuk Cheat Engine, Mono, Trainer, dsb                       |
+| ✅ Encrypted Config       | IP server dienkripsi pakai XOR, tidak bisa dicari via hex editor         |
+| ✅ Server-Side Monitoring | Semua hasil dikirim ke `Server.exe` anti-cheat listener secara realtime  |
 
 ---
 
-## 🧩 Struktur Folder
+## 🧠 Roadmap Next Development
+
+### 🔁 1. Real-Time CRC Validator (GRF, .LUB, .LUA, .DLL)
+- Cek CRC/MD5 setiap frame/battle
+- Deteksi file delay hack (`skillinfo.lub`), GRF decrypt, visual cheat
+- Bisa bind ke launcher/patcher
+> 🎯 Anti: GRF edit, delay cheat, aura disable
+
+### 🧠 2. Memory Signature Scanner (Advanced)
+- Signature scan Cheat Engine, Mono, RCX
+- Support wildcard AOB (Array of Bytes)
+- Bandingkan dengan DB signature
+> 🎯 Anti: Cheat stealth, non-injector hacks
+
+### 🧬 3. Syscall Tracer (Advanced Anti-Debug)
+- Hook `NtReadVirtualMemory`, `NtQueryInfoProc`
+- Deteksi detour cheat internal, VEH hook
+> 🎯 Anti: dnSpy, GH Injector, internal C++ hacks
+
+### 🔐 4. Encrypted Config + Integrity Check
+- Encrypt: IP, HWID key, Scan interval
+- Cek CRC/MD5 pada `Client.dll` dan config file
+> 🎯 Anti: Modifikasi DLL/config
+
+### 🪪 5. Server-Side Enforcement (Auto-Ban / Kick)
+- Kirim `@kick`, `@ban`, atau disconnect ke login-server
+- Based on: DLL Injected, CRC mismatch, HWID not whitelisted
+> 🎯 Real-time enforcer dari log anti-cheat
+
+### 🧪 6. VM / Sandbox Detection
+- Deteksi: VMware, VirtualBox, Sandboxie
+- Cek via: CPUID vendor ID, MAC OUI, IsDebuggerPresent
+> 🎯 Prevent cheat testing di environment aman
+
+---
+
+## 📦 Struktur Project
 
 GarudaHS/ 
-├── include/ # Header file masing-masing modul 
-├── src/ # Implementasi masing-masing fitur anti-cheat 
-├── Debug/ # Output Client.dll dan Server.exe 
-├── Server/ # Server TCP listener untuk menerima log dari client
+├── Client/ # Anti-cheat DLL 
+├── Server/ # Server listener (log receiver) 
+├── CRCGen/ # Tool untuk generate CRC32 file 
+├── EncryptIP/ # Tool untuk enkripsi IP config 
+└── ThorPatcher/ # (Opsional) untuk patcher integrasi
 
 
 ---
 
-## 🚀 Cara Kerja
+## ⚙️ Build Instructions
 
-1. `Client.dll` di-*inject* ke proses Ragnarok (`RRO.exe atau ragexe milik kalian`) menggunakan Stud_PE ( https://docs.herc.ws/client/dll-import/ )
-2. Setiap 10 detik, modul berikut dijalankan:
-   - Proses scan
-   - DLL scan
-   - Thread integrity check
-   - IAT Hook check
-   - HWID report
-   - File hash report
-   - Overlay detection
-   - Proteksi thread dari suspend
-3. Semua hasil dikirim ke `Server.exe` melalui socket
-4. Admin server bisa log / ban berdasarkan hasil
-5. File yang sudah bisa digunakan ada di dalam folder Debug
----
-
-## 🔧 Setup Developer
-
-### Client (DLL)
-- Buka `GarudaHS.sln` di Visual Studio 2022
-- Target: Win32, Debug / Release
-- Build → output `Client.dll`
-
-### Server
-- File: `Server/main.cpp`
-- Compile jadi `Server.exe`
-- Jalankan di port `4000` (hardcoded)
+1. Buka `GarudaHS.sln` di Visual Studio 2022
+2. Pilih: `Release`, `Win32`
+3. Build → Rebuild Solution
+4. Ambil:
+   - `Client/Release/Client.dll` → inject ke Ragnarok
+   - `Server/Release/Server.exe` → jalankan sebagai listener
 
 ---
 
-## 🧪 Testing
+## 🛠️ Integrasi ke Ragnarok
 
-- Jalankan `Server.exe`
-- Jalankan `RRO.exe` lalu inject `Client.dll`
-- Gunakan Cheat Engine, ESP, atau DLL custom
-- Lihat hasil log di terminal `Server.exe`
+1. Patch `Client.dll` lewat Thor Patcher → misal `System/Client.dll`
+2. Inject otomatis/manual via launcher
+3. Jalankan `Server.exe` di server internal / dev PC
+4. Output:
+[AC-Server] Client connected! 
+[AC-Server] Received: CRC_CHECK: Republic.grf = ... 
+[AC-Server] Received: MEM_SIG: Found pattern: Cheat Engine
 
----
-
-## ⚠️ Notes
-
-- Tidak menggunakan signature validator (optional module — bisa ditambahkan nanti) gw gak punya duit buat signaturenya bro wakakkakaka
-- Masih Tahap pengembangan
 
 ---
 
-## ✅ Status
+## 👤 Credits
 
-**Production Ready ✔️**  
-Cocok untuk server private Ragnarok Online  
-Sudah teruji dengan CE, Extreme Injector, dan x64dbg
+- Project Owner: `RepublicRO`
+- Anti-Cheat Developer: `GarudaHS Team`
+- Status: Private, production-ready
+
+---
+
+## 🔒 Status Keamanan
+
+GarudaHS telah digunakan secara private oleh tim pengembang RepublicRO. Seluruh komunikasi hanya satu arah, tidak mengakses internet terbuka, dan hanya digunakan untuk monitoring integrity client lokal.
+
+> ❗ Anti-Cheat ini **tidak bersifat invasive** dan tidak menyentuh proses selain game Ragnarok yang sedang dijalankan.
 
 ---
 
-## 📜 Lisensi
+## 📥 Distribusi & Update
 
-Proyek ini dibuat untuk keperluan personal / server privat.  
-Gunakan dengan bijak. Tidak disarankan untuk dikomersialkan tanpa izin pemilik konten Ragnarok asli.
+- Didistribusikan melalui Thor Patcher
+- Rencana: integrasi update otomatis `Client.dll` & DB signature via patch
+- Build Release: `Client.dll` (stripped, non-debug)
 
 ---
+
+GarudaHS: Protecting your world from inside the client.  
+Let's build the future of RO anti-cheat.
 
