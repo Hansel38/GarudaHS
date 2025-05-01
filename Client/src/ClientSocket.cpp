@@ -1,49 +1,57 @@
-#include <winsock2.h>          // harus paling atas
-#include <ws2tcpip.h>          // (opsional, buat inet_pton/dll)
-#include <windows.h>           // jangan di atas winsock2.h
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include "pch.h"
+#include <winsock2.h>      // WAJIB sebelum windows.h
+#include <ws2tcpip.h>
+#include <windows.h>
+
 #include "../include/ClientSocket.h"
+#include "../include/Config.h"
+#include "../include/ConfigDecrypt.h"
+
+#include <string>
+#include <iostream>
 
 #pragma comment(lib, "ws2_32.lib")
 
+namespace {
+    SOCKET clientSocket = INVALID_SOCKET;
+    bool initialized = false;
+}
+
+void ClientSocket::Initialize() {
+    if (initialized)
+        return;
+
+    WSADATA wsaData;
+    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
+        return;
+
+    clientSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (clientSocket == INVALID_SOCKET)
+        return;
+
+    sockaddr_in serverAddr;
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_port = htons(kServerPort);
+    serverAddr.sin_addr.s_addr = inet_addr(ConfigDecrypt::GetDecryptedIP().c_str());
+
+    if (connect(clientSocket, (sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) {
+        closesocket(clientSocket);
+        clientSocket = INVALID_SOCKET;
+        WSACleanup();
+        return;
+    }
+
+    initialized = true;
+}
+
 void ClientSocket::SendMessageToServer(const std::string& message) {
-    WSADATA wsa;
-    SOCKET sock;
-    sockaddr_in server;
+    if (!initialized)
+        Initialize();
 
-    if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
-        OutputDebugStringA("[AC-Client] WSAStartup failed\n");
+    if (clientSocket == INVALID_SOCKET)
         return;
-    }
 
-    sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (sock == INVALID_SOCKET) {
-        OutputDebugStringA("[AC-Client] Socket creation failed\n");
-        WSACleanup();
-        return;
-    }
-
-    server.sin_addr.s_addr = inet_addr("127.0.0.1");
-    server.sin_family = AF_INET;
-    server.sin_port = htons(4000);
-
-    if (connect(sock, (sockaddr*)&server, sizeof(server)) == SOCKET_ERROR) {
-        OutputDebugStringA("[AC-Client] Connection to server failed\n");
-        closesocket(sock);
-        WSACleanup();
-        return;
-    }
-
-    OutputDebugStringA("[AC-Client] Connected to server\n");
-
-    int sent = send(sock, message.c_str(), message.length(), 0);
-    if (sent == SOCKET_ERROR) {
-        OutputDebugStringA("[AC-Client] Send failed\n");
-    }
-    else {
-        OutputDebugStringA("[AC-Client] Message sent to server\n");
-    }
-
-    closesocket(sock);
-    WSACleanup();
+    std::string finalMessage = "[AC-Client] " + message + "\n";
+    send(clientSocket, finalMessage.c_str(), (int)finalMessage.length(), 0);
 }

@@ -22,11 +22,14 @@
     <ClInclude Include="include\AntiDebug.h" />
     <ClInclude Include="include\ClientSocket.h" />
     <ClInclude Include="include\Config.h" />
+    <ClInclude Include="include\ConfigDecrypt.h" />
+    <ClInclude Include="include\CRCChecker.h" />
     <ClInclude Include="include\DllScanner.h" />
     <ClInclude Include="include\FileChecker.h" />
     <ClInclude Include="include\framework.h" />
     <ClInclude Include="include\HWID.h" />
     <ClInclude Include="include\IATHookScanner.h" />
+    <ClInclude Include="include\MemScanner.h" />
     <ClInclude Include="include\OverlayScanner.h" />
     <ClInclude Include="include\pch.h" />
     <ClInclude Include="include\ProcessWatcher.h" />
@@ -40,10 +43,13 @@
     </ClCompile>
     <ClCompile Include="src\AntiDebug.cpp" />
     <ClCompile Include="src\ClientSocket.cpp" />
+    <ClCompile Include="src\ConfigDecrypt.cpp" />
+    <ClCompile Include="src\CRCChecker.cpp" />
     <ClCompile Include="src\DllScanner.cpp" />
     <ClCompile Include="src\FileChecker.cpp" />
     <ClCompile Include="src\HWID.cpp" />
     <ClCompile Include="src\IATHookScanner.cpp" />
+    <ClCompile Include="src\MemScanner.cpp" />
     <ClCompile Include="src\OverlayScanner.cpp" />
     <ClCompile Include="src\ProcessWatcher.cpp" />
     <ClCompile Include="src\ThreadProtector.cpp" />

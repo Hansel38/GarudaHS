@@ -54,6 +54,15 @@
     <ClInclude Include="include\ThreadProtector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\CRCChecker.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MemScanner.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ConfigDecrypt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -90,6 +99,15 @@
       <Filter>Resource Files</Filter>
     </ClCompile>
     <ClCompile Include="src\ThreadProtector.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CRCChecker.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MemScanner.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ConfigDecrypt.cpp">
       <Filter>Resource Files</Filter>
     </ClCompile>
   </ItemGroup>

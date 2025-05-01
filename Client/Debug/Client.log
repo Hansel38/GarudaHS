@@ -1,5 +1,18 @@
-﻿  dllmain.cpp
+﻿  pch.cpp
+  dllmain.cpp
+  AntiDebug.cpp
+  ClientSocket.cpp
+  ConfigDecrypt.cpp
+  CRCChecker.cpp
+  DllScanner.cpp
+  FileChecker.cpp
+  HWID.cpp
+  IATHookScanner.cpp
+  MemScanner.cpp
+  OverlayScanner.cpp
+  ProcessWatcher.cpp
   ThreadProtector.cpp
+  ThreadWatcher.cpp
   Generating Code...
      Creating library F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\Debug\Client.lib and object F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\Debug\Client.exp
   Client.vcxproj -> F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\Debug\Client.dll

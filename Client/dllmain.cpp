@@ -1,7 +1,8 @@
 #include "pch.h"
 #include "../include/Config.h"
-#include "../include/ProcessWatcher.h"
+#include "../include/ConfigDecrypt.h"
 #include "../include/ClientSocket.h"
+#include "../include/ProcessWatcher.h"
 #include "../include/ThreadWatcher.h"
 #include "../include/AntiDebug.h"
 #include "../include/DllScanner.h"
@@ -10,6 +11,8 @@
 #include "../include/OverlayScanner.h"
 #include "../include/IATHookScanner.h"
 #include "../include/ThreadProtector.h"
+#include "../include/MemScanner.h"
+#include "../include/CRCChecker.h"
 
 void Log(const char* msg) {
     OutputDebugStringA("[AC-Client] ");
@@ -17,44 +20,58 @@ void Log(const char* msg) {
     OutputDebugStringA("\n");
 }
 
-// Thread utama anti-cheat, loop setiap 10 detik
 DWORD WINAPI AntiCheatThread(LPVOID lpParam) {
+    Log("AntiCheatThread started.");
+
     while (true) {
         ProcessWatcher::ScanRunningProcesses();
         ThreadWatcher::ScanThreads();
         AntiDebug::RunChecks();
         DllScanner::ScanModules();
         FileChecker::CheckCriticalFiles();
+        CRCChecker::CheckFiles();
         HWID::SendHWID();
         OverlayScanner::ScanForOverlays();
         IATHookScanner::ScanIAT();
-        Sleep(10000);
+        MemScanner::ScanForCheatSignatures();
+
+        // Debug log
+        OutputDebugStringA("[AC-Client] Scan cycle complete.\n");
+
+        Sleep(10000); // Setiap 10 detik
     }
+
     return 0;
 }
 
-// Entry point eksternal, dipanggil saat DLL inject
 extern "C" __declspec(dllexport) void InitializeAntiCheat() {
     Log("InitializeAntiCheat called");
 
-    // Jalankan thread utama anti-cheat
+    // Initialize koneksi ke server anti-cheat
+    ClientSocket::Initialize();
+
+    // Cek integritas file DLL (anti tamper)
+    if (!ConfigDecrypt::VerifySelfChecksum()) {
+        ClientSocket::SendMessageToServer("TAMPER: Client.dll checksum mismatch");
+    }
+
+    // Jalankan thread utama
     HANDLE hThread = CreateThread(nullptr, 0, AntiCheatThread, nullptr, 0, nullptr);
 
-    // Jalankan watchdog untuk proteksi suspend thread
+    // Cegah suspend
     ThreadProtector::StartWatchdog(hThread);
 
-    // Kirim status awal
+    // Laporan awal ke server
     ClientSocket::SendMessageToServer("ANTICHEAT:OK");
 }
 
-// Entry point DLL (dipanggil otomatis saat DLL inject)
 BOOL APIENTRY DllMain(HMODULE hModule,
     DWORD  ul_reason_for_call,
     LPVOID lpReserved) {
     switch (ul_reason_for_call) {
     case DLL_PROCESS_ATTACH:
         Log("DLL_PROCESS_ATTACH");
-        InitializeAntiCheat(); // Inisialisasi saat attach
+        InitializeAntiCheat();
         break;
     case DLL_THREAD_ATTACH:
     case DLL_THREAD_DETACH:
