@@ -48,8 +48,8 @@ unsigned long CRCChecker::GetFileCRC32(const std::string& filePath) {
 
 void CRCChecker::CheckFiles() {
     std::vector<std::pair<std::string, unsigned long>> fileList = {
-        { "Republic.grf", 0x29F3A18C }, // Ganti nilai CRC ini dengan hasil asli lu
-        { "System\\skillinfoz\\skillinfolist.lub", 0xDDEEFF00 } // Opsional
+        { "Republic.grf", 0x4FAAC8FE }, // Ganti nilai CRC ini dengan hasil asli lu
+        //{ "System\\skillinfoz\\skillinfolist.lub", 0xDDEEFF00 } // Opsional
     };
 
     for (const auto& file : fileList) {

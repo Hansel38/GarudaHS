@@ -63,6 +63,9 @@
     <ClInclude Include="include\ConfigDecrypt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\VMDetector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -108,6 +111,9 @@
       <Filter>Resource Files</Filter>
     </ClCompile>
     <ClCompile Include="src\ConfigDecrypt.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VMDetector.cpp">
       <Filter>Resource Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -13,6 +13,8 @@
 #include "../include/ThreadProtector.h"
 #include "../include/MemScanner.h"
 #include "../include/CRCChecker.h"
+#include "../include/VMDetector.h"
+
 
 void Log(const char* msg) {
     OutputDebugStringA("[AC-Client] ");
@@ -34,6 +36,7 @@ DWORD WINAPI AntiCheatThread(LPVOID lpParam) {
         OverlayScanner::ScanForOverlays();
         IATHookScanner::ScanIAT();
         MemScanner::ScanForCheatSignatures();
+		VMDetector::CheckEnvironment(); // penambahan VMDetector
 
         // Debug log
         OutputDebugStringA("[AC-Client] Scan cycle complete.\n");

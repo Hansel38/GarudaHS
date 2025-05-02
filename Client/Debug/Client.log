@@ -13,6 +13,7 @@
   ProcessWatcher.cpp
   ThreadProtector.cpp
   ThreadWatcher.cpp
+  VMDetector.cpp
   Generating Code...
      Creating library F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\Debug\Client.lib and object F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\Debug\Client.exp
   Client.vcxproj -> F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\Debug\Client.dll
