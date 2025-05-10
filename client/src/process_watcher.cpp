@@ -1,5 +1,6 @@
 #include "process_watcher.h"
 #include "net_report.h"
+#include "hwid.h" // <--- Tambahkan ini
 #include <windows.h>
 #include <tlhelp32.h>
 #include <vector>
@@ -49,7 +50,7 @@ std::string getBlacklistedProcess() {
 }
 
 void killRagnarok() {
-    HWND hwnd = FindWindowA(NULL, "Republic-RO"); // Ganti jika nama window client lo beda
+    HWND hwnd = FindWindowA(NULL, "Republic-RO");
     if (hwnd) {
         DWORD pid;
         GetWindowThreadProcessId(hwnd, &pid);
@@ -66,7 +67,8 @@ void startProcessWatcher() {
         while (true) {
             std::string proc = getBlacklistedProcess();
             if (!proc.empty()) {
-                std::string message = "[GarudaHS] Detected cheat process: " + proc;
+                std::string hwid = generateHWID();
+                std::string message = "[GarudaHS] Detected cheat process: " + proc + " | HWID: " + hwid;
                 sendCheatReport(message, "127.0.0.1", 1337);
                 MessageBoxA(NULL, message.c_str(), "Garuda Hack Shield", MB_ICONERROR | MB_OK);
                 killRagnarok();

@@ -1,0 +1,11 @@
+[Sat May 10 21:30:55 2025] [Server] Server started on port 1337
+[Sat May 10 21:33:25 2025] [Server] Server started on port 1337
+[Sat May 10 21:36:58 2025] [Server] GarudaHS Server listening on port 1337...
+[Sat May 10 21:38:09 2025] [Server] GarudaHS Server listening on port 1337...
+[Sat May 10 21:38:43 2025] [Server] Client connected.
+[Sat May 10 21:38:43 2025] [GarudaHS] Detected cheat process: cheatengine-x86_64.exe | HWID: dd84caf5
+[Sat May 10 21:38:43 2025] [Server] Client disconnected.
+[Sat May 10 21:41:22 2025] [Server] GarudaHS Server listening on port 1337...
+[Sat May 10 21:41:41 2025] [Server] Client connected.
+[Sat May 10 21:41:41 2025] [BLOCKED] HWID dd84caf5 is blocked. Disconnecting.
+[Sat May 10 21:41:41 2025] [Server] Client disconnected.

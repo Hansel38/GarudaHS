@@ -130,9 +130,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="server.cpp" />
+    <ClCompile Include="src\hwid_blocklist.cpp" />
     <ClCompile Include="src\network_server.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\hwid_blocklist.h" />
     <ClInclude Include="include\network_server.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
