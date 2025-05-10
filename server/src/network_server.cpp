@@ -1,5 +1,6 @@
-#include "network_server.h"
+﻿#include "network_server.h"
 #include "hwid_blocklist.h"
+#include "crypto_utils.h"
 
 #include <winsock2.h>
 #include <ws2tcpip.h>
@@ -8,15 +9,16 @@
 #include <thread>
 #include <regex>
 #include <string>
+#include <vector>
+#include <filesystem>
 #include <fstream>
 #include <ctime>
-#include <filesystem>
 
 #pragma comment(lib, "ws2_32.lib")
 
 static std::string getExeFolder() {
     char buf[MAX_PATH];
-    DWORD len = GetModuleFileNameA(nullptr, buf, MAX_PATH);
+    DWORD len = GetModuleFileNameA(NULL, buf, MAX_PATH);
     std::string full(buf, len);
     size_t pos = full.find_last_of("\\/");
     return (pos == std::string::npos) ? "." : full.substr(0, pos);
@@ -24,87 +26,112 @@ static std::string getExeFolder() {
 
 void writeLog(const std::string& msg) {
     auto base = getExeFolder();
-    auto logDir = std::filesystem::path(base) / "logs";
-    std::filesystem::create_directories(logDir);
-    auto logFile = logDir / "garudahs_server.log";
+    auto dir = std::filesystem::path(base) / "logs";
+    std::filesystem::create_directories(dir);
+    auto file = dir / "garudahs_server.log";
 
-    std::ofstream log(logFile.string(), std::ios::app);
-    if (!log.is_open()) return;
+    std::ofstream ofs(file.string(), std::ios::app);
+    if (!ofs.is_open()) return;
 
-    std::time_t now = std::time(nullptr);
-    char timebuf[64];
-    ctime_s(timebuf, sizeof(timebuf), &now);
-    timebuf[strlen(timebuf) - 1] = '\0';
+    std::time_t t = std::time(nullptr);
+    char tb[64];
+    ctime_s(tb, sizeof(tb), &t);
+    tb[strlen(tb) - 1] = '\0';
 
-    log << "[" << timebuf << "] " << msg << "\n";
+    ofs << "[" << tb << "] " << msg << "\n";
 }
 
-void handle_client(SOCKET clientSocket) {
-    char recvbuf[512];
-    int bytes;
-    writeLog("[Server] Client connected.");
+void handle_client(SOCKET sock) {
+    std::cout << "[Server] Client connected\n";
+    writeLog("[Server] Client connected");
 
-    while ((bytes = recv(clientSocket, recvbuf, sizeof(recvbuf) - 1, 0)) > 0) {
-        recvbuf[bytes] = '\0';
-        std::string msg(recvbuf);
+    BYTE buf[2048];
+    while (true) {
+        int r = recv(sock, (char*)buf, sizeof(buf), 0);
+        if (r <= 0) break;
 
+        // Decrypt payload
+        std::vector<BYTE> blob(buf, buf + r);
+        std::string plain;
+        if (!aesDecrypt("GarudaHSSecret", blob, plain)) {
+            std::cerr << "[Server] Decrypt failed\n";
+            break;
+        }
+
+        // Cek HWID
         std::smatch m;
-        std::regex hwidRegex(R"(HWID:\s*([a-fA-F0-9]+))");
-        if (std::regex_search(msg, m, hwidRegex)) {
-            std::string hwid = m[1];
+        std::regex re(R"(HWID:\s*([A-Fa-f0-9]+))");
+        if (std::regex_search(plain, m, re)) {
+            std::string hwid = m[1].str();  // gunakan .str()
             if (isHWIDBlocked(hwid)) {
-                std::string blockMsg = "[BLOCKED] HWID " + hwid + " is blocked. Disconnecting.";
+                std::string blockMsg = std::string("[BLOCKED] ") + hwid + " is blocked. Disconnecting.";
                 std::cout << blockMsg << "\n";
                 writeLog(blockMsg);
                 break;
             }
         }
 
-        std::cout << "[GarudaHS Report] " << msg << "\n";
-        writeLog(msg);
+        std::cout << "[Report] " << plain << "\n";
+        writeLog(plain);
     }
 
-    writeLog("[Server] Client disconnected.");
-    closesocket(clientSocket);
+    closesocket(sock);
+    writeLog("[Server] Client disconnected");
 }
 
 void startServer(unsigned short port) {
-    // tentukan path ke blocklist
-    std::string base = getExeFolder();
-    auto blockFile = std::filesystem::path(base) / "data" / "blocked_hwids.txt";
-    loadHWIDBlocklist(blockFile.string());
-    startBlocklistWatcher(blockFile.string(), 5); // cek tiap 5 detik
+    // Load dan watch blocklist
+    auto base = getExeFolder();
+    auto data = std::filesystem::path(base) / "data" / "blocked_hwids.txt";
+    loadHWIDBlocklist(data.string());
 
-    WSADATA wsa;
-    SOCKET listenSock;
-    sockaddr_in addr{};
+    std::thread watcher([data]() {
+        auto last = std::filesystem::last_write_time(data);
+        while (true) {
+            std::this_thread::sleep_for(std::chrono::seconds(5));
+            auto now = std::filesystem::last_write_time(data);
+            if (now != last) {
+                writeLog("[Server] Blocklist file changed, reloading");
+                loadHWIDBlocklist(data.string());
+                last = now;
+            }
+        }
+        });
+    watcher.detach();
 
-    if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
-        writeLog("[ERROR] WSAStartup failed.");
+    // Setup socket
+    WSADATA w;
+    SOCKET ls = INVALID_SOCKET;
+    if (WSAStartup(MAKEWORD(2, 2), &w) != 0) {
+        writeLog("[ERROR] WSAStartup failed");
         return;
     }
 
-    listenSock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    ls = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    sockaddr_in addr{};
     addr.sin_family = AF_INET;
     addr.sin_port = htons(port);
     addr.sin_addr.s_addr = INADDR_ANY;
 
-    if (bind(listenSock, (SOCKADDR*)&addr, sizeof(addr)) == SOCKET_ERROR ||
-        listen(listenSock, SOMAXCONN) == SOCKET_ERROR) {
-        writeLog("[ERROR] Unable to bind/listen.");
+    if (bind(ls, (sockaddr*)&addr, sizeof(addr)) == SOCKET_ERROR ||
+        listen(ls, SOMAXCONN) == SOCKET_ERROR) {
+        writeLog("[ERROR] Bind/Listen failed");
+        closesocket(ls);
         WSACleanup();
         return;
     }
 
-    writeLog("[Server] Listening on port " + std::to_string(port));
+    writeLog(std::string("[Server] Listening on port ") + std::to_string(port));
+    std::cout << "[Server] Listening on port " << port << "...\n";
 
+    // Accept loop
     while (true) {
-        SOCKET clientSock = accept(listenSock, nullptr, nullptr);
-        if (clientSock != INVALID_SOCKET) {
-            std::thread(handle_client, clientSock).detach();
+        SOCKET cs = accept(ls, nullptr, nullptr);
+        if (cs != INVALID_SOCKET) {
+            std::thread(handle_client, cs).detach();
         }
     }
 
-    closesocket(listenSock);
+    closesocket(ls);
     WSACleanup();
 }

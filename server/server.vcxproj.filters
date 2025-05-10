@@ -24,12 +24,18 @@
     <ClCompile Include="src\hwid_blocklist.cpp">
       <Filter>Resource Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\crypto_utils.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\network_server.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\hwid_blocklist.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\crypto_utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

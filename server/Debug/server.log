@@ -1,4 +1,6 @@
-﻿  hwid_blocklist.cpp
+﻿  server.cpp
+  crypto_utils.cpp
+  hwid_blocklist.cpp
   network_server.cpp
   Generating Code...
   server.vcxproj -> F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS-V.1.0.2\Debug\server.exe

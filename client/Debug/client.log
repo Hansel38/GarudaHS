@@ -1,5 +1,6 @@
 ﻿  pch.cpp
   dllmain.cpp
+  crypto_utils.cpp
   hwid.cpp
   net_report.cpp
   process_watcher.cpp
