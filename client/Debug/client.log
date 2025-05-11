@@ -1,5 +1,6 @@
 ﻿  pch.cpp
   dllmain.cpp
+  anti_debug.cpp
   crypto_utils.cpp
   hwid.cpp
   net_report.cpp

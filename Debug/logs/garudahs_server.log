@@ -10,3 +10,5 @@
 [Sat May 10 21:41:41 2025] [BLOCKED] HWID dd84caf5 is blocked. Disconnecting.
 [Sat May 10 21:41:41 2025] [Server] Client disconnected.
 [Sat May 10 21:51:24 2025] [Server] Listening on port 1337
+[Sun May 11 15:37:28 2025] [Server] Listening on port 1337
+[Sun May 11 15:37:43 2025] [Server] Blocklist updated, reloading...

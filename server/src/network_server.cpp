@@ -41,82 +41,97 @@ void writeLog(const std::string& msg) {
     ofs << "[" << tb << "] " << msg << "\n";
 }
 
-void handle_client(SOCKET sock) {
+void handle_client(SOCKET clientSocket) {
+    BYTE buf[2048];
+    int bytes;
+
     std::cout << "[Server] Client connected\n";
     writeLog("[Server] Client connected");
 
-    BYTE buf[2048];
-    while (true) {
-        int r = recv(sock, (char*)buf, sizeof(buf), 0);
-        if (r <= 0) break;
+    while ((bytes = recv(clientSocket, (char*)buf, sizeof(buf), 0)) > 0) {
+        std::vector<BYTE> encrypted(buf, buf + bytes);
+        std::string decrypted;
 
-        // Decrypt payload
-        std::vector<BYTE> blob(buf, buf + r);
-        std::string plain;
-        if (!aesDecrypt("GarudaHSSecret", blob, plain)) {
-            std::cerr << "[Server] Decrypt failed\n";
-            break;
+        if (!aesDecryptSecure("GarudaHSSecret", encrypted, decrypted)) {
+            writeLog("[ERROR] Failed to decrypt message");
+            continue;
         }
 
-        // Cek HWID
+        // Anti-Replay: Validasi Timestamp
+        std::regex tsRe(R"(TS:\s*(\d+))");
+        std::smatch tsMatch;
+        if (std::regex_search(decrypted, tsMatch, tsRe)) {
+            std::time_t msg_ts = std::stoll(tsMatch[1].str());
+            std::time_t now_ts = std::time(nullptr);
+            if (std::abs(now_ts - msg_ts) > 30) {
+                writeLog("[REJECT] Message expired or replayed. Timestamp too far.");
+                continue;
+            }
+        }
+        else {
+            writeLog("[REJECT] No timestamp found in message.");
+            continue;
+        }
+
+        // Cek HWID di dalam pesan
         std::smatch m;
-        std::regex re(R"(HWID:\s*([A-Fa-f0-9]+))");
-        if (std::regex_search(plain, m, re)) {
-            std::string hwid = m[1].str();  // gunakan .str()
+        std::regex hwidRe(R"(HWID:\s*([a-fA-F0-9]+))");
+        if (std::regex_search(decrypted, m, hwidRe)) {
+            std::string hwid = m[1].str();
             if (isHWIDBlocked(hwid)) {
-                std::string blockMsg = std::string("[BLOCKED] ") + hwid + " is blocked. Disconnecting.";
-                std::cout << blockMsg << "\n";
-                writeLog(blockMsg);
+                std::string msg = "[BLOCKED] " + hwid + " is blocked. Disconnecting.";
+                std::cout << msg << "\n";
+                writeLog(msg);
                 break;
             }
         }
 
-        std::cout << "[Report] " << plain << "\n";
-        writeLog(plain);
+        std::cout << "[GarudaHS Report] " << decrypted << "\n";
+        writeLog(decrypted);
     }
 
-    closesocket(sock);
+    closesocket(clientSocket);
     writeLog("[Server] Client disconnected");
 }
 
 void startServer(unsigned short port) {
-    // Load dan watch blocklist
-    auto base = getExeFolder();
-    auto data = std::filesystem::path(base) / "data" / "blocked_hwids.txt";
-    loadHWIDBlocklist(data.string());
+    std::string base = getExeFolder();
+    std::filesystem::path blocklistPath = std::filesystem::path(base) / "data" / "blocked_hwids.txt";
 
-    std::thread watcher([data]() {
-        auto last = std::filesystem::last_write_time(data);
+    loadHWIDBlocklist(blocklistPath.string());
+
+    std::thread watcher([blocklistPath]() {
+        auto last = std::filesystem::last_write_time(blocklistPath);
         while (true) {
             std::this_thread::sleep_for(std::chrono::seconds(5));
-            auto now = std::filesystem::last_write_time(data);
+            auto now = std::filesystem::last_write_time(blocklistPath);
             if (now != last) {
-                writeLog("[Server] Blocklist file changed, reloading");
-                loadHWIDBlocklist(data.string());
+                writeLog("[Server] Blocklist updated, reloading...");
+                loadHWIDBlocklist(blocklistPath.string());
                 last = now;
             }
         }
         });
     watcher.detach();
 
-    // Setup socket
-    WSADATA w;
-    SOCKET ls = INVALID_SOCKET;
-    if (WSAStartup(MAKEWORD(2, 2), &w) != 0) {
+    WSADATA wsa;
+    SOCKET listenSock = INVALID_SOCKET;
+    sockaddr_in addr{};
+
+    if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
         writeLog("[ERROR] WSAStartup failed");
         return;
     }
 
-    ls = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    sockaddr_in addr{};
+    listenSock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     addr.sin_family = AF_INET;
     addr.sin_port = htons(port);
     addr.sin_addr.s_addr = INADDR_ANY;
 
-    if (bind(ls, (sockaddr*)&addr, sizeof(addr)) == SOCKET_ERROR ||
-        listen(ls, SOMAXCONN) == SOCKET_ERROR) {
+    if (bind(listenSock, (SOCKADDR*)&addr, sizeof(addr)) == SOCKET_ERROR ||
+        listen(listenSock, SOMAXCONN) == SOCKET_ERROR) {
         writeLog("[ERROR] Bind/Listen failed");
-        closesocket(ls);
+        closesocket(listenSock);
         WSACleanup();
         return;
     }
@@ -124,14 +139,13 @@ void startServer(unsigned short port) {
     writeLog(std::string("[Server] Listening on port ") + std::to_string(port));
     std::cout << "[Server] Listening on port " << port << "...\n";
 
-    // Accept loop
     while (true) {
-        SOCKET cs = accept(ls, nullptr, nullptr);
-        if (cs != INVALID_SOCKET) {
-            std::thread(handle_client, cs).detach();
+        SOCKET clientSock = accept(listenSock, nullptr, nullptr);
+        if (clientSock != INVALID_SOCKET) {
+            std::thread(handle_client, clientSock).detach();
         }
     }
 
-    closesocket(ls);
+    closesocket(listenSock);
     WSACleanup();
 }
