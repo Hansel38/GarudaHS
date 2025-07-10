@@ -1,6 +1,8 @@
 ﻿  pch.cpp
   dllmain.cpp
   AntiDebug.cpp
+  AntiSuspendDetectionLayer.cpp
+  AntiSuspendThreads.cpp
   Configuration.cpp
   DetectionEngine.cpp
   Exports.cpp

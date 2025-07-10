@@ -3,6 +3,7 @@
 #ifndef WINDOWDETECTOR_H
 #define WINDOWDETECTOR_H
 
+#define NOMINMAX
 #include <Windows.h>
 #include <string>
 #include <vector>

@@ -1,3 +1,4 @@
+#include "../pch.h"
 #define NOMINMAX
 #include <Windows.h>
 #include "../include/OverlayDetectionLayer.h"

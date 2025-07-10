@@ -1,4 +1,4 @@
-#include <Windows.h>
+#include "../pch.h"
 #include <string>
 #include <sstream>
 #include "../include/ProcessWatcher.h"
@@ -52,16 +52,13 @@ typedef struct _GARUDAHS_CONFIG {
     BOOL autoTerminate;
     BOOL enableLogging;
     char configPath[260];
-
-    // Additional AntiDebug configuration
     BOOL enablePerformanceMonitoring;
     char logFilePath[260];
     BOOL enableStealthMode;
     BOOL enableRandomization;
     DWORD maxDetectionHistory;
     float globalSensitivity;
-
-    DWORD reserved[10];  // Reduced to accommodate new fields
+    DWORD reserved[8];
 } GarudaHSConfig;
 
 // Detection result structure
@@ -267,9 +264,9 @@ extern "C" {
             config.scanInterval = 3000;
             config.autoTerminate = TRUE;
             config.enableLogging = TRUE;
-            strcpy_s(config.configPath, sizeof(config.configPath), "garudahs_config.ini");
+            strcpy_s(config.configPath, "garudahs_config.ini");
             config.enablePerformanceMonitoring = TRUE;
-            strcpy_s(config.logFilePath, sizeof(config.logFilePath), "garudahs.log");
+            strcpy_s(config.logFilePath, "garudahs.log");
 
             config.enableStealthMode = TRUE;
             config.enableRandomization = TRUE;

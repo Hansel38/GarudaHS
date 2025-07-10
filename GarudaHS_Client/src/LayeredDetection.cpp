@@ -1,3 +1,4 @@
+#include "../pch.h"
 #define NOMINMAX
 #include <Windows.h>
 #include <TlHelp32.h>
@@ -8,6 +9,7 @@
 #include <winternl.h>
 #include "../include/LayeredDetection.h"
 #include "../include/OverlayDetectionLayer.h"
+#include "../include/AntiSuspendDetectionLayer.h"
 
 namespace GarudaHS {
 
@@ -41,6 +43,11 @@ namespace GarudaHS {
         // Note: OverlayDetectionLayer will need to be initialized with logger and config
         // This would typically be done through dependency injection
         AddDetectionLayer(std::move(overlayLayer));
+
+        // Add anti-suspend threads detection layer
+        auto antiSuspendLayer = std::make_unique<AntiSuspendDetectionLayer>();
+        // Note: AntiSuspendDetectionLayer will be initialized automatically
+        AddDetectionLayer(std::move(antiSuspendLayer));
 
         return true;
     }

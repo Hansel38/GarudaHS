@@ -1,3 +1,5 @@
+#include "../pch.h"
+#define NOMINMAX
 #include <Windows.h>
 #include <TlHelp32.h>
 #include <string>

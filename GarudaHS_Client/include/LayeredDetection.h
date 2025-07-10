@@ -3,6 +3,7 @@
 #ifndef LAYEREDDETECTION_H
 #define LAYEREDDETECTION_H
 
+#define NOMINMAX
 #include <Windows.h>
 #include <string>
 #include <vector>
@@ -25,7 +26,22 @@ namespace GarudaHS {
         NETWORK_ANOMALY = 7,        // Suspicious network activity
         OVERLAY_DETECTION = 8,      // Screen overlay detected
         GRAPHICS_HOOK = 9,          // Graphics API hook detected
-        RENDERING_ANOMALY = 10      // Suspicious rendering behavior
+        RENDERING_ANOMALY = 10,     // Suspicious rendering behavior
+        THREAD_MANIPULATION = 11,   // Thread manipulation detected
+        ANOMALOUS_BEHAVIOR = 12,    // Anomalous behavior detected
+        SUSPICIOUS_PATTERN = 13,    // Suspicious pattern detected
+        EXTERNAL_MANIPULATION = 14, // External manipulation detected
+        CRITICAL_SYSTEM_THREAT = 15,// Critical system threat
+        CODE_INJECTION = 16,        // Code injection detected
+        UNKNOWN_THREAT = 17         // Unknown threat type
+    };
+
+    // Threat severity levels
+    enum class ThreatSeverity {
+        LOW = 0,
+        MEDIUM = 1,
+        HIGH = 2,
+        CRITICAL = 3
     };
 
     // Individual detection signal
@@ -35,8 +51,11 @@ namespace GarudaHS {
         float confidence;           // 0.0 - 1.0 confidence
         DWORD timestamp;           // When detected
         std::string details;        // Additional information
+        std::string description;    // Human readable description
         bool persistent;           // Signal persists across scans
         DWORD processId;           // Associated process ID
+        DWORD threadId;            // Associated thread ID
+        ThreatSeverity severity;   // Threat severity level
     };
 
     // Aggregated threat assessment

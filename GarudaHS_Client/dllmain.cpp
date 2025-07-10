@@ -1,3 +1,4 @@
+#include "pch.h"
 #include <windows.h>
 #include "include/ProcessWatcher.h"
 

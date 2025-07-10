@@ -1,3 +1,4 @@
+#include "../pch.h"
 #include <Windows.h>
 #include <fstream>
 #include <sstream>
@@ -6,13 +7,23 @@
 
 namespace GarudaHS {
 
-    Configuration::Configuration() 
+    Configuration::Configuration()
         : m_scanIntervalMs(3000)
         , m_enableLogging(true)
         , m_enablePopupWarnings(true)
         , m_autoTerminateGame(true)
         , m_enableFileWatching(false)
         , m_logFilePath("garudahs.log")
+        , m_enableAntiSuspend(true)
+        , m_enableThreadSuspensionDetection(true)
+        , m_enableSuspendCountMonitoring(true)
+        , m_enableThreadStateMonitoring(true)
+        , m_enableExternalSuspensionDetection(true)
+        , m_enableCriticalThreadProtection(true)
+        , m_enableAutoResume(true)
+        , m_antiSuspendScanInterval(3000)
+        , m_maxSuspendCount(3)
+        , m_threadSuspensionConfidence(0.9f)
     {
         ZeroMemory(&m_lastModified, sizeof(FILETIME));
         LoadDefaults();
@@ -114,6 +125,40 @@ namespace GarudaHS {
         else if (key == "log_file_path") {
             m_logFilePath = value;
         }
+        // Anti-Suspend Threads configuration
+        else if (key == "enable_antisuspend") {
+            m_enableAntiSuspend = (value == "true" || value == "1");
+        }
+        else if (key == "enable_thread_suspension_detection") {
+            m_enableThreadSuspensionDetection = (value == "true" || value == "1");
+        }
+        else if (key == "enable_suspend_count_monitoring") {
+            m_enableSuspendCountMonitoring = (value == "true" || value == "1");
+        }
+        else if (key == "enable_thread_state_monitoring") {
+            m_enableThreadStateMonitoring = (value == "true" || value == "1");
+        }
+        else if (key == "enable_external_suspension_detection") {
+            m_enableExternalSuspensionDetection = (value == "true" || value == "1");
+        }
+        else if (key == "enable_critical_thread_protection") {
+            m_enableCriticalThreadProtection = (value == "true" || value == "1");
+        }
+        else if (key == "enable_auto_resume") {
+            m_enableAutoResume = (value == "true" || value == "1");
+        }
+        else if (key == "antisuspend_scan_interval_ms") {
+            m_antiSuspendScanInterval = static_cast<DWORD>(std::stoul(value));
+        }
+        else if (key == "max_suspend_count") {
+            m_maxSuspendCount = static_cast<DWORD>(std::stoul(value));
+        }
+        else if (key == "thread_suspension_confidence") {
+            m_threadSuspensionConfidence = std::stof(value);
+        }
+        else if (key == "antisuspend_whitelisted_processes") {
+            m_antiSuspendWhitelistedProcesses = ParseStringList(value);
+        }
         else {
             return false; // Unknown key
         }
@@ -212,6 +257,29 @@ namespace GarudaHS {
         m_autoTerminateGame = true;
         m_enableFileWatching = false;
         m_logFilePath = "garudahs.log";
+
+        // Anti-Suspend Threads defaults
+        m_enableAntiSuspend = true;
+        m_enableThreadSuspensionDetection = true;
+        m_enableSuspendCountMonitoring = true;
+        m_enableThreadStateMonitoring = true;
+        m_enableExternalSuspensionDetection = true;
+        m_enableCriticalThreadProtection = true;
+        m_enableAutoResume = true;
+        m_antiSuspendScanInterval = 3000;
+        m_maxSuspendCount = 3;
+        m_threadSuspensionConfidence = 0.9f;
+
+        m_antiSuspendWhitelistedProcesses = {
+            "explorer.exe",
+            "dwm.exe",
+            "winlogon.exe",
+            "csrss.exe",
+            "services.exe",
+            "lsass.exe",
+            "svchost.exe",
+            "system"
+        };
     }
 
     bool Configuration::ValidateConfiguration() const {
@@ -219,8 +287,21 @@ namespace GarudaHS {
         if (m_scanIntervalMs < 1000 || m_scanIntervalMs > 60000) {
             return false;
         }
-        
+
         if (m_blacklistedProcesses.empty()) {
+            return false;
+        }
+
+        // Anti-Suspend Threads validation
+        if (m_antiSuspendScanInterval < 100 || m_antiSuspendScanInterval > 60000) {
+            return false;
+        }
+
+        if (m_maxSuspendCount == 0 || m_maxSuspendCount > 100) {
+            return false;
+        }
+
+        if (m_threadSuspensionConfidence < 0.0f || m_threadSuspensionConfidence > 1.0f) {
             return false;
         }
 
@@ -395,6 +476,117 @@ namespace GarudaHS {
 
         m_gameProcessNames.push_back(processName);
         return true;
+    }
+
+    // Anti-Suspend Threads configuration methods
+    bool Configuration::IsAntiSuspendEnabled() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_enableAntiSuspend;
+    }
+
+    void Configuration::SetAntiSuspendEnabled(bool enabled) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_enableAntiSuspend = enabled;
+    }
+
+    bool Configuration::IsThreadSuspensionDetectionEnabled() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_enableThreadSuspensionDetection;
+    }
+
+    void Configuration::SetThreadSuspensionDetectionEnabled(bool enabled) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_enableThreadSuspensionDetection = enabled;
+    }
+
+    bool Configuration::IsSuspendCountMonitoringEnabled() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_enableSuspendCountMonitoring;
+    }
+
+    void Configuration::SetSuspendCountMonitoringEnabled(bool enabled) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_enableSuspendCountMonitoring = enabled;
+    }
+
+    bool Configuration::IsThreadStateMonitoringEnabled() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_enableThreadStateMonitoring;
+    }
+
+    void Configuration::SetThreadStateMonitoringEnabled(bool enabled) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_enableThreadStateMonitoring = enabled;
+    }
+
+    bool Configuration::IsExternalSuspensionDetectionEnabled() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_enableExternalSuspensionDetection;
+    }
+
+    void Configuration::SetExternalSuspensionDetectionEnabled(bool enabled) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_enableExternalSuspensionDetection = enabled;
+    }
+
+    bool Configuration::IsCriticalThreadProtectionEnabled() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_enableCriticalThreadProtection;
+    }
+
+    void Configuration::SetCriticalThreadProtectionEnabled(bool enabled) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_enableCriticalThreadProtection = enabled;
+    }
+
+    bool Configuration::IsAutoResumeEnabled() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_enableAutoResume;
+    }
+
+    void Configuration::SetAutoResumeEnabled(bool enabled) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_enableAutoResume = enabled;
+    }
+
+    DWORD Configuration::GetAntiSuspendScanInterval() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_antiSuspendScanInterval;
+    }
+
+    void Configuration::SetAntiSuspendScanInterval(DWORD intervalMs) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_antiSuspendScanInterval = intervalMs;
+    }
+
+    DWORD Configuration::GetMaxSuspendCount() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_maxSuspendCount;
+    }
+
+    void Configuration::SetMaxSuspendCount(DWORD count) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_maxSuspendCount = count;
+    }
+
+    float Configuration::GetThreadSuspensionConfidence() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_threadSuspensionConfidence;
+    }
+
+    void Configuration::SetThreadSuspensionConfidence(float confidence) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_threadSuspensionConfidence = confidence;
+    }
+
+    std::vector<std::string> Configuration::GetAntiSuspendWhitelistedProcesses() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_antiSuspendWhitelistedProcesses;
+    }
+
+    void Configuration::SetAntiSuspendWhitelistedProcesses(const std::vector<std::string>& processes) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_antiSuspendWhitelistedProcesses = processes;
     }
 
 } // namespace GarudaHS

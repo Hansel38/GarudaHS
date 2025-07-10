@@ -31,6 +31,19 @@ namespace GarudaHS {
         bool m_autoTerminateGame;
         bool m_enableFileWatching;
         std::string m_logFilePath;
+
+        // Anti-Suspend Threads configuration
+        bool m_enableAntiSuspend;
+        bool m_enableThreadSuspensionDetection;
+        bool m_enableSuspendCountMonitoring;
+        bool m_enableThreadStateMonitoring;
+        bool m_enableExternalSuspensionDetection;
+        bool m_enableCriticalThreadProtection;
+        bool m_enableAutoResume;
+        DWORD m_antiSuspendScanInterval;
+        DWORD m_maxSuspendCount;
+        float m_threadSuspensionConfidence;
+        std::vector<std::string> m_antiSuspendWhitelistedProcesses;
         
         // Private methods
         bool LoadFromFile();
@@ -77,14 +90,48 @@ namespace GarudaHS {
         
         std::string GetLogFilePath() const;
         void SetLogFilePath(const std::string& path);
-        
+
+        // Anti-Suspend Threads configuration
+        bool IsAntiSuspendEnabled() const;
+        void SetAntiSuspendEnabled(bool enabled);
+
+        bool IsThreadSuspensionDetectionEnabled() const;
+        void SetThreadSuspensionDetectionEnabled(bool enabled);
+
+        bool IsSuspendCountMonitoringEnabled() const;
+        void SetSuspendCountMonitoringEnabled(bool enabled);
+
+        bool IsThreadStateMonitoringEnabled() const;
+        void SetThreadStateMonitoringEnabled(bool enabled);
+
+        bool IsExternalSuspensionDetectionEnabled() const;
+        void SetExternalSuspensionDetectionEnabled(bool enabled);
+
+        bool IsCriticalThreadProtectionEnabled() const;
+        void SetCriticalThreadProtectionEnabled(bool enabled);
+
+        bool IsAutoResumeEnabled() const;
+        void SetAutoResumeEnabled(bool enabled);
+
+        DWORD GetAntiSuspendScanInterval() const;
+        void SetAntiSuspendScanInterval(DWORD intervalMs);
+
+        DWORD GetMaxSuspendCount() const;
+        void SetMaxSuspendCount(DWORD count);
+
+        float GetThreadSuspensionConfidence() const;
+        void SetThreadSuspensionConfidence(float confidence);
+
+        std::vector<std::string> GetAntiSuspendWhitelistedProcesses() const;
+        void SetAntiSuspendWhitelistedProcesses(const std::vector<std::string>& processes);
+
         // File operations
         bool Save() const;
         bool CheckForUpdates();
-        
+
         // Default configuration
         void LoadDefaults();
-        
+
         // Validation
         bool ValidateConfiguration() const;
     };

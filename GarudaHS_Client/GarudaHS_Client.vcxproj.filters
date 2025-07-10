@@ -54,6 +54,12 @@
     <ClInclude Include="include\GarudaHS_UnifiedAPI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\AntiSuspendDetectionLayer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AntiSuspendThreads.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -90,6 +96,12 @@
       <Filter>Resource Files</Filter>
     </ClCompile>
     <ClCompile Include="src\AntiDebug.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AntiSuspendDetectionLayer.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AntiSuspendThreads.cpp">
       <Filter>Resource Files</Filter>
     </ClCompile>
   </ItemGroup>

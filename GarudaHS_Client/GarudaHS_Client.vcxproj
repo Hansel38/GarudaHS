@@ -114,7 +114,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;GARUDAHSCLIENT_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalOptions>/FS %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
@@ -147,6 +147,8 @@
   <ItemGroup>
     <ClInclude Include="framework.h" />
     <ClInclude Include="include\AntiDebug.h" />
+    <ClInclude Include="include\AntiSuspendDetectionLayer.h" />
+    <ClInclude Include="include\AntiSuspendThreads.h" />
     <ClInclude Include="include\Configuration.h" />
     <ClInclude Include="include\DetectionEngine.h" />
     <ClInclude Include="include\GarudaHSSimpleAPI.h" />
@@ -168,6 +170,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\AntiDebug.cpp" />
+    <ClCompile Include="src\AntiSuspendDetectionLayer.cpp" />
+    <ClCompile Include="src\AntiSuspendThreads.cpp" />
     <ClCompile Include="src\Configuration.cpp" />
     <ClCompile Include="src\DetectionEngine.cpp" />
     <ClCompile Include="src\Exports.cpp" />
