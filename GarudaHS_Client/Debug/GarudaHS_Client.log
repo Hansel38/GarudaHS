@@ -1,6 +1,29 @@
 ﻿  pch.cpp
   dllmain.cpp
+  AntiDebug.cpp
   Configuration.cpp
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\AntiDebug.cpp(457,13): error C2713: Only one form of exception handling permitted per function
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\AntiDebug.cpp(450,21): error C2712: Cannot use __try in functions that require object unwinding
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\AntiDebug.cpp(1071,27): error C4996: 'GetVersion': was declared deprecated
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\AntiDebug.cpp(1081,9): error C2059: syntax error: 'return'
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\AntiDebug.cpp(1084,10): error C2653: 'AntiDebug': is not a class or namespace name
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\AntiDebug.cpp(1085,42): error C2065: 'm_configMutex': undeclared identifier
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\AntiDebug.cpp(1086,9): error C2065: 'm_antiDebugConfig': undeclared identifier
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\AntiDebug.cpp(1089,13): error C3861: 'ObfuscateDetectionMethods': identifier not found
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\AntiDebug.cpp(1093,10): error C2653: 'AntiDebug': is not a class or namespace name
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\AntiDebug.cpp(1094,42): error C2065: 'm_configMutex': undeclared identifier
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\AntiDebug.cpp(1099,10): error C2653: 'AntiDebug': is not a class or namespace name
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\AntiDebug.cpp(1100,42): error C2065: 'm_configMutex': undeclared identifier
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\AntiDebug.cpp(1101,9): error C2065: 'm_antiDebugConfig': undeclared identifier
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\AntiDebug.cpp(1105,13): error C2065: 'm_antiDebugConfig': undeclared identifier
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\AntiDebug.cpp(1107,13): error C2065: 'm_antiDebugConfig': undeclared identifier
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\AntiDebug.cpp(1109,13): error C2065: 'm_antiDebugConfig': undeclared identifier
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\AntiDebug.cpp(1113,10): error C2653: 'AntiDebug': is not a class or namespace name
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\AntiDebug.cpp(1118,10): error C2653: 'AntiDebug': is not a class or namespace name
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\AntiDebug.cpp(1124,42): error C2065: 'm_configMutex': undeclared identifier
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\AntiDebug.cpp(1125,9): error C2065: 'm_antiDebugConfig': undeclared identifier
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\AntiDebug.cpp(1128,1): error C2059: syntax error: '}'
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\AntiDebug.cpp(1128,1): error C2143: syntax error: missing ';' before '}'
   DetectionEngine.cpp
   Exports.cpp
   Logger.cpp
@@ -10,5 +33,3 @@
   ProcessWatcher.cpp
   WindowDetector.cpp
   Generating Code...
-     Creating library F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\Debug\GarudaHS_Client.lib and object F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\Debug\GarudaHS_Client.exp
-  GarudaHS_Client.vcxproj -> F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\Debug\GarudaHS_Client.dll

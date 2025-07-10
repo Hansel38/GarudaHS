@@ -60,3 +60,4 @@
 *.vsidx
 *.ipch
 *.db
+*.db-wal

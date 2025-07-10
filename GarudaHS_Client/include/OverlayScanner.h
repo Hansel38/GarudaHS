@@ -80,6 +80,27 @@ namespace GarudaHS {
         bool enableRealTimeMonitoring;
         std::vector<std::string> whitelistedProcesses;
         std::vector<std::string> suspiciousModules;
+
+        // Configurable confidence scores
+        float directxHookConfidence;
+        float openglHookConfidence;
+        float windowOverlayConfidence;
+        float screenCaptureConfidence;
+        float endSceneHookConfidence;
+        float dxgiHookConfidence;
+
+        // Detection thresholds
+        DWORD maxModuleCount;
+        DWORD hookDetectionBufferSize;
+        BYTE transparencyThreshold;
+        DWORD detectionHistoryLimit;
+        DWORD minScanInterval;
+        DWORD maxScanInterval;
+
+        // Advanced detection settings
+        bool enableStrictValidation;
+        bool enableLegitimateAppProtection;
+        float falsePositiveReductionFactor;
     };
 
     /**

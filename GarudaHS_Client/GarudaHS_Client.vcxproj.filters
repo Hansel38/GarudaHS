@@ -24,9 +24,6 @@
     <ClInclude Include="include\ProcessWatcher.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Exports.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Configuration.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -46,6 +43,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\OverlayScanner.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GarudaHSSimpleAPI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AntiDebug.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GarudaHS_UnifiedAPI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -81,6 +87,9 @@
       <Filter>Resource Files</Filter>
     </ClCompile>
     <ClCompile Include="src\OverlayScanner.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AntiDebug.cpp">
       <Filter>Resource Files</Filter>
     </ClCompile>
   </ItemGroup>

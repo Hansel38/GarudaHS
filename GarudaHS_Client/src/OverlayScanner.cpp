@@ -265,10 +265,10 @@ namespace GarudaHS {
         try {
             // Get list of loaded modules
             HANDLE hProcess = GetCurrentProcess();
-            HMODULE hModules[1024];
+            std::vector<HMODULE> hModules(m_scannerConfig.maxModuleCount);
             DWORD cbNeeded;
 
-            if (EnumProcessModules(hProcess, hModules, sizeof(hModules), &cbNeeded)) {
+            if (EnumProcessModules(hProcess, hModules.data(), static_cast<DWORD>(hModules.size() * sizeof(HMODULE)), &cbNeeded)) {
                 DWORD moduleCount = cbNeeded / sizeof(HMODULE);
 
                 for (DWORD i = 0; i < moduleCount; i++) {
@@ -315,7 +315,7 @@ namespace GarudaHS {
                 result.processId = GetCurrentProcessId();
                 result.windowHandle = nullptr;
                 result.details = "Screen capture API hooks detected";
-                result.confidence = 0.75f;
+                result.confidence = m_scannerConfig.screenCaptureConfidence;
                 result.timestamp = GetTickCount();
 
                 LogDetection(result);
@@ -344,16 +344,70 @@ namespace GarudaHS {
         m_scannerConfig.logDetections = true;
         m_scannerConfig.enableRealTimeMonitoring = true;
 
-        // Default whitelisted processes
+        // Configurable confidence scores (reduced for false positive prevention)
+        m_scannerConfig.directxHookConfidence = 0.75f;      // Reduced from 0.85f
+        m_scannerConfig.openglHookConfidence = 0.75f;       // Reduced from 0.85f
+        m_scannerConfig.windowOverlayConfidence = 0.60f;    // Reduced from 0.70f
+        m_scannerConfig.screenCaptureConfidence = 0.65f;    // Reduced from 0.75f
+        m_scannerConfig.endSceneHookConfidence = 0.80f;     // Reduced from 0.90f
+        m_scannerConfig.dxgiHookConfidence = 0.70f;         // Reduced from 0.80f
+
+        // Detection thresholds
+        m_scannerConfig.maxModuleCount = 2048;              // Increased from 1024
+        m_scannerConfig.hookDetectionBufferSize = 32;       // Increased from 16
+        m_scannerConfig.transparencyThreshold = 200;        // More lenient than 255
+        m_scannerConfig.detectionHistoryLimit = 200;        // Increased from 100
+        m_scannerConfig.minScanInterval = 2000;             // More lenient than 1000
+        m_scannerConfig.maxScanInterval = 120000;           // Increased from 60000
+
+        // Advanced settings for false positive reduction
+        m_scannerConfig.enableStrictValidation = false;     // Disabled by default
+        m_scannerConfig.enableLegitimateAppProtection = true;
+        m_scannerConfig.falsePositiveReductionFactor = 0.8f;
+
+        // Default whitelisted processes (expanded for false positive prevention)
         m_scannerConfig.whitelistedProcesses = {
+            // System processes
             "explorer.exe",
             "dwm.exe",
             "winlogon.exe",
             "csrss.exe",
+            "svchost.exe",
+            "lsass.exe",
+            "wininit.exe",
+
+            // Legitimate gaming/streaming software
             "discord.exe",
             "steam.exe",
+            "steamwebhelper.exe",
             "obs64.exe",
-            "obs32.exe"
+            "obs32.exe",
+            "obs-studio.exe",
+            "streamlabs obs.exe",
+            "xsplit.broadcaster.exe",
+
+            // Graphics/driver software
+            "nvcontainer.exe",
+            "nvidia web helper.exe",
+            "nvidia share.exe",
+            "geforce experience.exe",
+            "radeoninstaller.exe",
+            "amdrsserv.exe",
+            "msiafterburner.exe",
+            "rtss.exe",
+
+            // Development tools
+            "devenv.exe",
+            "code.exe",
+            "rider64.exe",
+            "unity.exe",
+            "unrealed.exe",
+
+            // Antivirus software
+            "avp.exe",
+            "avgui.exe",
+            "mbam.exe",
+            "msmpeng.exe"
         };
 
         // Default suspicious modules
@@ -384,7 +438,7 @@ namespace GarudaHS {
                 result.processId = GetCurrentProcessId();
                 result.windowHandle = nullptr;
                 result.details = "DirectX 9 API hooks detected";
-                result.confidence = 0.85f;
+                result.confidence = m_scannerConfig.directxHookConfidence;
                 result.timestamp = GetTickCount();
 
                 LogDetection(result);
@@ -406,7 +460,7 @@ namespace GarudaHS {
                     result.processId = GetCurrentProcessId();
                     result.windowHandle = nullptr;
                     result.details = "DirectX 9 EndScene hook detected";
-                    result.confidence = 0.90f;
+                    result.confidence = m_scannerConfig.endSceneHookConfidence;
                     result.timestamp = GetTickCount();
 
                     LogDetection(result);
@@ -615,8 +669,8 @@ namespace GarudaHS {
             DWORD flags;
 
             if (GetLayeredWindowAttributes(hwnd, &colorKey, &alpha, &flags)) {
-                // Check for transparency
-                if ((flags & LWA_ALPHA) && alpha < 255) {
+                // Check for transparency with configurable threshold
+                if ((flags & LWA_ALPHA) && alpha < m_scannerConfig.transparencyThreshold) {
                     return true;
                 }
                 if (flags & LWA_COLORKEY) {
@@ -663,10 +717,10 @@ namespace GarudaHS {
 
         try {
             // Read first few bytes of the function
-            BYTE buffer[16];
+            std::vector<BYTE> buffer(m_scannerConfig.hookDetectionBufferSize);
             SIZE_T bytesRead;
 
-            if (ReadProcessMemory(GetCurrentProcess(), address, buffer, sizeof(buffer), &bytesRead)) {
+            if (ReadProcessMemory(GetCurrentProcess(), address, buffer.data(), buffer.size(), &bytesRead)) {
                 // Check for common hook patterns
 
                 // JMP instruction (0xE9)
@@ -796,12 +850,29 @@ namespace GarudaHS {
         std::string lowerProcessName = processName;
         std::transform(lowerProcessName.begin(), lowerProcessName.end(), lowerProcessName.begin(), ::tolower);
 
+        // Enhanced whitelist checking with legitimate app protection
         for (const auto& whitelisted : m_scannerConfig.whitelistedProcesses) {
             std::string lowerWhitelisted = whitelisted;
             std::transform(lowerWhitelisted.begin(), lowerWhitelisted.end(), lowerWhitelisted.begin(), ::tolower);
 
             if (lowerProcessName.find(lowerWhitelisted) != std::string::npos) {
                 return true;
+            }
+        }
+
+        // Additional protection for legitimate applications
+        if (m_scannerConfig.enableLegitimateAppProtection) {
+            // Check for common legitimate app patterns
+            std::vector<std::string> legitimatePatterns = {
+                "microsoft", "adobe", "google", "mozilla", "chrome", "firefox",
+                "nvidia", "amd", "intel", "steam", "epic", "origin", "uplay",
+                "discord", "skype", "zoom", "teams", "obs", "streamlabs"
+            };
+
+            for (const auto& pattern : legitimatePatterns) {
+                if (lowerProcessName.find(pattern) != std::string::npos) {
+                    return true;
+                }
             }
         }
 
@@ -838,7 +909,8 @@ namespace GarudaHS {
     }
 
     bool OverlayScanner::ValidateConfiguration() const {
-        if (m_scannerConfig.scanIntervalMs < 1000 || m_scannerConfig.scanIntervalMs > 60000) {
+        if (m_scannerConfig.scanIntervalMs < m_scannerConfig.minScanInterval ||
+            m_scannerConfig.scanIntervalMs > m_scannerConfig.maxScanInterval) {
             return false;
         }
 
@@ -890,22 +962,37 @@ namespace GarudaHS {
 
     void OverlayScanner::UpdateStatistics(const OverlayDetectionResult& result) {
         if (result.detected) {
-            m_overlaysDetected.fetch_add(1);
-
-            // Add to detection history
-            std::lock_guard<std::mutex> lock(m_scanMutex);
-            m_detectionHistory.push_back(result);
-
-            // Keep only recent detections (last 100)
-            if (m_detectionHistory.size() > 100) {
-                m_detectionHistory.erase(m_detectionHistory.begin());
+            // Apply false positive reduction factor
+            OverlayDetectionResult adjustedResult = result;
+            if (m_scannerConfig.falsePositiveReductionFactor < 1.0f) {
+                adjustedResult.confidence *= m_scannerConfig.falsePositiveReductionFactor;
             }
 
-            // Call detection callback if set
-            {
-                std::lock_guard<std::mutex> callbackLock(m_callbackMutex);
-                if (m_detectionCallback) {
-                    m_detectionCallback(result);
+            // Only count as detection if confidence is still above threshold
+            if (adjustedResult.confidence >= m_scannerConfig.confidenceThreshold) {
+                m_overlaysDetected.fetch_add(1);
+
+                // Add to detection history
+                std::lock_guard<std::mutex> lock(m_scanMutex);
+                m_detectionHistory.push_back(adjustedResult);
+
+                // Keep only recent detections (configurable limit)
+                if (m_detectionHistory.size() > m_scannerConfig.detectionHistoryLimit) {
+                    m_detectionHistory.erase(m_detectionHistory.begin());
+                }
+
+                // Call detection callback if set
+                {
+                    std::lock_guard<std::mutex> callbackLock(m_callbackMutex);
+                    if (m_detectionCallback) {
+                        m_detectionCallback(adjustedResult);
+                    }
+                }
+            } else {
+                // Log as potential false positive
+                if (m_logger && m_scannerConfig.logDetections) {
+                    m_logger->InfoF("OverlayScanner: Low confidence detection filtered out - Confidence: %.2f%%, Threshold: %.2f%%",
+                        adjustedResult.confidence * 100.0f, m_scannerConfig.confidenceThreshold * 100.0f);
                 }
             }
         }
