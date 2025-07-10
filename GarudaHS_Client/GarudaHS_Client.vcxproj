@@ -85,6 +85,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
+      <AdditionalDependencies>d3d9.lib;d3d11.lib;dxgi.lib;opengl32.lib;psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -102,6 +103,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
+      <AdditionalDependencies>d3d9.lib;d3d11.lib;dxgi.lib;opengl32.lib;psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -117,6 +119,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
+      <AdditionalDependencies>d3d9.lib;d3d11.lib;dxgi.lib;opengl32.lib;psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -134,6 +137,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
+      <AdditionalDependencies>d3d9.lib;d3d11.lib;dxgi.lib;opengl32.lib;psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -142,6 +146,8 @@
     <ClInclude Include="include\DetectionEngine.h" />
     <ClInclude Include="include\Exports.h" />
     <ClInclude Include="include\Logger.h" />
+    <ClInclude Include="include\OverlayDetectionLayer.h" />
+    <ClInclude Include="include\OverlayScanner.h" />
     <ClInclude Include="include\PerformanceMonitor.h" />
     <ClInclude Include="include\ProcessWatcher.h" />
     <ClInclude Include="include\WindowDetector.h" />
@@ -159,6 +165,8 @@
     <ClCompile Include="src\DetectionEngine.cpp" />
     <ClCompile Include="src\Exports.cpp" />
     <ClCompile Include="src\Logger.cpp" />
+    <ClCompile Include="src\OverlayDetectionLayer.cpp" />
+    <ClCompile Include="src\OverlayScanner.cpp" />
     <ClCompile Include="src\PerformanceMonitor.cpp" />
     <ClCompile Include="src\ProcessWatcher.cpp" />
     <ClCompile Include="src\WindowDetector.cpp" />

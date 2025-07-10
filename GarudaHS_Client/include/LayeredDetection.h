@@ -22,7 +22,10 @@ namespace GarudaHS {
         MODULE_INJECTION = 4,       // DLL injection detected
         HOOK_DETECTION = 5,         // API hooks detected
         TIMING_ANOMALY = 6,         // Timing-based detection
-        NETWORK_ANOMALY = 7         // Suspicious network activity
+        NETWORK_ANOMALY = 7,        // Suspicious network activity
+        OVERLAY_DETECTION = 8,      // Screen overlay detected
+        GRAPHICS_HOOK = 9,          // Graphics API hook detected
+        RENDERING_ANOMALY = 10      // Suspicious rendering behavior
     };
 
     // Individual detection signal
@@ -202,6 +205,10 @@ namespace GarudaHS {
         void AddTrustedModule(const std::string& moduleName);
         void LoadDefaultTrustedModules();
     };
+
+    // Forward declaration for OverlayDetectionLayer
+    // Full implementation is in OverlayScanner.h
+    class OverlayDetectionLayer;
 
 } // namespace GarudaHS
 

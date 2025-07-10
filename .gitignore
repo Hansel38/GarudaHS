@@ -58,3 +58,5 @@
 .vs/GarudaHS/v17/ipch/e59e2b49b5cf68c2.ipch
 .vscode/settings.json
 *.vsidx
+*.ipch
+*.db

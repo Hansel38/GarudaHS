@@ -42,6 +42,12 @@
     <ClInclude Include="include\DetectionEngine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\OverlayDetectionLayer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\OverlayScanner.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -69,6 +75,12 @@
       <Filter>Resource Files</Filter>
     </ClCompile>
     <ClCompile Include="src\DetectionEngine.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\OverlayDetectionLayer.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\OverlayScanner.cpp">
       <Filter>Resource Files</Filter>
     </ClCompile>
   </ItemGroup>

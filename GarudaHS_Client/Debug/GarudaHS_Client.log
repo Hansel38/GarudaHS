@@ -4,6 +4,8 @@
   DetectionEngine.cpp
   Exports.cpp
   Logger.cpp
+  OverlayDetectionLayer.cpp
+  OverlayScanner.cpp
   PerformanceMonitor.cpp
   ProcessWatcher.cpp
   WindowDetector.cpp
