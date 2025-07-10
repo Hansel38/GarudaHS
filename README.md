@@ -3,109 +3,117 @@
 <div align="center">
 
 ![Version](https://img.shields.io/badge/version-3.0.0-blue.svg)
+![Build](https://img.shields.io/badge/build-passing-brightgreen.svg)
 ![Platform](https://img.shields.io/badge/platform-Windows-lightgrey.svg)
-![Language](https://img.shields.io/badge/language-C++-blue.svg)
+![Language](https://img.shields.io/badge/language-C++20-blue.svg)
 ![Architecture](https://img.shields.io/badge/architecture-x86%20%7C%20x64-green.svg)
+![VS](https://img.shields.io/badge/Visual%20Studio-2022-purple.svg)
 ![License](https://img.shields.io/badge/license-Private-red.svg)
 
-**Advanced Multi-Layer Anti-Cheat System untuk Ragnarok Online**
-*Layered Detection • Confidence Scoring • Adaptive Intelligence*
+**Sistem Anti-Cheat Multi-Layer Canggih untuk Ragnarok Online**
+*Deteksi Berlapis • Skor Kepercayaan • Kecerdasan Adaptif*
 
-[🚀 Features](#-features) • [📦 Installation](#-installation) • [🔧 Configuration](#-configuration) • [📖 Documentation](#-documentation) • [🛠️ Development](#️-development)
+[🚀 Fitur](#-fitur) • [📦 Instalasi](#-instalasi) • [🔧 Konfigurasi](#-konfigurasi) • [📖 Dokumentasi](#-dokumentasi) • [🛠️ Pengembangan](#️-pengembangan)
 
 </div>
 
 ---
 
-## 📋 Table of Contents
+## 📋 Daftar Isi
 
-- [🎯 Overview](#-overview)
-- [🚀 Features](#-features)
-- [🏗️ Architecture](#️-architecture)
-- [📦 Installation](#-installation)
-- [🔧 Configuration](#-configuration)
-- [💻 API Reference](#-api-reference)
-- [🎮 Usage Examples](#-usage-examples)
-- [⚡ Performance](#-performance)
-- [🛠️ Development](#️-development)
+- [🎯 Gambaran Umum](#-gambaran-umum)
+- [🚀 Fitur](#-fitur)
+- [🏗️ Arsitektur](#️-arsitektur)
+- [📦 Instalasi](#-instalasi)
+- [🔧 Konfigurasi](#-konfigurasi)
+- [💻 Referensi API](#-referensi-api)
+- [🎮 Contoh Penggunaan](#-contoh-penggunaan)
+- [⚡ Performa](#-performa)
+- [✅ Status Kompilasi](#-status-kompilasi)
+- [🛠️ Pengembangan](#️-pengembangan)
 - [📊 Changelog](#-changelog)
-- [🤝 Contributing](#-contributing)
+- [🤝 Kontribusi](#-kontribusi)
 
 ---
 
-## 🎯 Overview
+## 🎯 Gambaran Umum
 
-**GarudaHS v3.0** adalah sistem anti-cheat professional yang menggunakan **layered detection** dengan **confidence scoring** untuk memberikan perlindungan maksimal terhadap cheat tools sambil meminimalkan false positives.
+**GarudaHS v3.0** adalah sistem anti-cheat profesional yang menggunakan **deteksi berlapis** dengan **skor kepercayaan** untuk memberikan perlindungan maksimal terhadap cheat tools sambil meminimalkan false positives.
 
-### ✨ Key Highlights
+### ✨ Fitur Utama
 
-- 🔍 **Multi-Layer Detection**: 8 detection layers dengan confidence scoring
-- 🛡️ **Smart Whitelisting**: Automatic protection untuk legitimate processes
-- ⏰ **Adaptive Timing**: Delayed aggressive detection sampai game ready
-- 📝 **Separated Logging**: Log analysis sebelum enforcement action
-- 🔒 **Safe Shutdown**: Graceful thread termination dengan events
-- 🌐 **Cross-Platform**: Support untuk semua Windows versions
-- 🔄 **Feedback Loop**: Continuous improvement dari detection logs
+- 🔍 **Deteksi Multi-Layer**: 11 lapisan deteksi dengan skor kepercayaan
+- 🛡️ **Smart Whitelisting**: Perlindungan otomatis untuk proses legitimate
+- ⏰ **Timing Adaptif**: Deteksi agresif tertunda sampai game siap
+- 📝 **Logging Terpisah**: Analisis log sebelum tindakan enforcement
+- 🔒 **Shutdown Aman**: Terminasi thread yang graceful dengan events
+- 🌐 **Cross-Platform**: Dukungan untuk semua versi Windows
+- 🔄 **Feedback Loop**: Peningkatan berkelanjutan dari log deteksi
+- 🎨 **Deteksi Overlay**: Sistem deteksi overlay grafis revolusioner
 
-### 🎮 Supported Games
+### 🎮 Game yang Didukung
 
-- **Ragnarok Online** (All versions)
+- **Ragnarok Online** (Semua versi)
 - **Ragnarok Re:Start**
 - **Ragnarok Zero**
 - **Custom RO Servers**
+- **Private Servers**
 
 ---
 
-## 🚀 Features
+## 🚀 Fitur
 
-### 🆕 **What's New in v3.0**
+### 🆕 **Yang Baru di v3.0**
 
-| Feature | v1.0 | v2.0 | v3.0 |
-|---------|------|------|------|
-| **Detection Method** | ❌ Single Layer | ✅ Multi-Component | 🚀 **11-Layer System** |
-| **False Positive Rate** | ❌ High (~15%) | ✅ Medium (~5%) | 🎯 **Ultra Low (~0.5%)** |
-| **Confidence Scoring** | ❌ None | ❌ Basic | ✅ **Advanced ML-based** |
-| **Game State Awareness** | ❌ None | ❌ Basic | ✅ **Full State Management** |
-| **Adaptive Detection** | ❌ Fixed | ❌ Limited | ✅ **Intelligent Adaptation** |
-| **Safe Shutdown** | ❌ TerminateThread | ✅ Events | ✅ **Advanced Management** |
-| **Feedback Learning** | ❌ None | ❌ None | ✅ **Auto-Improvement** |
+| Fitur | v1.0 | v2.0 | v3.0 |
+|-------|------|------|------|
+| **Metode Deteksi** | ❌ Single Layer | ✅ Multi-Component | 🚀 **Sistem 11-Layer** |
+| **False Positive Rate** | ❌ Tinggi (~15%) | ✅ Sedang (~5%) | 🎯 **Ultra Rendah (~0.5%)** |
+| **Confidence Scoring** | ❌ Tidak Ada | ❌ Basic | ✅ **Advanced ML-based** |
+| **Game State Awareness** | ❌ Tidak Ada | ❌ Basic | ✅ **Full State Management** |
+| **Deteksi Adaptif** | ❌ Fixed | ❌ Terbatas | ✅ **Adaptasi Cerdas** |
+| **Safe Shutdown** | ❌ TerminateThread | ✅ Events | ✅ **Manajemen Canggih** |
+| **Feedback Learning** | ❌ Tidak Ada | ❌ Tidak Ada | ✅ **Auto-Improvement** |
+| **Deteksi Overlay** | ❌ Tidak Ada | ❌ Tidak Ada | 🆕 **Sistem Revolusioner** |
 
-### 🔍 **Detection Layers**
+### 🔍 **Lapisan Deteksi**
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                   11-Layer Detection System                 │
+│                   Sistem Deteksi 11-Layer                  │
 ├─────────────────────────────────────────────────────────────┤
-│  Layer 1: Process Detection        │ Weight: 1.0 │ 🎯 High  │
-│  Layer 2: Debugger Detection       │ Weight: 0.9 │ 🎯 High  │
-│  Layer 3: Thread Hijack Detection  │ Weight: 0.8 │ 🟡 Med   │
-│  Layer 4: Module Validation        │ Weight: 0.7 │ 🟡 Med   │
-│  Layer 5: Memory Scan Detection    │ Weight: 0.6 │ 🟡 Med   │
-│  Layer 6: API Hook Detection       │ Weight: 0.8 │ 🎯 High  │
-│  Layer 7: Timing Anomaly          │ Weight: 0.5 │ 🟢 Low   │
-│  Layer 8: Network Anomaly         │ Weight: 0.4 │ 🟢 Low   │
-│  Layer 9: Overlay Detection       │ Weight: 0.75│ 🎯 High  │
-│  Layer 10: Graphics Hook          │ Weight: 0.85│ 🎯 High  │
-│  Layer 11: Rendering Anomaly      │ Weight: 0.65│ 🟡 Med   │
+│  Layer 1: Deteksi Proses           │ Bobot: 1.0 │ 🎯 Tinggi │
+│  Layer 2: Deteksi Debugger         │ Bobot: 0.9 │ 🎯 Tinggi │
+│  Layer 3: Deteksi Thread Hijack    │ Bobot: 0.8 │ 🟡 Sedang │
+│  Layer 4: Validasi Module          │ Bobot: 0.7 │ 🟡 Sedang │
+│  Layer 5: Deteksi Memory Scan      │ Bobot: 0.6 │ 🟡 Sedang │
+│  Layer 6: Deteksi API Hook         │ Bobot: 0.8 │ 🎯 Tinggi │
+│  Layer 7: Anomali Timing           │ Bobot: 0.5 │ 🟢 Rendah │
+│  Layer 8: Anomali Network          │ Bobot: 0.4 │ 🟢 Rendah │
+│  Layer 9: Deteksi Overlay          │ Bobot: 0.75│ 🎯 Tinggi │
+│  Layer 10: Graphics Hook           │ Bobot: 0.85│ 🎯 Tinggi │
+│  Layer 11: Anomali Rendering       │ Bobot: 0.65│ 🟡 Sedang │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 🛡️ **Protection Features**
+### 🛡️ **Fitur Perlindungan**
 
-- **Real-time Monitoring**: Continuous background scanning
-- **Stealth Operation**: Minimal system footprint
+- **Monitoring Real-time**: Scanning background berkelanjutan
+- **Operasi Stealth**: Jejak sistem minimal
 - **Anti-Bypass**: Multiple detection layers
-- **Auto-Response**: Graduated response system
-- **Comprehensive Audit**: Complete detection logs
-- **🎨 Overlay Detection**: Advanced graphics overlay scanning
-- **🎮 Graphics API Monitoring**: DirectX/OpenGL hook detection
-- **🖼️ Visual Cheat Detection**: Screen overlay and ESP detection
+- **Auto-Response**: Sistem respons bertingkat
+- **Audit Komprehensif**: Log deteksi lengkap
+- **🎨 Deteksi Overlay**: Scanning overlay grafis canggih
+- **🎮 Monitoring Graphics API**: Deteksi hook DirectX/OpenGL
+- **🖼️ Deteksi Visual Cheat**: Deteksi overlay layar dan ESP
+- **🔒 Thread Safety**: Semua operasi thread-safe
+- **⚡ Performa Optimal**: Dampak CPU <2%
 
 ---
 
-## 🏗️ Architecture
+## 🏗️ Arsitektur
 
-GarudaHS v3.0 menggunakan **modern layered architecture** dengan **separation of concerns**:
+GarudaHS v3.0 menggunakan **arsitektur berlapis modern** dengan **separation of concerns**:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -132,61 +140,64 @@ GarudaHS v3.0 menggunakan **modern layered architecture** dengan **separation of
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 🧩 **Core Components**
+### 🧩 **Komponen Inti**
 
-| Component | Responsibility | Thread-Safe | Configurable |
-|-----------|---------------|-------------|--------------|
-| **ProcessWatcher** | Main engine coordination | ✅ | ✅ |
-| **LayeredDetection** | Multi-layer threat detection | ✅ | ✅ |
-| **OverlayScanner** | 🆕 Graphics overlay detection | ✅ | ✅ |
-| **GameStateManager** | Game state & timing control | ✅ | ✅ |
-| **ActionManager** | Response & escalation logic | ✅ | ✅ |
-| **DetectionEngine** | Rule-based pattern matching | ✅ | ✅ |
-| **Configuration** | Dynamic config management | ✅ | ✅ |
-| **Logger** | Professional logging system | ✅ | ✅ |
-| **PerformanceMonitor** | Performance optimization | ✅ | ✅ |
+| Komponen | Tanggung Jawab | Thread-Safe | Dapat Dikonfigurasi |
+|----------|---------------|-------------|---------------------|
+| **ProcessWatcher** | Koordinasi engine utama | ✅ | ✅ |
+| **LayeredDetection** | Deteksi ancaman multi-layer | ✅ | ✅ |
+| **OverlayScanner** | 🆕 Deteksi overlay grafis | ✅ | ✅ |
+| **AntiDebug** | Deteksi anti-debug canggih | ✅ | ✅ |
+| **DetectionEngine** | Pattern matching berbasis aturan | ✅ | ✅ |
+| **Configuration** | Manajemen config dinamis | ✅ | ✅ |
+| **Logger** | Sistem logging profesional | ✅ | ✅ |
+| **PerformanceMonitor** | Optimasi performa | ✅ | ✅ |
+| **WindowDetector** | Deteksi window suspicious | ✅ | ✅ |
 
 ---
 
 ## 🎨 Overlay Scanner
 
-### 🆕 **Advanced Graphics Overlay Detection**
+### 🆕 **Deteksi Overlay Grafis Canggih**
 
-GarudaHS v3.0 memperkenalkan **Overlay Scanner** - sistem deteksi overlay grafis yang revolusioner untuk mendeteksi berbagai jenis visual cheats.
+GarudaHS v3.0 memperkenalkan **Overlay Scanner** - sistem deteksi overlay grafis yang revolusioner untuk mendeteksi berbagai jenis visual cheats dan ESP.
 
-### 🎯 **Cheat Types Detected**
+### 🎯 **Jenis Cheat yang Terdeteksi**
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    Overlay Detection Coverage               │
+│                    Cakupan Deteksi Overlay                 │
 ├─────────────────────────────────────────────────────────────┤
 │  🎮 ESP (Extra Sensory Perception)     │ DirectX/OpenGL    │
 │  🖼️ Wallhacks & Visual Cheats          │ Graphics API      │
 │  🎯 Aimbot Overlays                     │ Window-based      │
 │  📊 Information Overlays                │ Screen Capture    │
 │  💉 Injection-based Overlays            │ Memory-based      │
+│  🔍 Radar Hacks                         │ Minimap Overlay   │
+│  ⚡ Speed Hacks (Visual)                │ Movement Display  │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 🔍 **Detection Methods**
+### 🔍 **Metode Deteksi**
 
-#### **🎮 Graphics API Monitoring**
-- **DirectX 9/11/12**: Hook detection pada Present, EndScene, SwapBuffers
-- **OpenGL**: wglSwapBuffers, glBegin/glEnd hook detection
-- **DXGI**: Factory dan SwapChain hook monitoring
-- **Vulkan**: Framework ready untuk future implementation
+#### **🎮 Monitoring Graphics API**
+- **DirectX 9/11/12**: Deteksi hook pada Present, EndScene, SwapBuffers
+- **OpenGL**: Deteksi hook wglSwapBuffers, glBegin/glEnd
+- **DXGI**: Monitoring hook Factory dan SwapChain
+- **Vulkan**: Framework siap untuk implementasi masa depan
 
-#### **🖼️ Visual Analysis**
-- **Window Layers**: Topmost, layered, transparent window detection
-- **Overlay Patterns**: Suspicious window behavior analysis
-- **Screen Capture**: BitBlt, StretchBlt hook detection
-- **Memory Scanning**: Graphics memory pattern analysis
+#### **🖼️ Analisis Visual**
+- **Window Layers**: Deteksi window topmost, layered, transparent
+- **Overlay Patterns**: Analisis perilaku window yang mencurigakan
+- **Screen Capture**: Deteksi hook BitBlt, StretchBlt
+- **Memory Scanning**: Analisis pattern memory grafis
 
-#### **🔧 Advanced Techniques**
-- **API Hook Scanning**: Function prologue analysis
-- **Module Validation**: Suspicious DLL detection
-- **Thread Analysis**: Injection thread detection
-- **Memory Protection**: RWX memory region scanning
+#### **🔧 Teknik Canggih**
+- **API Hook Scanning**: Analisis function prologue
+- **Validasi Module**: Deteksi DLL yang mencurigakan
+- **Analisis Thread**: Deteksi injection thread
+- **Memory Protection**: Scanning region memory RWX
+- **Anti-Debug**: Deteksi debugger dan reverse engineering tools
 
 ### ⚙️ **Configuration Options**
 
@@ -276,16 +287,18 @@ if (InitializeOverlayScanner()) {
 
 ---
 
-## 📦 Installation
+## 📦 Instalasi
 
-### 🔧 **System Requirements**
+### 🔧 **Kebutuhan Sistem**
 
 - **OS**: Windows 7/8/10/11 (x86/x64)
-- **RAM**: 512MB available memory
-- **Storage**: 50MB free space
-- **Permissions**: Administrator privileges (for injection)
+- **RAM**: 512MB memori tersedia
+- **Storage**: 50MB ruang kosong
+- **Permissions**: Hak administrator (untuk injection)
+- **Visual Studio**: 2022 (untuk development)
+- **C++ Runtime**: Visual C++ Redistributable terbaru
 
-### 📁 **Project Structure**
+### 📁 **Struktur Proyek**
 
 ```
 GarudaHS/
@@ -328,41 +341,52 @@ GarudaHS/
 └── 📄 README.md                # This file
 ```
 
-### 🚀 **Quick Start**
+### 🚀 **Panduan Cepat**
 
-#### **For Developers:**
+#### **Untuk Developer:**
 
 ```bash
 # 1. Clone repository
 git clone https://github.com/YourUsername/GarudaHS.git
 cd GarudaHS
 
-# 2. Open in Visual Studio 2022
+# 2. Buka di Visual Studio 2022
 # File → Open → Project/Solution → GarudaHS.sln
 
-# 3. Build solution (All files already included)
+# 3. Build solution (Semua file sudah termasuk)
 # Build → Rebuild Solution (Ctrl+Shift+B)
 # Platform: x86 (Debug/Release)
 
-# 4. Output files will be in Debug/ or Release/ folder
-# - GarudaHS_Client.dll (Anti-cheat library)
-# - GarudaHS_Server.exe (Server component)
+# 4. File output akan ada di folder Debug/ atau Release/
+# - GarudaHS_Client.dll (Library anti-cheat)
+# - GarudaHS_Server.exe (Komponen server)
 ```
 
-#### **For End Users:**
+#### **Untuk End User:**
 
 ```bash
-# 1. Download release package
-# 2. Extract to game folder
-# 3. Configure garudahs_config.ini
-# 4. Inject DLL or use static linking
+# 1. Download paket release
+# 2. Extract ke folder game
+# 3. Konfigurasi garudahs_config.ini
+# 4. Inject DLL atau gunakan static linking
+```
+
+#### **🚀 Build Satu Klik (Visual Studio 2022):**
+
+```bash
+# Buka Developer Command Prompt dan jalankan:
+cd "F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS"
+MSBuild.exe GarudaHS.sln /p:Configuration=Debug /p:Platform=x86
+
+# Atau untuk Release build:
+MSBuild.exe GarudaHS.sln /p:Configuration=Release /p:Platform=x86
 ```
 
 ---
 
-## 🔧 Configuration
+## 🔧 Konfigurasi
 
-### 📄 **Main Configuration (garudahs_config.ini)**
+### 📄 **Konfigurasi Utama (garudahs_config.ini)**
 
 ```ini
 # ═══════════════════════════════════════════════════════════
@@ -839,77 +863,77 @@ performance_mode=BALANCED    # PERFORMANCE, BALANCED, SECURITY
 
 ---
 
-## ✅ Compilation Status
+## ✅ Status Kompilasi
 
-### 🎯 **Current Build Status**
+### 🎯 **Status Build Saat Ini**
 
-| Component | Status | Platform | Configuration |
-|-----------|--------|----------|---------------|
-| **GarudaHS_Client.dll** | ✅ **SUCCESS** | x86 | Debug/Release |
-| **GarudaHS_Server.exe** | ✅ **SUCCESS** | x86 | Debug/Release |
-| **All Dependencies** | ✅ **INCLUDED** | - | Static Linking |
-| **Precompiled Headers** | ✅ **ENABLED** | - | Required |
+| Komponen | Status | Platform | Konfigurasi |
+|----------|--------|----------|-------------|
+| **GarudaHS_Client.dll** | ✅ **BERHASIL** | x86 | Debug/Release |
+| **GarudaHS_Server.exe** | ✅ **BERHASIL** | x86 | Debug/Release |
+| **Semua Dependencies** | ✅ **TERMASUK** | - | Static Linking |
+| **Precompiled Headers** | ✅ **AKTIF** | - | Diperlukan |
 
-### 🔧 **Recent Compilation Fixes**
+### 🔧 **Perbaikan Kompilasi Terbaru**
 
-#### **🚨 Major Issues Resolved (Latest Update)**
+#### **🚨 Masalah Utama yang Telah Diperbaiki (Update Terbaru)**
 
-| Error Code | Description | Status | Solution Applied |
-|------------|-------------|--------|------------------|
-| **C2712** | Cannot use __try in functions that require object unwinding | ✅ **FIXED** | Replaced SEH with safer API calls |
-| **C2317** | 'try' block has no catch handlers | ✅ **FIXED** | Fixed try-catch structure |
-| **C2653** | 'AntiDebug': is not a class or namespace name | ✅ **FIXED** | Added proper PCH inclusion |
-| **C3861** | 'UpdateWhitelist': identifier not found | ✅ **FIXED** | Added missing function declaration |
-| **C2059** | syntax error: 'catch' | ✅ **FIXED** | Corrected class structure |
-| **C2143** | syntax error: missing ';' before '{' | ✅ **FIXED** | Fixed syntax issues |
+| Kode Error | Deskripsi | Status | Solusi yang Diterapkan |
+|------------|-----------|--------|------------------------|
+| **C2712** | Cannot use __try in functions that require object unwinding | ✅ **DIPERBAIKI** | Mengganti SEH dengan API calls yang lebih aman |
+| **C2317** | 'try' block has no catch handlers | ✅ **DIPERBAIKI** | Memperbaiki struktur try-catch |
+| **C2653** | 'AntiDebug': is not a class or namespace name | ✅ **DIPERBAIKI** | Menambahkan PCH inclusion yang benar |
+| **C3861** | 'UpdateWhitelist': identifier not found | ✅ **DIPERBAIKI** | Menambahkan deklarasi fungsi yang hilang |
+| **C2059** | syntax error: 'catch' | ✅ **DIPERBAIKI** | Memperbaiki struktur class |
+| **C2143** | syntax error: missing ';' before '{' | ✅ **DIPERBAIKI** | Memperbaiki masalah syntax |
 
-#### **🛠️ Technical Solutions Applied**
+#### **🛠️ Solusi Teknis yang Diterapkan**
 
-1. **SEH Compatibility Fix**:
+1. **Perbaikan Kompatibilitas SEH**:
    ```cpp
-   // OLD (Problematic)
+   // LAMA (Bermasalah)
    __try {
-       GarudaHS::DebugDetectionResult result = {}; // C++ object in SEH
+       GarudaHS::DebugDetectionResult result = {}; // C++ object dalam SEH
    }
 
-   // NEW (Fixed)
+   // BARU (Diperbaiki)
    bool detected = false;
    __try {
-       detected = true; // Simple types only
+       detected = true; // Hanya tipe sederhana
    }
-   // Handle C++ objects outside SEH block
+   // Handle C++ objects di luar blok SEH
    ```
 
-2. **Precompiled Header Fix**:
+2. **Perbaikan Precompiled Header**:
    ```cpp
-   // Added as first include in all .cpp files
+   // Ditambahkan sebagai include pertama di semua file .cpp
    #include "../pch.h"
    ```
 
-3. **Missing Declaration Fix**:
+3. **Perbaikan Deklarasi yang Hilang**:
    ```cpp
-   // Added to AntiDebug.h
+   // Ditambahkan ke AntiDebug.h
    void UpdateWhitelist(const std::vector<std::string>& whitelist);
    ```
 
-4. **Build Configuration Fix**:
+4. **Perbaikan Konfigurasi Build**:
    ```bash
-   # Corrected platform name
-   MSBuild.exe GarudaHS.sln /p:Platform=x86  # Not Win32
+   # Nama platform yang benar
+   MSBuild.exe GarudaHS.sln /p:Platform=x86  # Bukan Win32
    ```
 
-### 📊 **Build Verification**
+### 📊 **Verifikasi Build**
 
 ```bash
-# Successful build output:
+# Output build yang berhasil:
 ✅ GarudaHS_Server.vcxproj -> Debug\GarudaHS_Server.exe
 ✅ AntiDebug.cpp
 ✅ Exports.cpp
 ✅ Generating Code...
 ✅ GarudaHS_Client.vcxproj -> Debug\GarudaHS_Client.dll
 
-# Output files generated:
-✅ Debug/GarudaHS_Client.dll    (Anti-cheat library)
+# File output yang dihasilkan:
+✅ Debug/GarudaHS_Client.dll    (Library anti-cheat)
 ✅ Debug/GarudaHS_Client.lib    (Import library)
 ✅ Debug/GarudaHS_Client.exp    (Export file)
 ✅ Debug/GarudaHS_Client.pdb    (Debug symbols)
@@ -919,15 +943,15 @@ performance_mode=BALANCED    # PERFORMANCE, BALANCED, SECURITY
 
 ---
 
-## 🛠️ Development
+## 🛠️ Pengembangan
 
-### 🔧 **Build Requirements**
+### 🔧 **Kebutuhan Build**
 
-- **Visual Studio 2022** (Recommended)
+- **Visual Studio 2022** (Direkomendasikan)
 - **Windows SDK 10.0+**
-- **C++20 Standard** (Enhanced compatibility)
+- **C++20 Standard** (Kompatibilitas yang ditingkatkan)
 - **Platform Toolset**: v143
-- **Precompiled Headers**: Enabled (Required)
+- **Precompiled Headers**: Aktif (Diperlukan)
 
 ### 📁 **Project Files Status**
 
@@ -1129,15 +1153,16 @@ Please include:
 
 <div align="center">
 
-**🛡️ GarudaHS v3.0 - Professional Anti-Cheat System**
+**🛡️ GarudaHS v3.0 - Sistem Anti-Cheat Profesional**
 
-*Protecting your game, preserving fair play*
+*Melindungi game Anda, menjaga fair play*
 
 [![Made with ❤️](https://img.shields.io/badge/Made%20with-❤️-red.svg)](https://github.com)
 [![Windows](https://img.shields.io/badge/Platform-Windows-blue.svg)](https://windows.microsoft.com)
-[![C++](https://img.shields.io/badge/Language-C++-blue.svg)](https://isocpp.org)
+[![C++](https://img.shields.io/badge/Language-C++20-blue.svg)](https://isocpp.org)
 [![Professional](https://img.shields.io/badge/Grade-Professional-gold.svg)](https://github.com)
+[![Build](https://img.shields.io/badge/Build-Passing-brightgreen.svg)](https://github.com)
 
-**[⭐ Star this repository](https://github.com/YourUsername/GarudaHS) if you find it useful!**
+**[⭐ Star repository ini](https://github.com/YourUsername/GarudaHS) jika berguna untuk Anda!**
 
 </div>
