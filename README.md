@@ -913,7 +913,10 @@ void TestLayeredDetection() {
 ### 🆕 **v3.0.0** (Current) - "Professional Grade"
 
 #### ✨ **Major Features**
-- 🔍 **8-Layer Detection System**: Process, Debugger, Thread, Module, Memory, Hook, Timing, Network
+- 🔍 **11-Layer Detection System**: Process, Debugger, Thread, Module, Memory, Hook, Timing, Network, Overlay, Graphics, Rendering
+- 🎨 **🆕 Overlay Scanner**: Revolutionary graphics overlay detection system
+- 🎮 **🆕 Multi-API Support**: DirectX 9/11/12, OpenGL, Vulkan detection
+- 🖼️ **🆕 Visual Cheat Detection**: ESP, wallhacks, aimbot overlays
 - 🎯 **Advanced Confidence Scoring**: ML-based threat assessment
 - 🎮 **Game State Management**: Adaptive detection based on game state
 - 🚨 **Graduated Response System**: Log → Warn → Escalate → Enforce
@@ -936,6 +939,18 @@ void TestLayeredDetection() {
 - ✅ Fixed Windows macro conflicts
 - ✅ Fixed thread safety issues
 - ✅ Fixed false positive detection for system processes
+
+#### 🎨 **🆕 Overlay Scanner Module**
+- 🎮 **DirectX Detection**: Hook detection for DirectX 9/11/12 APIs
+- 🖼️ **OpenGL Detection**: wglSwapBuffers and OpenGL function hooks
+- 🪟 **Window Analysis**: Topmost, layered, transparent window detection
+- 🔍 **Hook Scanning**: Advanced API hook pattern recognition
+- 📺 **Screen Capture**: BitBlt/StretchBlt hook monitoring
+- 💉 **Injection Detection**: Suspicious module and thread analysis
+- ⚙️ **Configurable**: 20+ configuration options
+- 📊 **Statistics**: Comprehensive detection metrics
+- 🔗 **API Integration**: 15+ export functions for external control
+- 🛡️ **Anti-Bypass**: Multi-layer detection with confidence scoring
 
 ### 📜 **v2.0.0** - "Modern Architecture"
 - ✅ Complete OOP rewrite
