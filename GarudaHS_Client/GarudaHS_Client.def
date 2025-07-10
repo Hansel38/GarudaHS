@@ -1,0 +1,7 @@
+EXPORTS
+StartGarudaHS
+InitializeGarudaHS
+CleanupGarudaHS
+GetGarudaHSVersion
+IsGarudaHSActive
+TriggerScan
