@@ -293,6 +293,8 @@ GarudaHS/
 │   ├── 📂 include/              # Header files
 │   │   ├── ProcessWatcher.h
 │   │   ├── LayeredDetection.h
+│   │   ├── OverlayScanner.h     # 🆕 Overlay detection
+│   │   ├── OverlayDetectionLayer.h # 🆕 Layer integration
 │   │   ├── GameStateManager.h
 │   │   ├── ActionManager.h
 │   │   ├── DetectionEngine.h
@@ -304,6 +306,8 @@ GarudaHS/
 │   ├── 📂 src/                  # Source files
 │   │   ├── ProcessWatcher.cpp
 │   │   ├── LayeredDetection.cpp
+│   │   ├── OverlayScanner.cpp   # 🆕 Overlay detection impl
+│   │   ├── OverlayDetectionLayer.cpp # 🆕 Layer impl
 │   │   ├── GameStateManager.cpp
 │   │   ├── ActionManager.cpp
 │   │   ├── DetectionEngine.cpp
