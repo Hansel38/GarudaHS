@@ -138,8 +138,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="framework.h" />
+    <ClInclude Include="include\Configuration.h" />
     <ClInclude Include="include\Exports.h" />
+    <ClInclude Include="include\Logger.h" />
+    <ClInclude Include="include\PerformanceMonitor.h" />
     <ClInclude Include="include\ProcessWatcher.h" />
+    <ClInclude Include="include\WindowDetector.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
@@ -150,8 +154,12 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\Configuration.cpp" />
     <ClCompile Include="src\Exports.cpp" />
+    <ClCompile Include="src\Logger.cpp" />
+    <ClCompile Include="src\PerformanceMonitor.cpp" />
     <ClCompile Include="src\ProcessWatcher.cpp" />
+    <ClCompile Include="src\WindowDetector.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -2,18 +2,33 @@
 #include "include/ProcessWatcher.h"
 #include "include/Exports.h"
 
-DWORD WINAPI MainThread(LPVOID lpParam) {
-    while (true) {
-        GarudaHS::ScanProcess();
-        Sleep(3000); // scan setiap 3 detik, bisa dioptimalkan nanti
-    }
-    return 0;
-}
-
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
-    if (ul_reason_for_call == DLL_PROCESS_ATTACH) {
+    switch (ul_reason_for_call) {
+    case DLL_PROCESS_ATTACH:
         DisableThreadLibraryCalls(hModule);
-        CreateThread(NULL, 0, MainThread, NULL, 0, NULL);
+
+        // Initialize and start ProcessWatcher automatically
+        {
+            auto& watcher = GarudaHS::GetGlobalProcessWatcher();
+            if (watcher.Initialize()) {
+                watcher.Start();
+            }
+        }
+        break;
+
+    case DLL_PROCESS_DETACH:
+        // Cleanup on DLL unload
+        {
+            auto& watcher = GarudaHS::GetGlobalProcessWatcher();
+            watcher.Shutdown();
+        }
+        break;
+
+    case DLL_THREAD_ATTACH:
+    case DLL_THREAD_DETACH:
+        // Nothing to do for thread attach/detach
+        break;
     }
+
     return TRUE;
 }

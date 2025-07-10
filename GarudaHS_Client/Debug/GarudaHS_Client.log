@@ -1,7 +1,11 @@
 ﻿  pch.cpp
   dllmain.cpp
+  Configuration.cpp
   Exports.cpp
+  Logger.cpp
+  PerformanceMonitor.cpp
   ProcessWatcher.cpp
+  WindowDetector.cpp
   Generating Code...
      Creating library F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\Debug\GarudaHS_Client.lib and object F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\Debug\GarudaHS_Client.exp
   GarudaHS_Client.vcxproj -> F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\Debug\GarudaHS_Client.dll
