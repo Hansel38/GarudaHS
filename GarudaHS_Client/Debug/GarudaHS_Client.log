@@ -1,6 +1,7 @@
 ﻿  pch.cpp
   dllmain.cpp
   Configuration.cpp
+  DetectionEngine.cpp
   Exports.cpp
   Logger.cpp
   PerformanceMonitor.cpp

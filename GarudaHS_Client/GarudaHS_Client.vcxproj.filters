@@ -39,6 +39,9 @@
     <ClInclude Include="include\WindowDetector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\DetectionEngine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -63,6 +66,9 @@
       <Filter>Resource Files</Filter>
     </ClCompile>
     <ClCompile Include="src\WindowDetector.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DetectionEngine.cpp">
       <Filter>Resource Files</Filter>
     </ClCompile>
   </ItemGroup>

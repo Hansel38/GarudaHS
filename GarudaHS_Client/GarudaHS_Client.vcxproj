@@ -139,6 +139,7 @@
   <ItemGroup>
     <ClInclude Include="framework.h" />
     <ClInclude Include="include\Configuration.h" />
+    <ClInclude Include="include\DetectionEngine.h" />
     <ClInclude Include="include\Exports.h" />
     <ClInclude Include="include\Logger.h" />
     <ClInclude Include="include\PerformanceMonitor.h" />
@@ -155,6 +156,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\Configuration.cpp" />
+    <ClCompile Include="src\DetectionEngine.cpp" />
     <ClCompile Include="src\Exports.cpp" />
     <ClCompile Include="src\Logger.cpp" />
     <ClCompile Include="src\PerformanceMonitor.cpp" />

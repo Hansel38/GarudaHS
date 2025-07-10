@@ -1,0 +1,79 @@
+{
+  "messages": {
+    "detection_alerts": {
+      "critical": {
+        "title": "GarudaHS - Critical Threat Detected",
+        "message": "Critical cheat tool detected: {process_name}\n\nRule: {rule_name}\nConfidence: {confidence}%\n\nThe game will be terminated immediately for security.",
+        "icon": "error"
+      },
+      "high": {
+        "title": "GarudaHS - High Risk Detection", 
+        "message": "Suspicious process detected: {process_name}\n\nRule: {rule_name}\nConfidence: {confidence}%\n\nPlease close the application or the game will be terminated.",
+        "icon": "warning"
+      },
+      "medium": {
+        "title": "GarudaHS - Security Warning",
+        "message": "Potentially suspicious process: {process_name}\n\nRule: {rule_name}\nConfidence: {confidence}%\n\nThis has been logged for review.",
+        "icon": "information"
+      },
+      "low": {
+        "title": "GarudaHS - Low Risk Detection",
+        "message": "Low confidence detection: {process_name}\n\nRule: {rule_name}\nConfidence: {confidence}%\n\nThis detection has been logged.",
+        "icon": "information"
+      }
+    },
+    "system_messages": {
+      "initialization": {
+        "success": "GarudaHS v{version} initialized successfully",
+        "failure": "Failed to initialize GarudaHS: {error}"
+      },
+      "configuration": {
+        "loaded": "Configuration loaded: {rules_count} rules, {whitelist_count} whitelist entries",
+        "reloaded": "Configuration reloaded successfully",
+        "error": "Configuration error: {error}"
+      },
+      "scanning": {
+        "started": "Process scanning started (interval: {interval}ms)",
+        "stopped": "Process scanning stopped",
+        "paused": "Process scanning paused",
+        "resumed": "Process scanning resumed"
+      }
+    },
+    "log_messages": {
+      "detection": "[DETECTION] {timestamp} - {confidence} confidence: {process_name} matched rule '{rule_name}' ({match_type})",
+      "whitelist": "[WHITELIST] {timestamp} - Process {process_name} whitelisted, skipping detection",
+      "false_positive": "[FALSE_POSITIVE] {timestamp} - Potential false positive: {process_name} (reason: {reason})",
+      "scan_complete": "[SCAN] {timestamp} - Scan completed: {processes_scanned} processes, {detections} detections",
+      "error": "[ERROR] {timestamp} - {error_message}",
+      "warning": "[WARNING] {timestamp} - {warning_message}",
+      "info": "[INFO] {timestamp} - {info_message}"
+    }
+  },
+  "languages": {
+    "default": "en",
+    "supported": ["en", "id"],
+    "fallback": "en"
+  },
+  "localization": {
+    "en": {
+      "cheat_detected": "Cheat Detected",
+      "game_terminated": "Game Terminated",
+      "process_name": "Process Name",
+      "rule_matched": "Rule Matched", 
+      "confidence_level": "Confidence Level",
+      "action_taken": "Action Taken",
+      "close_application": "Please close the application",
+      "contact_support": "Contact support if this is a false positive"
+    },
+    "id": {
+      "cheat_detected": "Cheat Terdeteksi",
+      "game_terminated": "Game Dihentikan",
+      "process_name": "Nama Proses",
+      "rule_matched": "Aturan yang Cocok",
+      "confidence_level": "Tingkat Keyakinan", 
+      "action_taken": "Tindakan yang Diambil",
+      "close_application": "Silakan tutup aplikasi tersebut",
+      "contact_support": "Hubungi support jika ini adalah false positive"
+    }
+  }
+}
