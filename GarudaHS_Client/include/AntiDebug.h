@@ -56,21 +56,64 @@ namespace GarudaHS {
         bool enableThreadContext;
         bool enableHeapFlags;
         bool enableSystemCalls;
-        
+
+        // Confidence scores (configurable)
+        float basicAPIConfidence;
+        float ntQueryConfidence;
+        float pebFlagsConfidence;
+        float hardwareBreakpointsConfidence;
+        float timingAttacksConfidence;
+        float exceptionHandlingConfidence;
+        float memoryProtectionConfidence;
+        float threadContextConfidence;
+        float heapFlagsConfidence;
+        float systemCallsConfidence;
+
         // Timing thresholds
         DWORD timingThresholdMs;
         DWORD maxTimingVariance;
-        
+        DWORD timingBaselineSamples;
+        DWORD detectionWindowMs;
+
         // Detection intervals
         DWORD scanIntervalMs;
         DWORD continuousMonitoringInterval;
-        
+        DWORD errorRecoverySleepMs;
+        DWORD threadWaitTimeoutMs;
+
+        // Memory addresses (configurable for different Windows versions)
+        DWORD_PTR pebOffsetX64;
+        DWORD_PTR pebOffsetX86;
+
+        // Magic numbers (configurable)
+        DWORD ntGlobalFlagMask;
+        DWORD dr7RegisterMask;
+        DWORD heapDebugFlags1;
+        DWORD heapDebugFlags2;
+        DWORD heapForceFlags;
+
+        // System call opcodes (configurable for different Windows versions)
+        BYTE expectedOpcodes[8];
+        DWORD opcodeLength;
+
         // Response configuration
         bool enableAutoResponse;
         bool enableLogging;
         bool enableCallbacks;
         float confidenceThreshold;
-        
+
+        // Whitelist configuration (to prevent false positives)
+        bool enableWhitelist;
+        std::vector<std::string> whitelistedProcesses;
+        std::vector<std::string> whitelistedModules;
+        std::vector<std::string> whitelistedPaths;
+
+        // False positive prevention
+        bool enableContextualAnalysis;
+        bool enableBehaviorBaseline;
+        DWORD minimumDetectionCount;
+        DWORD falsePositiveThreshold;
+
         // Advanced options
         bool enableStealthMode;         // Hide anti-debug presence
         bool enableRandomization;       // Randomize detection timing
@@ -152,6 +195,16 @@ namespace GarudaHS {
         void LogDetection(const DebugDetectionResult& result);
         void TriggerCallback(const DebugDetectionResult& result);
         void HandleError(const std::string& error);
+
+        // Whitelist and false positive prevention
+        bool IsProcessWhitelisted(const std::string& processName);
+        bool IsModuleWhitelisted(const std::string& moduleName);
+        bool IsPathWhitelisted(const std::string& path);
+        bool IsLegitimateDebugger();
+        bool ShouldIgnoreDetection(const DebugDetectionResult& result);
+        void UpdateFalsePositiveStats(const DebugDetectionResult& result);
+        bool IsSystemUnderDevelopment();
+        void AnalyzeDetectionContext(DebugDetectionResult& result);
         
         // Thread procedures
         static DWORD WINAPI ScanThreadProc(LPVOID lpParam);
@@ -160,7 +213,7 @@ namespace GarudaHS {
         // Stealth and obfuscation
         void ObfuscateDetectionMethods();
         void RandomizeDetectionTiming();
-        
+
         // Configuration helpers
         void LoadDefaultConfiguration();
         bool ValidateConfiguration() const;
@@ -210,6 +263,9 @@ namespace GarudaHS {
         void EnableStealthMode(bool enabled);
         void EnableContinuousMonitoring(bool enabled);
         void SetDetectionSensitivity(float sensitivity); // 0.0 - 1.0
+
+        // Whitelist management
+        void UpdateWhitelist(const std::vector<std::string>& whitelist);
     };
 
 } // namespace GarudaHS
