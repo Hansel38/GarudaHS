@@ -61,3 +61,4 @@
 *.ipch
 *.db
 *.db-wal
+*.db-wal

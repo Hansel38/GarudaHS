@@ -45,13 +45,7 @@
     <ClInclude Include="include\OverlayScanner.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\GarudaHSSimpleAPI.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\AntiDebug.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\GarudaHS_UnifiedAPI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\AntiSuspendDetectionLayer.h">
@@ -75,6 +69,16 @@
     <ClInclude Include="include\MemorySignatureScanner.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\GarudaHS_Exports.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\LayeredDetection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GarudaHS_StaticCore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -84,9 +88,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\ProcessWatcher.cpp">
-      <Filter>Resource Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Exports.cpp">
       <Filter>Resource Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Configuration.cpp">
@@ -128,5 +129,18 @@
     <ClCompile Include="src\MemorySignatureScanner.cpp">
       <Filter>Resource Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\GarudaHS_StaticCore.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\LayeredDetection.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SecurityUtils.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\StaticExports.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
+
   </ItemGroup>
 </Project>

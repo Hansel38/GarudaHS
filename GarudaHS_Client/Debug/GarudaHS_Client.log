@@ -5,17 +5,123 @@
   AntiSuspendThreads.cpp
   Configuration.cpp
   DetectionEngine.cpp
-  Exports.cpp
+  GarudaHS_StaticCore.cpp
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\GarudaHS_StaticCore.cpp(53,26): error C2712: Cannot use __try in functions that require object unwinding
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\GarudaHS_StaticCore.cpp(118,26): error C2712: Cannot use __try in functions that require object unwinding
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\GarudaHS_StaticCore.cpp(141,12): error C2039: 'LogInfo': is not a member of 'GarudaHS::Logger'
+      F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\include\Logger.h(25,11):
+      see declaration of 'GarudaHS::Logger'
+  
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\GarudaHS_StaticCore.cpp(141,12): error C2660: 'GarudaHS::Logger::LogError': function does not take 1 arguments
+      F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\include\Logger.h(75,14):
+      see declaration of 'GarudaHS::Logger::LogError'
+      F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\GarudaHS_StaticCore.cpp(141,12):
+      while trying to match the argument list '(std::string)'
+  
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\GarudaHS_StaticCore.cpp(141,12): error C2664: 'bool GarudaHS::InjectionScanner::Initialize(std::shared_ptr<GarudaHS::Logger>,std::shared_ptr<GarudaHS::Configuration>)': cannot convert argument 1 from 'std::unique_ptr<GarudaHS::Logger,std::default_delete<GarudaHS::Logger>>' to 'std::shared_ptr<GarudaHS::Logger>'
+      F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\GarudaHS_StaticCore.cpp(141,12):
+      No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
+      F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\include\InjectionScanner.h(226,14):
+      see declaration of 'GarudaHS::InjectionScanner::Initialize'
+      F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\GarudaHS_StaticCore.cpp(141,12):
+      while trying to match the argument list '(std::unique_ptr<GarudaHS::Logger,std::default_delete<GarudaHS::Logger>>, std::unique_ptr<GarudaHS::Configuration,std::default_delete<GarudaHS::Configuration>>)'
+  
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\GarudaHS_StaticCore.cpp(141,12): error C2039: 'Initialize': is not a member of 'GarudaHS::WindowDetector'
+      F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\include\WindowDetector.h(35,11):
+      see declaration of 'GarudaHS::WindowDetector'
+  
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\GarudaHS_StaticCore.cpp(141,12): error C2664: 'bool GarudaHSStaticCore::SecureWrapper(std::function<bool (void)>)': cannot convert argument 1 from 'GarudaHSStaticCore::Initialize::<lambda_1>' to 'std::function<bool (void)>'
+      F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\GarudaHS_StaticCore.cpp(141,12):
+      No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
+      F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\GarudaHS_StaticCore.cpp(118,26):
+      see declaration of 'GarudaHSStaticCore::SecureWrapper'
+      F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\GarudaHS_StaticCore.cpp(141,12):
+      while trying to match the argument list '(GarudaHSStaticCore::Initialize::<lambda_1>)'
+  
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\GarudaHS_StaticCore.cpp(245,12): error C2039: 'LogInfo': is not a member of 'GarudaHS::Logger'
+      F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\include\Logger.h(25,11):
+      see declaration of 'GarudaHS::Logger'
+  
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\GarudaHS_StaticCore.cpp(245,12): error C2039: 'Start': is not a member of 'GarudaHS::OverlayScanner'
+      F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\include\OverlayScanner.h(113,11):
+      see declaration of 'GarudaHS::OverlayScanner'
+  
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\GarudaHS_StaticCore.cpp(245,12): error C2039: 'Start': is not a member of 'GarudaHS::WindowDetector'
+      F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\include\WindowDetector.h(35,11):
+      see declaration of 'GarudaHS::WindowDetector'
+  
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\GarudaHS_StaticCore.cpp(245,12): error C2039: 'Start': is not a member of 'GarudaHS::LayeredDetection'
+      F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\include\LayeredDetection.h(89,11):
+      see declaration of 'GarudaHS::LayeredDetection'
+  
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\GarudaHS_StaticCore.cpp(245,12): error C2660: 'GarudaHS::Logger::LogError': function does not take 1 arguments
+      F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\include\Logger.h(75,14):
+      see declaration of 'GarudaHS::Logger::LogError'
+      F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\GarudaHS_StaticCore.cpp(245,12):
+      while trying to match the argument list '(std::string)'
+  
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\GarudaHS_StaticCore.cpp(245,12): error C2664: 'bool GarudaHSStaticCore::SecureWrapper(std::function<bool (void)>)': cannot convert argument 1 from 'GarudaHSStaticCore::Start::<lambda_1>' to 'std::function<bool (void)>'
+      F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\GarudaHS_StaticCore.cpp(245,12):
+      No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
+      F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\GarudaHS_StaticCore.cpp(118,26):
+      see declaration of 'GarudaHSStaticCore::SecureWrapper'
+      F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\GarudaHS_StaticCore.cpp(245,12):
+      while trying to match the argument list '(GarudaHSStaticCore::Start::<lambda_1>)'
+  
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\GarudaHS_StaticCore.cpp(278,12): error C2039: 'LogInfo': is not a member of 'GarudaHS::Logger'
+      F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\include\Logger.h(25,11):
+      see declaration of 'GarudaHS::Logger'
+  
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\GarudaHS_StaticCore.cpp(278,12): error C2039: 'ScanProcesses': is not a member of 'GarudaHS::ProcessWatcher'
+      F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\include\ProcessWatcher.h(46,11):
+      see declaration of 'GarudaHS::ProcessWatcher'
+  
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\GarudaHS_StaticCore.cpp(278,12): error C2039: 'ScanOverlays': is not a member of 'GarudaHS::OverlayScanner'
+      F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\include\OverlayScanner.h(113,11):
+      see declaration of 'GarudaHS::OverlayScanner'
+  
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\GarudaHS_StaticCore.cpp(278,12): error C2039: 'ScanForDebugger': is not a member of 'GarudaHS::AntiDebug'
+      F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\include\AntiDebug.h(132,11):
+      see declaration of 'GarudaHS::AntiDebug'
+  
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\GarudaHS_StaticCore.cpp(278,12): error C2039: 'ScanWindows': is not a member of 'GarudaHS::WindowDetector'
+      F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\include\WindowDetector.h(35,11):
+      see declaration of 'GarudaHS::WindowDetector'
+  
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\GarudaHS_StaticCore.cpp(278,12): error C2039: 'ScanForSuspendedThreads': is not a member of 'GarudaHS::AntiSuspendThreads'
+      F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\include\AntiSuspendThreads.h(155,11):
+      see declaration of 'GarudaHS::AntiSuspendThreads'
+  
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\GarudaHS_StaticCore.cpp(278,12): error C2664: 'bool GarudaHSStaticCore::SecureWrapper(std::function<bool (void)>)': cannot convert argument 1 from 'GarudaHSStaticCore::PerformSecurityScan::<lambda_1>' to 'std::function<bool (void)>'
+      F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\GarudaHS_StaticCore.cpp(278,12):
+      No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
+      F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\GarudaHS_StaticCore.cpp(118,26):
+      see declaration of 'GarudaHSStaticCore::SecureWrapper'
+      F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\GarudaHS_StaticCore.cpp(278,12):
+      while trying to match the argument list '(GarudaHSStaticCore::PerformSecurityScan::<lambda_1>)'
+  
+  LayeredDetection.cpp
+  SecurityUtils.cpp
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\SecurityUtils.cpp(103,43): error C3861: '__readgsqword': identifier not found
   InjectionDetectionLayer.cpp
   InjectionScanner.cpp
-  LayeredDetection.cpp
   Logger.cpp
   MemorySignatureScanner.cpp
   OverlayDetectionLayer.cpp
   OverlayScanner.cpp
   PerformanceMonitor.cpp
   ProcessWatcher.cpp
+  StaticExports.cpp
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\StaticExports.cpp(74,28): error C2712: Cannot use __try in functions that require object unwinding
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\StaticExports.cpp(157,48): error C2248: 'GarudaHSStaticCore::CalculateChecksum': cannot access private member declared in class 'GarudaHSStaticCore'
+      F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\include\GarudaHS_StaticCore.h(98,18):
+      see declaration of 'GarudaHSStaticCore::CalculateChecksum'
+      F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\include\GarudaHS_StaticCore.h(72,7):
+      see declaration of 'GarudaHSStaticCore'
+  
+F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\src\StaticExports.cpp(122,28): error C2712: Cannot use __try in functions that require object unwinding
+  Compiling with Static Linking + Module Definition security model
+  Exports: GHS_InitializeSecure, GHS_PerformScan, GHS_GetStatus, GHS_GetVersion
+  Security features: Code obfuscation, Runtime protection, Input validation
   WindowDetector.cpp
   Generating Code...
-     Creating library F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\Debug\GarudaHS_Client.lib and object F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\Debug\GarudaHS_Client.exp
-  GarudaHS_Client.vcxproj -> F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\Debug\GarudaHS_Client.dll

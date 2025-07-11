@@ -83,6 +83,7 @@
       <AdditionalOptions>/FS /GS /guard:cf /sdl %(AdditionalOptions)</AdditionalOptions>
       <BufferSecurityCheck>true</BufferSecurityCheck>
       <ControlFlowGuard>Guard</ControlFlowGuard>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -98,11 +99,16 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;GARUDAHSCLIENT_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;GARUDAHSCLIENT_EXPORTS;_WINDOWS;_USRDLL;GARUDAHS_STATIC_CORE=1;GARUDAHS_SECURITY_ENABLED=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalOptions>/FS %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>/FS /GS /guard:cf /sdl %(AdditionalOptions)</AdditionalOptions>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <ControlFlowGuard>Guard</ControlFlowGuard>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -116,11 +122,16 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;GARUDAHSCLIENT_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;GARUDAHSCLIENT_EXPORTS;_WINDOWS;_USRDLL;GARUDAHS_STATIC_CORE=1;GARUDAHS_SECURITY_ENABLED=1;GARUDAHS_DEBUG=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalOptions>/FS %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>/FS /GS /guard:cf /sdl %(AdditionalOptions)</AdditionalOptions>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <ControlFlowGuard>Guard</ControlFlowGuard>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -136,11 +147,16 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;GARUDAHSCLIENT_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;GARUDAHSCLIENT_EXPORTS;_WINDOWS;_USRDLL;GARUDAHS_STATIC_CORE=1;GARUDAHS_SECURITY_ENABLED=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalOptions>/FS %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>F:\Private MMO\Republic Project\12. Republic Anti Cheat\GarudaHS\GarudaHS_Client\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>/FS /GS /guard:cf /sdl %(AdditionalOptions)</AdditionalOptions>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <ControlFlowGuard>Guard</ControlFlowGuard>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -159,6 +175,7 @@
     <ClInclude Include="include\Constants.h" />
     <ClInclude Include="include\DetectionEngine.h" />
     <ClInclude Include="include\GarudaHS_Exports.h" />
+
     <ClInclude Include="include\GarudaHS_StaticCore.h" />
     <ClInclude Include="include\InjectionDetectionLayer.h" />
     <ClInclude Include="include\InjectionScanner.h" />
@@ -186,18 +203,19 @@
     <ClCompile Include="src\AntiSuspendThreads.cpp" />
     <ClCompile Include="src\Configuration.cpp" />
     <ClCompile Include="src\DetectionEngine.cpp" />
+
     <ClCompile Include="src\GarudaHS_StaticCore.cpp" />
-    <ClCompile Include="src\StaticExports.cpp" />
+    <ClCompile Include="src\LayeredDetection.cpp" />
     <ClCompile Include="src\SecurityUtils.cpp" />
     <ClCompile Include="src\InjectionDetectionLayer.cpp" />
     <ClCompile Include="src\InjectionScanner.cpp" />
-    <ClCompile Include="src\LayeredDetection.cpp" />
     <ClCompile Include="src\Logger.cpp" />
     <ClCompile Include="src\MemorySignatureScanner.cpp" />
     <ClCompile Include="src\OverlayDetectionLayer.cpp" />
     <ClCompile Include="src\OverlayScanner.cpp" />
     <ClCompile Include="src\PerformanceMonitor.cpp" />
     <ClCompile Include="src\ProcessWatcher.cpp" />
+    <ClCompile Include="src\StaticExports.cpp" />
     <ClCompile Include="src\WindowDetector.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <functional>
 
 // Security Macros untuk Code Obfuscation
 #define OBFUSCATE_STRING(str) ObfuscateString(str, __LINE__)
@@ -204,5 +205,3 @@ namespace SecurityConstants {
     constexpr DWORD CHECKSUM_SEED = 0x12345678;
     constexpr int OBFUSCATION_KEY = 0xDEADBEEF;
 }
-
-#endif // GARUDAHS_STATICCORE_H
