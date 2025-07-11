@@ -42,6 +42,24 @@ namespace GarudaHS {
         , m_antiSuspendScanInterval(3000)
         , m_maxSuspendCount(3)
         , m_threadSuspensionConfidence(0.9f)
+        , m_enableMemorySignatureScanner(true)
+        , m_enableMemoryRealTimeScanning(true)
+        , m_enableMemoryDeepScan(false)
+        , m_enableMemoryHeuristicAnalysis(true)
+        , m_enableMemoryEntropyAnalysis(false)
+        , m_enableMemoryCrossReferenceCheck(true)
+        , m_enableMemorySignatureUpdates(false)
+        , m_enableMemoryWhitelistProtection(true)
+        , m_enableMemoryFalsePositiveReduction(true)
+        , m_memoryScanInterval(5000)
+        , m_maxProcessesToScanForMemory(50)
+        , m_memoryScanTimeout(10000)
+        , m_maxMemoryRegionsPerProcess(100)
+        , m_maxMemoryRegionSize(10 * 1024 * 1024)  // 10 MB
+        , m_minMemoryRegionSize(1024)              // 1 KB
+        , m_memoryConfidenceThreshold(0.7f)
+        , m_maxMemoryDetectionHistory(1000)
+        , m_memoryFalsePositiveThreshold(5)
     {
         ZeroMemory(&m_lastModified, sizeof(FILETIME));
         LoadDefaults();
@@ -358,6 +376,59 @@ namespace GarudaHS {
             "Microsoft Corporation",
             "Microsoft Windows",
             "Microsoft Windows Publisher"
+        };
+
+        // Memory Signature Scanner defaults
+        m_enableMemorySignatureScanner = true;
+        m_enableMemoryRealTimeScanning = true;
+        m_enableMemoryDeepScan = false;
+        m_enableMemoryHeuristicAnalysis = true;
+        m_enableMemoryEntropyAnalysis = false;
+        m_enableMemoryCrossReferenceCheck = true;
+        m_enableMemorySignatureUpdates = false;
+        m_enableMemoryWhitelistProtection = true;
+        m_enableMemoryFalsePositiveReduction = true;
+        m_memoryScanInterval = 5000;
+        m_maxProcessesToScanForMemory = 50;
+        m_memoryScanTimeout = 10000;
+        m_maxMemoryRegionsPerProcess = 100;
+        m_maxMemoryRegionSize = 10 * 1024 * 1024; // 10 MB
+        m_minMemoryRegionSize = 1024; // 1 KB
+        m_memoryConfidenceThreshold = 0.7f;
+        m_maxMemoryDetectionHistory = 1000;
+        m_memoryFalsePositiveThreshold = 5;
+
+        m_memoryWhitelistedProcesses = {
+            "explorer.exe",
+            "winlogon.exe",
+            "csrss.exe",
+            "lsass.exe",
+            "services.exe",
+            "svchost.exe",
+            "dwm.exe",
+            "conhost.exe",
+            "system",
+            "smss.exe",
+            "wininit.exe"
+        };
+
+        m_memoryWhitelistedPaths = {
+            "C:\\Windows\\System32\\",
+            "C:\\Windows\\SysWOW64\\",
+            "C:\\Program Files\\Windows Defender\\",
+            "C:\\Program Files (x86)\\Windows Defender\\",
+            "C:\\Windows\\Microsoft.NET\\",
+            "C:\\Windows\\WinSxS\\"
+        };
+
+        m_memoryTrustedSigners = {
+            "Microsoft Corporation",
+            "Microsoft Windows",
+            "NVIDIA Corporation",
+            "Intel Corporation",
+            "AMD Inc.",
+            "Realtek Semiconductor Corp.",
+            "VIA Technologies, Inc."
         };
     }
 
@@ -1000,6 +1071,217 @@ namespace GarudaHS {
     void Configuration::SetInjectionTrustedSigners(const std::vector<std::string>& signers) {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_injectionTrustedSigners = signers;
+    }
+
+    // Memory Signature Scanner configuration implementation
+    bool Configuration::IsMemorySignatureScannerEnabled() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_enableMemorySignatureScanner;
+    }
+
+    void Configuration::SetMemorySignatureScannerEnabled(bool enabled) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_enableMemorySignatureScanner = enabled;
+    }
+
+    bool Configuration::IsMemoryRealTimeScanningEnabled() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_enableMemoryRealTimeScanning;
+    }
+
+    void Configuration::SetMemoryRealTimeScanningEnabled(bool enabled) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_enableMemoryRealTimeScanning = enabled;
+    }
+
+    bool Configuration::IsMemoryDeepScanEnabled() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_enableMemoryDeepScan;
+    }
+
+    void Configuration::SetMemoryDeepScanEnabled(bool enabled) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_enableMemoryDeepScan = enabled;
+    }
+
+    bool Configuration::IsMemoryHeuristicAnalysisEnabled() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_enableMemoryHeuristicAnalysis;
+    }
+
+    void Configuration::SetMemoryHeuristicAnalysisEnabled(bool enabled) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_enableMemoryHeuristicAnalysis = enabled;
+    }
+
+    bool Configuration::IsMemoryEntropyAnalysisEnabled() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_enableMemoryEntropyAnalysis;
+    }
+
+    void Configuration::SetMemoryEntropyAnalysisEnabled(bool enabled) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_enableMemoryEntropyAnalysis = enabled;
+    }
+
+    bool Configuration::IsMemoryCrossReferenceCheckEnabled() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_enableMemoryCrossReferenceCheck;
+    }
+
+    void Configuration::SetMemoryCrossReferenceCheckEnabled(bool enabled) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_enableMemoryCrossReferenceCheck = enabled;
+    }
+
+    bool Configuration::IsMemorySignatureUpdatesEnabled() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_enableMemorySignatureUpdates;
+    }
+
+    void Configuration::SetMemorySignatureUpdatesEnabled(bool enabled) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_enableMemorySignatureUpdates = enabled;
+    }
+
+    bool Configuration::IsMemoryWhitelistProtectionEnabled() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_enableMemoryWhitelistProtection;
+    }
+
+    void Configuration::SetMemoryWhitelistProtectionEnabled(bool enabled) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_enableMemoryWhitelistProtection = enabled;
+    }
+
+    bool Configuration::IsMemoryFalsePositiveReductionEnabled() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_enableMemoryFalsePositiveReduction;
+    }
+
+    void Configuration::SetMemoryFalsePositiveReductionEnabled(bool enabled) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_enableMemoryFalsePositiveReduction = enabled;
+    }
+
+    DWORD Configuration::GetMemoryScanInterval() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_memoryScanInterval;
+    }
+
+    void Configuration::SetMemoryScanInterval(DWORD intervalMs) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_memoryScanInterval = clamp_min(intervalMs, static_cast<DWORD>(1000)); // Minimum 1 second
+    }
+
+    DWORD Configuration::GetMaxProcessesToScanForMemory() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_maxProcessesToScanForMemory;
+    }
+
+    void Configuration::SetMaxProcessesToScanForMemory(DWORD count) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_maxProcessesToScanForMemory = clamp_range(count, static_cast<DWORD>(1), static_cast<DWORD>(200));
+    }
+
+    DWORD Configuration::GetMemoryScanTimeout() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_memoryScanTimeout;
+    }
+
+    void Configuration::SetMemoryScanTimeout(DWORD timeoutMs) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_memoryScanTimeout = clamp_min(timeoutMs, static_cast<DWORD>(1000)); // Minimum 1 second
+    }
+
+    DWORD Configuration::GetMaxMemoryRegionsPerProcess() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_maxMemoryRegionsPerProcess;
+    }
+
+    void Configuration::SetMaxMemoryRegionsPerProcess(DWORD count) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_maxMemoryRegionsPerProcess = clamp_range(count, static_cast<DWORD>(1), static_cast<DWORD>(1000));
+    }
+
+    SIZE_T Configuration::GetMaxMemoryRegionSize() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_maxMemoryRegionSize;
+    }
+
+    void Configuration::SetMaxMemoryRegionSize(SIZE_T size) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_maxMemoryRegionSize = clamp_min(size, static_cast<SIZE_T>(1024)); // Minimum 1 KB
+    }
+
+    SIZE_T Configuration::GetMinMemoryRegionSize() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_minMemoryRegionSize;
+    }
+
+    void Configuration::SetMinMemoryRegionSize(SIZE_T size) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_minMemoryRegionSize = clamp_min(size, static_cast<SIZE_T>(16)); // Minimum 16 bytes
+    }
+
+    float Configuration::GetMemoryConfidenceThreshold() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_memoryConfidenceThreshold;
+    }
+
+    void Configuration::SetMemoryConfidenceThreshold(float threshold) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_memoryConfidenceThreshold = clamp_range(threshold, 0.0f, 1.0f);
+    }
+
+    DWORD Configuration::GetMaxMemoryDetectionHistory() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_maxMemoryDetectionHistory;
+    }
+
+    void Configuration::SetMaxMemoryDetectionHistory(DWORD count) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_maxMemoryDetectionHistory = clamp_range(count, static_cast<DWORD>(10), static_cast<DWORD>(10000));
+    }
+
+    DWORD Configuration::GetMemoryFalsePositiveThreshold() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_memoryFalsePositiveThreshold;
+    }
+
+    void Configuration::SetMemoryFalsePositiveThreshold(DWORD threshold) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_memoryFalsePositiveThreshold = clamp_range(threshold, static_cast<DWORD>(1), static_cast<DWORD>(100));
+    }
+
+    std::vector<std::string> Configuration::GetMemoryWhitelistedProcesses() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_memoryWhitelistedProcesses;
+    }
+
+    void Configuration::SetMemoryWhitelistedProcesses(const std::vector<std::string>& processes) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_memoryWhitelistedProcesses = processes;
+    }
+
+    std::vector<std::string> Configuration::GetMemoryWhitelistedPaths() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_memoryWhitelistedPaths;
+    }
+
+    void Configuration::SetMemoryWhitelistedPaths(const std::vector<std::string>& paths) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_memoryWhitelistedPaths = paths;
+    }
+
+    std::vector<std::string> Configuration::GetMemoryTrustedSigners() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_memoryTrustedSigners;
+    }
+
+    void Configuration::SetMemoryTrustedSigners(const std::vector<std::string>& signers) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_memoryTrustedSigners = signers;
     }
 
 } // namespace GarudaHS

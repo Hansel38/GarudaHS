@@ -5,93 +5,16 @@
 #include "../include/OverlayScanner.h"
 #include "../include/AntiDebug.h"
 #include "../include/InjectionScanner.h"
+#include "../include/MemorySignatureScanner.h"
+#include "../include/GarudaHS_Exports.h"
 
-// Simple status structure for exports
-typedef struct _GARUDAHS_STATUS {
-    DWORD structSize;
-    DWORD apiVersion;
-    DWORD buildNumber;
-    BOOL initialized;
-    BOOL running;
-    DWORD uptime;
-    BOOL processWatcherActive;
-    DWORD totalProcessScans;
-    DWORD threatsDetected;
-    DWORD processesTerminated;
-    DWORD lastScanTime;
-    BOOL overlayScannerActive;
-    DWORD totalOverlayScans;
-    DWORD overlaysDetected;
-    DWORD directxHooksFound;
-    DWORD openglHooksFound;
-    DWORD windowOverlaysFound;
-    BOOL antiDebugActive;
-    DWORD totalDebugScans;
-    DWORD debugAttemptsDetected;
-    BOOL debuggerCurrentlyPresent;
-    DWORD lastDebugDetection;
-    float avgScanTime;
-    float cpuUsage;
-    DWORD memoryUsage;
-    float detectionRate;
-    BOOL configLoaded;
-    DWORD configLastModified;
-    BOOL loggingEnabled;
-    BOOL autoTerminateEnabled;
-    char version[64];
-    char lastError[256];
-    DWORD reserved[32];
-} GarudaHSStatus;
-
-// Configuration structure for exports
-typedef struct _GARUDAHS_CONFIG {
-    DWORD structSize;
-    BOOL enableProcessWatcher;
-    BOOL enableOverlayScanner;
-    BOOL enableAntiDebug;
-    BOOL enableInjectionScanner;
-    DWORD scanInterval;
-    BOOL autoTerminate;
-    BOOL enableLogging;
-    char configPath[260];
-    BOOL enablePerformanceMonitoring;
-    char logFilePath[260];
-    BOOL enableStealthMode;
-    BOOL enableRandomization;
-    DWORD maxDetectionHistory;
-    float globalSensitivity;
-    DWORD reserved[10];
-} GarudaHSConfig;
-
-// Detection result structure
-typedef struct _GARUDAHS_DETECTION_RESULT {
-    DWORD timestamp;
-    char threatName[128];
-    char details[256];
-    float confidence;
-    DWORD processId;
-    char processName[64];
-    DWORD reserved[8];
-} GarudaHSDetectionResult;
-
-// Injection detection result structure
-typedef struct _GARUDAHS_INJECTION_RESULT {
-    DWORD timestamp;
-    DWORD injectionType;        // InjectionType enum value
-    char processName[64];
-    DWORD processId;
-    char modulePath[260];
-    char injectedDllName[128];
-    float confidence;
-    char reason[256];
-    BOOL isWhitelisted;
-    DWORD reserved[4];
-} GarudaHSInjectionResult;
+// Struktur sudah didefinisikan di GarudaHS_Exports.h
 
 // Global instances
 static std::unique_ptr<GarudaHS::OverlayScanner> g_overlayScanner = nullptr;
 static std::unique_ptr<GarudaHS::AntiDebug> g_antiDebug = nullptr;
 static std::unique_ptr<GarudaHS::InjectionScanner> g_injectionScanner = nullptr;
+static std::unique_ptr<GarudaHS::MemorySignatureScanner> g_memoryScanner = nullptr;
 
 // Helper function to get or create overlay scanner
 GarudaHS::OverlayScanner& GetGlobalOverlayScanner() {
@@ -117,7 +40,15 @@ GarudaHS::InjectionScanner& GetGlobalInjectionScanner() {
     return *g_injectionScanner;
 }
 
-// Struct definition sudah ada di header file, tidak perlu duplikasi
+// Helper function to get or create memory signature scanner
+GarudaHS::MemorySignatureScanner& GetGlobalMemoryScanner() {
+    if (!g_memoryScanner) {
+        g_memoryScanner = std::make_unique<GarudaHS::MemorySignatureScanner>();
+    }
+    return *g_memoryScanner;
+}
+
+
 
 // SIMPLIFIED EXPORT - Hanya 4 fungsi utama aja!
 extern "C" {
@@ -535,6 +466,277 @@ extern "C" {
             return status.c_str();
         } catch (...) {
             return "Error getting status";
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    //                    MEMORY SIGNATURE SCANNER EXPORTS
+    // ═══════════════════════════════════════════════════════════
+
+    __declspec(dllexport) BOOL GHS_InitMemory() {
+        try {
+            auto& scanner = GetGlobalMemoryScanner();
+            return scanner.Initialize() ? TRUE : FALSE;
+        } catch (...) {
+            return FALSE;
+        }
+    }
+
+    __declspec(dllexport) BOOL GHS_StartMemory() {
+        try {
+            auto& scanner = GetGlobalMemoryScanner();
+            return scanner.Start() ? TRUE : FALSE;
+        } catch (...) {
+            return FALSE;
+        }
+    }
+
+    __declspec(dllexport) BOOL GHS_StopMemory() {
+        try {
+            auto& scanner = GetGlobalMemoryScanner();
+            return scanner.Stop() ? TRUE : FALSE;
+        } catch (...) {
+            return FALSE;
+        }
+    }
+
+    __declspec(dllexport) BOOL GHS_ScanMemory(DWORD processId, GarudaHSMemoryResult* result) {
+        if (!result) {
+            return FALSE;
+        }
+
+        try {
+            auto& scanner = GetGlobalMemoryScanner();
+            auto scanResult = scanner.ScanProcess(processId);
+
+            if (scanResult.detected) {
+                // Convert internal result to export structure
+                result->timestamp = scanResult.timestamp;
+                strncpy_s(result->signatureName, sizeof(result->signatureName),
+                         scanResult.signatureName.c_str(), _TRUNCATE);
+                result->signatureType = static_cast<DWORD>(scanResult.type);
+                result->confidenceLevel = static_cast<DWORD>(scanResult.confidence);
+                strncpy_s(result->processName, sizeof(result->processName),
+                         scanResult.processName.c_str(), _TRUNCATE);
+                result->processId = scanResult.processId;
+                result->memoryAddress = scanResult.memoryAddress;
+                result->memorySize = scanResult.memorySize;
+                result->regionType = static_cast<DWORD>(scanResult.regionType);
+                strncpy_s(result->reason, sizeof(result->reason),
+                         scanResult.reason.c_str(), _TRUNCATE);
+                result->accuracyScore = scanResult.accuracyScore;
+                result->isWhitelisted = scanResult.isWhitelisted ? TRUE : FALSE;
+                result->falsePositive = scanResult.falsePositive ? TRUE : FALSE;
+
+                return TRUE;
+            }
+
+            return FALSE;
+        } catch (...) {
+            return FALSE;
+        }
+    }
+
+    __declspec(dllexport) BOOL GHS_IsMemoryThreat(DWORD processId) {
+        try {
+            auto& scanner = GetGlobalMemoryScanner();
+            auto result = scanner.ScanProcess(processId);
+            return result.detected ? TRUE : FALSE;
+        } catch (...) {
+            return FALSE;
+        }
+    }
+
+    __declspec(dllexport) DWORD GHS_GetMemoryScans() {
+        try {
+            auto& scanner = GetGlobalMemoryScanner();
+            return scanner.GetTotalScans();
+        } catch (...) {
+            return 0;
+        }
+    }
+
+    __declspec(dllexport) DWORD GHS_GetMemoryDetections() {
+        try {
+            auto& scanner = GetGlobalMemoryScanner();
+            return scanner.GetTotalDetections();
+        } catch (...) {
+            return 0;
+        }
+    }
+
+    __declspec(dllexport) BOOL GHS_AddMemoryProcWhite(const char* processName) {
+        if (!processName) {
+            return FALSE;
+        }
+
+        try {
+            auto& scanner = GetGlobalMemoryScanner();
+            return scanner.AddProcessToWhitelist(std::string(processName)) ? TRUE : FALSE;
+        } catch (...) {
+            return FALSE;
+        }
+    }
+
+    __declspec(dllexport) BOOL GHS_RemoveMemoryProcWhite(const char* processName) {
+        if (!processName) {
+            return FALSE;
+        }
+
+        try {
+            auto& scanner = GetGlobalMemoryScanner();
+            return scanner.RemoveProcessFromWhitelist(std::string(processName)) ? TRUE : FALSE;
+        } catch (...) {
+            return FALSE;
+        }
+    }
+
+    __declspec(dllexport) BOOL GHS_AddMemoryPathWhite(const char* path) {
+        if (!path) {
+            return FALSE;
+        }
+
+        try {
+            auto& scanner = GetGlobalMemoryScanner();
+            return scanner.AddPathToWhitelist(std::string(path)) ? TRUE : FALSE;
+        } catch (...) {
+            return FALSE;
+        }
+    }
+
+    __declspec(dllexport) BOOL GHS_IsMemoryEnabled() {
+        try {
+            auto& scanner = GetGlobalMemoryScanner();
+            return scanner.IsRunning() ? TRUE : FALSE;
+        } catch (...) {
+            return FALSE;
+        }
+    }
+
+    __declspec(dllexport) BOOL GHS_SetMemoryEnabled(BOOL enabled) {
+        try {
+            auto& scanner = GetGlobalMemoryScanner();
+            if (enabled) {
+                return scanner.Start() ? TRUE : FALSE;
+            } else {
+                return scanner.Stop() ? TRUE : FALSE;
+            }
+        } catch (...) {
+            return FALSE;
+        }
+    }
+
+    __declspec(dllexport) const char* GHS_GetMemoryStatus() {
+        try {
+            auto& scanner = GetGlobalMemoryScanner();
+            static std::string status = scanner.GetStatusReport();
+            return status.c_str();
+        } catch (...) {
+            return "Error getting memory scanner status";
+        }
+    }
+
+    __declspec(dllexport) BOOL GHS_LoadMemorySignatures(const char* filePath) {
+        if (!filePath) {
+            return FALSE;
+        }
+
+        try {
+            auto& scanner = GetGlobalMemoryScanner();
+            return scanner.LoadSignatures(std::string(filePath)) ? TRUE : FALSE;
+        } catch (...) {
+            return FALSE;
+        }
+    }
+
+    __declspec(dllexport) BOOL GHS_SaveMemorySignatures(const char* filePath) {
+        if (!filePath) {
+            return FALSE;
+        }
+
+        try {
+            auto& scanner = GetGlobalMemoryScanner();
+            return scanner.SaveSignatures(std::string(filePath)) ? TRUE : FALSE;
+        } catch (...) {
+            return FALSE;
+        }
+    }
+
+    __declspec(dllexport) DWORD GHS_GetMemorySignatureCount() {
+        try {
+            auto& scanner = GetGlobalMemoryScanner();
+            auto signatures = scanner.GetSignatures();
+            return static_cast<DWORD>(signatures.size());
+        } catch (...) {
+            return 0;
+        }
+    }
+
+    __declspec(dllexport) float GHS_GetMemoryAccuracy() {
+        try {
+            auto& scanner = GetGlobalMemoryScanner();
+            return static_cast<float>(scanner.GetAccuracyRate());
+        } catch (...) {
+            return 0.0f;
+        }
+    }
+
+    __declspec(dllexport) BOOL GHS_ClearMemoryHistory() {
+        try {
+            auto& scanner = GetGlobalMemoryScanner();
+            scanner.ClearDetectionHistory();
+            return TRUE;
+        } catch (...) {
+            return FALSE;
+        }
+    }
+
+    __declspec(dllexport) GarudaHSMemoryResult* GHS_GetMemoryHistory(DWORD* count) {
+        if (!count) {
+            return nullptr;
+        }
+
+        try {
+            auto& scanner = GetGlobalMemoryScanner();
+            auto history = scanner.GetDetectionHistory();
+
+            *count = static_cast<DWORD>(history.size());
+
+            if (history.empty()) {
+                return nullptr;
+            }
+
+            // Allocate memory for results (caller must free this)
+            static std::vector<GarudaHSMemoryResult> exportResults;
+            exportResults.clear();
+            exportResults.reserve(history.size());
+
+            for (const auto& result : history) {
+                GarudaHSMemoryResult exportResult = {};
+                exportResult.timestamp = result.timestamp;
+                strncpy_s(exportResult.signatureName, sizeof(exportResult.signatureName),
+                         result.signatureName.c_str(), _TRUNCATE);
+                exportResult.signatureType = static_cast<DWORD>(result.type);
+                exportResult.confidenceLevel = static_cast<DWORD>(result.confidence);
+                strncpy_s(exportResult.processName, sizeof(exportResult.processName),
+                         result.processName.c_str(), _TRUNCATE);
+                exportResult.processId = result.processId;
+                exportResult.memoryAddress = result.memoryAddress;
+                exportResult.memorySize = result.memorySize;
+                exportResult.regionType = static_cast<DWORD>(result.regionType);
+                strncpy_s(exportResult.reason, sizeof(exportResult.reason),
+                         result.reason.c_str(), _TRUNCATE);
+                exportResult.accuracyScore = result.accuracyScore;
+                exportResult.isWhitelisted = result.isWhitelisted ? TRUE : FALSE;
+                exportResult.falsePositive = result.falsePositive ? TRUE : FALSE;
+
+                exportResults.push_back(exportResult);
+            }
+
+            return exportResults.data();
+        } catch (...) {
+            *count = 0;
+            return nullptr;
         }
     }
 

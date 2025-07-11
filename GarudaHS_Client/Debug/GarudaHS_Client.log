@@ -9,6 +9,7 @@
   InjectionDetectionLayer.cpp
   InjectionScanner.cpp
   Logger.cpp
+  MemorySignatureScanner.cpp
   OverlayDetectionLayer.cpp
   OverlayScanner.cpp
   PerformanceMonitor.cpp

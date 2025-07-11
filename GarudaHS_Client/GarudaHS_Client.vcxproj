@@ -157,6 +157,7 @@
     <ClInclude Include="include\InjectionDetectionLayer.h" />
     <ClInclude Include="include\InjectionScanner.h" />
     <ClInclude Include="include\Logger.h" />
+    <ClInclude Include="include\MemorySignatureScanner.h" />
     <ClInclude Include="include\OverlayDetectionLayer.h" />
     <ClInclude Include="include\OverlayScanner.h" />
     <ClInclude Include="include\PerformanceMonitor.h" />
@@ -182,6 +183,7 @@
     <ClCompile Include="src\InjectionDetectionLayer.cpp" />
     <ClCompile Include="src\InjectionScanner.cpp" />
     <ClCompile Include="src\Logger.cpp" />
+    <ClCompile Include="src\MemorySignatureScanner.cpp" />
     <ClCompile Include="src\OverlayDetectionLayer.cpp" />
     <ClCompile Include="src\OverlayScanner.cpp" />
     <ClCompile Include="src\PerformanceMonitor.cpp" />

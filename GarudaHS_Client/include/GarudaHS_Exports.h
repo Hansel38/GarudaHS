@@ -92,6 +92,24 @@ typedef struct _GARUDAHS_INJECTION_RESULT {
     DWORD reserved[4];
 } GarudaHSInjectionResult;
 
+// Memory signature detection result structure
+typedef struct _GARUDAHS_MEMORY_RESULT {
+    DWORD timestamp;
+    char signatureName[128];
+    DWORD signatureType;        // SignatureType enum value
+    DWORD confidenceLevel;      // ConfidenceLevel enum value
+    char processName[64];
+    DWORD processId;
+    LPVOID memoryAddress;
+    SIZE_T memorySize;
+    DWORD regionType;           // MemoryRegionType enum value
+    char reason[256];
+    float accuracyScore;
+    BOOL isWhitelisted;
+    BOOL falsePositive;
+    DWORD reserved[6];
+} GarudaHSMemoryResult;
+
 // ═══════════════════════════════════════════════════════════
 //                    FUNGSI EXPORT UTAMA (PENDEK)
 // ═══════════════════════════════════════════════════════════
@@ -145,6 +163,30 @@ __declspec(dllexport) BOOL GHS_IsInjectEnabled();                               
 __declspec(dllexport) BOOL GHS_SetInjectEnabled(BOOL enabled);                         // Set enabled state
 __declspec(dllexport) const char* GHS_GetInjectStatus();                               // Get status report
 
+// ═══════════════════════════════════════════════════════════
+//                    FUNGSI MEMORY SIGNATURE SCANNER
+// ═══════════════════════════════════════════════════════════
+
+__declspec(dllexport) BOOL GHS_InitMemory();                                           // Init memory scanner
+__declspec(dllexport) BOOL GHS_StartMemory();                                          // Start memory scanner
+__declspec(dllexport) BOOL GHS_StopMemory();                                           // Stop memory scanner
+__declspec(dllexport) BOOL GHS_ScanMemory(DWORD processId, GarudaHSMemoryResult* result);  // Scan process memory
+__declspec(dllexport) BOOL GHS_IsMemoryThreat(DWORD processId);                        // Check if memory threat detected
+__declspec(dllexport) DWORD GHS_GetMemoryScans();                                      // Get scan count
+__declspec(dllexport) DWORD GHS_GetMemoryDetections();                                 // Get detection count
+__declspec(dllexport) BOOL GHS_AddMemoryProcWhite(const char* processName);            // Add process whitelist
+__declspec(dllexport) BOOL GHS_RemoveMemoryProcWhite(const char* processName);         // Remove process whitelist
+__declspec(dllexport) BOOL GHS_AddMemoryPathWhite(const char* path);                   // Add path whitelist
+__declspec(dllexport) BOOL GHS_IsMemoryEnabled();                                      // Check if enabled
+__declspec(dllexport) BOOL GHS_SetMemoryEnabled(BOOL enabled);                         // Set enabled state
+__declspec(dllexport) const char* GHS_GetMemoryStatus();                               // Get status report
+__declspec(dllexport) BOOL GHS_LoadMemorySignatures(const char* filePath);             // Load signatures from file
+__declspec(dllexport) BOOL GHS_SaveMemorySignatures(const char* filePath);             // Save signatures to file
+__declspec(dllexport) DWORD GHS_GetMemorySignatureCount();                             // Get loaded signature count
+__declspec(dllexport) float GHS_GetMemoryAccuracy();                                   // Get accuracy rate
+__declspec(dllexport) BOOL GHS_ClearMemoryHistory();                                   // Clear detection history
+__declspec(dllexport) GarudaHSMemoryResult* GHS_GetMemoryHistory(DWORD* count);        // Get detection history
+
 #ifdef __cplusplus
 }
 #endif
@@ -184,9 +226,32 @@ FUNGSI INJECTION SCANNER:
    GHS_AddProcWhite("notepad.exe");
    GHS_AddModWhite("legitimate.dll");
 
+FUNGSI MEMORY SIGNATURE SCANNER:
+
+1. Init memory scanner:
+   GHS_InitMemory();
+
+2. Start scanning:
+   GHS_StartMemory();
+
+3. Scan process tertentu:
+   GarudaHSMemoryResult result;
+   BOOL detected = GHS_ScanMemory(processId, &result);
+
+4. Tambah whitelist:
+   GHS_AddMemoryProcWhite("notepad.exe");
+   GHS_AddMemoryPathWhite("C:\\Program Files\\");
+
+5. Load signatures:
+   GHS_LoadMemorySignatures("custom_signatures.json");
+
+6. Cek status:
+   const char* status = GHS_GetMemoryStatus();
+
 CATATAN:
 - Semua nama fungsi dipendekkan dari GarudaHS_* menjadi GHS_*
 - Fungsi injection menggunakan singkatan Inject
+- Fungsi memory scanner menggunakan singkatan Memory
 - Whitelist menggunakan singkatan White
 - Semua fungsi tetap kompatibel dengan versi sebelumnya
 */

@@ -86,6 +86,32 @@ namespace GarudaHS {
         std::vector<std::string> m_injectionWhitelistedPaths;
         std::vector<std::string> m_injectionTrustedSigners;
 
+        // Memory Signature Scanner configuration
+        bool m_enableMemorySignatureScanner;
+        bool m_enableMemoryRealTimeScanning;
+        bool m_enableMemoryDeepScan;
+        bool m_enableMemoryHeuristicAnalysis;
+        bool m_enableMemoryEntropyAnalysis;
+        bool m_enableMemoryCrossReferenceCheck;
+        bool m_enableMemorySignatureUpdates;
+        bool m_enableMemoryWhitelistProtection;
+        bool m_enableMemoryFalsePositiveReduction;
+
+        DWORD m_memoryScanInterval;
+        DWORD m_maxProcessesToScanForMemory;
+        DWORD m_memoryScanTimeout;
+        DWORD m_maxMemoryRegionsPerProcess;
+        SIZE_T m_maxMemoryRegionSize;
+        SIZE_T m_minMemoryRegionSize;
+        float m_memoryConfidenceThreshold;
+        DWORD m_maxMemoryDetectionHistory;
+        DWORD m_memoryFalsePositiveThreshold;
+
+        // Memory Signature Scanner whitelist
+        std::vector<std::string> m_memoryWhitelistedProcesses;
+        std::vector<std::string> m_memoryWhitelistedPaths;
+        std::vector<std::string> m_memoryTrustedSigners;
+
         // Private methods
         bool LoadFromFile();
         bool SaveToFile() const;
@@ -268,6 +294,70 @@ namespace GarudaHS {
 
         std::vector<std::string> GetInjectionTrustedSigners() const;
         void SetInjectionTrustedSigners(const std::vector<std::string>& signers);
+
+        // Memory Signature Scanner configuration
+        bool IsMemorySignatureScannerEnabled() const;
+        void SetMemorySignatureScannerEnabled(bool enabled);
+
+        bool IsMemoryRealTimeScanningEnabled() const;
+        void SetMemoryRealTimeScanningEnabled(bool enabled);
+
+        bool IsMemoryDeepScanEnabled() const;
+        void SetMemoryDeepScanEnabled(bool enabled);
+
+        bool IsMemoryHeuristicAnalysisEnabled() const;
+        void SetMemoryHeuristicAnalysisEnabled(bool enabled);
+
+        bool IsMemoryEntropyAnalysisEnabled() const;
+        void SetMemoryEntropyAnalysisEnabled(bool enabled);
+
+        bool IsMemoryCrossReferenceCheckEnabled() const;
+        void SetMemoryCrossReferenceCheckEnabled(bool enabled);
+
+        bool IsMemorySignatureUpdatesEnabled() const;
+        void SetMemorySignatureUpdatesEnabled(bool enabled);
+
+        bool IsMemoryWhitelistProtectionEnabled() const;
+        void SetMemoryWhitelistProtectionEnabled(bool enabled);
+
+        bool IsMemoryFalsePositiveReductionEnabled() const;
+        void SetMemoryFalsePositiveReductionEnabled(bool enabled);
+
+        DWORD GetMemoryScanInterval() const;
+        void SetMemoryScanInterval(DWORD intervalMs);
+
+        DWORD GetMaxProcessesToScanForMemory() const;
+        void SetMaxProcessesToScanForMemory(DWORD count);
+
+        DWORD GetMemoryScanTimeout() const;
+        void SetMemoryScanTimeout(DWORD timeoutMs);
+
+        DWORD GetMaxMemoryRegionsPerProcess() const;
+        void SetMaxMemoryRegionsPerProcess(DWORD count);
+
+        SIZE_T GetMaxMemoryRegionSize() const;
+        void SetMaxMemoryRegionSize(SIZE_T size);
+
+        SIZE_T GetMinMemoryRegionSize() const;
+        void SetMinMemoryRegionSize(SIZE_T size);
+
+        float GetMemoryConfidenceThreshold() const;
+        void SetMemoryConfidenceThreshold(float threshold);
+
+        DWORD GetMaxMemoryDetectionHistory() const;
+        void SetMaxMemoryDetectionHistory(DWORD count);
+
+        DWORD GetMemoryFalsePositiveThreshold() const;
+        void SetMemoryFalsePositiveThreshold(DWORD threshold);
+
+        std::vector<std::string> GetMemoryWhitelistedProcesses() const;
+        void SetMemoryWhitelistedProcesses(const std::vector<std::string>& processes);
+
+        std::vector<std::string> GetMemoryWhitelistedPaths() const;
+        void SetMemoryWhitelistedPaths(const std::vector<std::string>& paths);
+
+        std::vector<std::string> GetMemoryTrustedSigners() const;
+        void SetMemoryTrustedSigners(const std::vector<std::string>& signers);
 
         // File operations
         bool Save() const;

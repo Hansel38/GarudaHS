@@ -72,6 +72,9 @@
     <ClInclude Include="include\ThreadSafetyUtils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\MemorySignatureScanner.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -120,6 +123,9 @@
       <Filter>Resource Files</Filter>
     </ClCompile>
     <ClCompile Include="src\InjectionScanner.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MemorySignatureScanner.cpp">
       <Filter>Resource Files</Filter>
     </ClCompile>
   </ItemGroup>
