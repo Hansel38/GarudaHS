@@ -123,7 +123,7 @@ GarudaHS::InjectionScanner& GetGlobalInjectionScanner() {
 extern "C" {
 
     // 1. Initialize semua (ProcessWatcher + OverlayScanner + AntiDebug)
-    __declspec(dllexport) BOOL GarudaHS_Initialize() {
+    __declspec(dllexport) BOOL GHS_Init() {
         try {
             auto& watcher = GarudaHS::GetGlobalProcessWatcher();
             auto& scanner = GetGlobalOverlayScanner();
@@ -140,7 +140,7 @@ extern "C" {
     }
 
     // 2. Start semua scanning
-    __declspec(dllexport) BOOL GarudaHS_Start() {
+    __declspec(dllexport) BOOL GHS_Start() {
         try {
             auto& watcher = GarudaHS::GetGlobalProcessWatcher();
             auto& scanner = GetGlobalOverlayScanner();
@@ -157,7 +157,7 @@ extern "C" {
     }
 
     // 3. Get comprehensive status - UNIFIED STATUS
-    __declspec(dllexport) GarudaHSStatus GarudaHS_GetStatus() {
+    __declspec(dllexport) GarudaHSStatus GHS_GetStatus() {
         GarudaHSStatus status = {};
 
         // Initialize struct dengan size validation
@@ -222,7 +222,7 @@ extern "C" {
     }
 
     // 4. Shutdown semua - RENAMED for consistency
-    __declspec(dllexport) void GarudaHS_Shutdown() {
+    __declspec(dllexport) void GHS_Shutdown() {
         try {
             auto& watcher = GarudaHS::GetGlobalProcessWatcher();
             watcher.Shutdown();
@@ -246,7 +246,7 @@ extern "C" {
     // ═══════════════════════════════════════════════════════════
 
     // Configuration Functions
-    __declspec(dllexport) BOOL GarudaHS_SetConfig(const GarudaHSConfig* config) {
+    __declspec(dllexport) BOOL GHS_SetConfig(const GarudaHSConfig* config) {
         if (!config || config->structSize != sizeof(GarudaHSConfig)) {
             return FALSE;
         }
@@ -277,7 +277,7 @@ extern "C" {
         }
     }
 
-    __declspec(dllexport) GarudaHSConfig GarudaHS_GetConfig() {
+    __declspec(dllexport) GarudaHSConfig GHS_GetConfig() {
         GarudaHSConfig config = {};
         config.structSize = sizeof(GarudaHSConfig);
 
@@ -305,7 +305,7 @@ extern "C" {
         return config;
     }
 
-    __declspec(dllexport) BOOL GarudaHS_ReloadConfig() {
+    __declspec(dllexport) BOOL GHS_ReloadConfig() {
         try {
             auto& watcher = GarudaHS::GetGlobalProcessWatcher();
             return watcher.ReloadConfiguration() ? TRUE : FALSE;
@@ -315,7 +315,7 @@ extern "C" {
     }
 
     // Detection Functions
-    __declspec(dllexport) BOOL GarudaHS_PerformScan() {
+    __declspec(dllexport) BOOL GHS_Scan() {
         try {
             auto& watcher = GarudaHS::GetGlobalProcessWatcher();
             auto& scanner = GetGlobalOverlayScanner();
@@ -331,13 +331,13 @@ extern "C" {
         }
     }
 
-    __declspec(dllexport) GarudaHSDetectionResult* GarudaHS_GetDetectionHistory(DWORD* count) {
+    __declspec(dllexport) GarudaHSDetectionResult* GHS_GetHistory(DWORD* count) {
         // TODO: Implement detection history retrieval
         if (count) *count = 0;
         return nullptr;
     }
 
-    __declspec(dllexport) void GarudaHS_ClearDetectionHistory() {
+    __declspec(dllexport) void GHS_ClearHistory() {
         try {
             auto& watcher = GarudaHS::GetGlobalProcessWatcher();
             auto& scanner = GetGlobalOverlayScanner();
@@ -350,7 +350,7 @@ extern "C" {
     }
 
     // Utility Functions
-    __declspec(dllexport) BOOL GarudaHS_IsInitialized() {
+    __declspec(dllexport) BOOL GHS_IsInit() {
         try {
             auto& watcher = GarudaHS::GetGlobalProcessWatcher();
             // Use a simple check since IsInitialized method may not exist
@@ -360,7 +360,7 @@ extern "C" {
         }
     }
 
-    __declspec(dllexport) BOOL GarudaHS_IsRunning() {
+    __declspec(dllexport) BOOL GHS_IsRunning() {
         try {
             auto& watcher = GarudaHS::GetGlobalProcessWatcher();
             auto& scanner = GetGlobalOverlayScanner();
@@ -372,7 +372,7 @@ extern "C" {
         }
     }
 
-    __declspec(dllexport) const char* GarudaHS_GetVersion() {
+    __declspec(dllexport) const char* GHS_GetVersion() {
         try {
             auto& watcher = GarudaHS::GetGlobalProcessWatcher();
             static std::string version = watcher.GetVersion() + " (Unified API v3.0)";
@@ -382,7 +382,7 @@ extern "C" {
         }
     }
 
-    __declspec(dllexport) const char* GarudaHS_GetLastError() {
+    __declspec(dllexport) const char* GHS_GetError() {
         // TODO: Implement global error tracking
         return "No error";
     }
@@ -391,7 +391,7 @@ extern "C" {
     //                    INJECTION SCANNER EXPORTS
     // ═══════════════════════════════════════════════════════════
 
-    __declspec(dllexport) BOOL GarudaHS_InitializeInjectionScanner() {
+    __declspec(dllexport) BOOL GHS_InitInject() {
         try {
             auto& scanner = GetGlobalInjectionScanner();
             // Initialize with default logger and config
@@ -402,7 +402,7 @@ extern "C" {
         }
     }
 
-    __declspec(dllexport) BOOL GarudaHS_StartInjectionScanner() {
+    __declspec(dllexport) BOOL GHS_StartInject() {
         try {
             auto& scanner = GetGlobalInjectionScanner();
             return scanner.Start() ? TRUE : FALSE;
@@ -411,7 +411,7 @@ extern "C" {
         }
     }
 
-    __declspec(dllexport) BOOL GarudaHS_StopInjectionScanner() {
+    __declspec(dllexport) BOOL GHS_StopInject() {
         try {
             auto& scanner = GetGlobalInjectionScanner();
             return scanner.Stop() ? TRUE : FALSE;
@@ -420,7 +420,7 @@ extern "C" {
         }
     }
 
-    __declspec(dllexport) BOOL GarudaHS_ScanProcessForInjection(DWORD processId, GarudaHSInjectionResult* result) {
+    __declspec(dllexport) BOOL GHS_ScanInject(DWORD processId, GarudaHSInjectionResult* result) {
         if (!result) return FALSE;
 
         try {
@@ -449,7 +449,7 @@ extern "C" {
         }
     }
 
-    __declspec(dllexport) BOOL GarudaHS_IsProcessInjected(DWORD processId) {
+    __declspec(dllexport) BOOL GHS_IsInjected(DWORD processId) {
         try {
             auto& scanner = GetGlobalInjectionScanner();
             return scanner.IsProcessInjected(processId) ? TRUE : FALSE;
@@ -458,7 +458,7 @@ extern "C" {
         }
     }
 
-    __declspec(dllexport) DWORD GarudaHS_GetInjectionScanCount() {
+    __declspec(dllexport) DWORD GHS_GetInjectScans() {
         try {
             auto& scanner = GetGlobalInjectionScanner();
             return scanner.GetTotalScans();
@@ -467,7 +467,7 @@ extern "C" {
         }
     }
 
-    __declspec(dllexport) DWORD GarudaHS_GetInjectionDetectionCount() {
+    __declspec(dllexport) DWORD GHS_GetInjectCount() {
         try {
             auto& scanner = GetGlobalInjectionScanner();
             return scanner.GetDetectionCount();
@@ -476,7 +476,7 @@ extern "C" {
         }
     }
 
-    __declspec(dllexport) BOOL GarudaHS_AddInjectionProcessWhitelist(const char* processName) {
+    __declspec(dllexport) BOOL GHS_AddProcWhite(const char* processName) {
         if (!processName) return FALSE;
 
         try {
@@ -487,7 +487,7 @@ extern "C" {
         }
     }
 
-    __declspec(dllexport) BOOL GarudaHS_RemoveInjectionProcessWhitelist(const char* processName) {
+    __declspec(dllexport) BOOL GHS_RemoveProcWhite(const char* processName) {
         if (!processName) return FALSE;
 
         try {
@@ -498,7 +498,7 @@ extern "C" {
         }
     }
 
-    __declspec(dllexport) BOOL GarudaHS_AddInjectionModuleWhitelist(const char* moduleName) {
+    __declspec(dllexport) BOOL GHS_AddModWhite(const char* moduleName) {
         if (!moduleName) return FALSE;
 
         try {
@@ -509,7 +509,7 @@ extern "C" {
         }
     }
 
-    __declspec(dllexport) BOOL GarudaHS_IsInjectionScannerEnabled() {
+    __declspec(dllexport) BOOL GHS_IsInjectEnabled() {
         try {
             auto& scanner = GetGlobalInjectionScanner();
             return scanner.IsEnabled() ? TRUE : FALSE;
@@ -518,7 +518,7 @@ extern "C" {
         }
     }
 
-    __declspec(dllexport) BOOL GarudaHS_SetInjectionScannerEnabled(BOOL enabled) {
+    __declspec(dllexport) BOOL GHS_SetInjectEnabled(BOOL enabled) {
         try {
             auto& scanner = GetGlobalInjectionScanner();
             scanner.SetEnabled(enabled == TRUE);
@@ -528,7 +528,7 @@ extern "C" {
         }
     }
 
-    __declspec(dllexport) const char* GarudaHS_GetInjectionScannerStatus() {
+    __declspec(dllexport) const char* GHS_GetInjectStatus() {
         try {
             auto& scanner = GetGlobalInjectionScanner();
             static std::string status = scanner.GetStatusReport();

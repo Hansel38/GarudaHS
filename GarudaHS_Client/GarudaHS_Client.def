@@ -1,7 +1,37 @@
 EXPORTS
-StartGarudaHS
-InitializeGarudaHS
-CleanupGarudaHS
-GetGarudaHSVersion
-IsGarudaHSActive
-TriggerScan
+    ; Core Functions (Short Names)
+    GHS_Init
+    GHS_Start
+    GHS_GetStatus
+    GHS_Shutdown
+
+    ; Configuration Functions
+    GHS_SetConfig
+    GHS_GetConfig
+    GHS_ReloadConfig
+
+    ; Detection Functions
+    GHS_Scan
+    GHS_GetHistory
+    GHS_ClearHistory
+
+    ; Utility Functions
+    GHS_IsInit
+    GHS_IsRunning
+    GHS_GetVersion
+    GHS_GetError
+
+    ; Injection Scanner Functions
+    GHS_InitInject
+    GHS_StartInject
+    GHS_StopInject
+    GHS_ScanInject
+    GHS_IsInjected
+    GHS_GetInjectScans
+    GHS_GetInjectCount
+    GHS_AddProcWhite
+    GHS_RemoveProcWhite
+    GHS_AddModWhite
+    GHS_IsInjectEnabled
+    GHS_SetInjectEnabled
+    GHS_GetInjectStatus
