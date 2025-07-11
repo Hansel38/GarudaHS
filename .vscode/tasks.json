@@ -1,0 +1,46 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build GarudaHS Debug x86",
+            "type": "shell",
+            "command": "msbuild",
+            "args": [
+                "GarudaHS.sln",
+                "/p:Configuration=Debug",
+                "/p:Platform=x86",
+                "/m",
+                "/v:minimal"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "Clean GarudaHS",
+            "type": "shell",
+            "command": "msbuild",
+            "args": [
+                "GarudaHS.sln",
+                "/t:Clean",
+                "/p:Configuration=Debug",
+                "/p:Platform=x86"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            }
+        }
+    ]
+}

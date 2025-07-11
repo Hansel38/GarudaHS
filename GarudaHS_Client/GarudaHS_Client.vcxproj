@@ -156,6 +156,7 @@
     <ClInclude Include="include\GarudaHS_UnifiedAPI.h" />
     <ClInclude Include="include\InjectionDetectionLayer.h" />
     <ClInclude Include="include\InjectionScanner.h" />
+    <ClInclude Include="include\LayeredDetection.h" />
     <ClInclude Include="include\Logger.h" />
     <ClInclude Include="include\MemorySignatureScanner.h" />
     <ClInclude Include="include\OverlayDetectionLayer.h" />
@@ -182,6 +183,7 @@
     <ClCompile Include="src\Exports.cpp" />
     <ClCompile Include="src\InjectionDetectionLayer.cpp" />
     <ClCompile Include="src\InjectionScanner.cpp" />
+    <ClCompile Include="src\LayeredDetection.cpp" />
     <ClCompile Include="src\Logger.cpp" />
     <ClCompile Include="src\MemorySignatureScanner.cpp" />
     <ClCompile Include="src\OverlayDetectionLayer.cpp" />

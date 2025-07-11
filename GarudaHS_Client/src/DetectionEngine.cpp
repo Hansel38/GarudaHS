@@ -3,6 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <regex>
 #include <TlHelp32.h>
 #include <Psapi.h>
 #include "../include/DetectionEngine.h"
@@ -396,6 +397,131 @@ namespace GarudaHS {
 
     void DetectionEngine::SetPathValidation(bool enabled) {
         m_enablePathValidation = enabled;
+    }
+
+    bool DetectionEngine::LoadRulesFromFile(const std::string& rulesFile) {
+        std::ifstream file(rulesFile);
+        if (!file.is_open()) {
+            return false;
+        }
+
+        m_detectionRules.clear();
+        std::string line;
+        DetectionRule currentRule = {};
+        bool inRule = false;
+
+        while (std::getline(file, line)) {
+            line = SimpleJSON::trim(line);
+            if (line.empty() || line[0] == '#') continue;
+
+            if (line.find("\"name\":") != std::string::npos) {
+                if (inRule) {
+                    m_detectionRules.push_back(currentRule);
+                }
+                currentRule = {};
+                inRule = true;
+                currentRule.name = SimpleJSON::extractStringValue(line);
+            }
+            else if (line.find("\"pattern\":") != std::string::npos && inRule) {
+                currentRule.pattern = SimpleJSON::extractStringValue(line);
+            }
+            else if (line.find("\"confidence\":") != std::string::npos && inRule) {
+                int confidence = SimpleJSON::extractIntValue(line);
+                currentRule.confidence = static_cast<ConfidenceLevel>(confidence);
+            }
+            else if (line.find("\"enabled\":") != std::string::npos && inRule) {
+                currentRule.enabled = SimpleJSON::extractBoolValue(line);
+            }
+            else if (line.find("\"description\":") != std::string::npos && inRule) {
+                currentRule.description = SimpleJSON::extractStringValue(line);
+            }
+        }
+
+        if (inRule) {
+            m_detectionRules.push_back(currentRule);
+        }
+
+        file.close();
+        return true;
+    }
+
+    bool DetectionEngine::SaveRulesToFile(const std::string& rulesFile) const {
+        std::ofstream file(rulesFile);
+        if (!file.is_open()) {
+            return false;
+        }
+
+        file << "{\n";
+        file << "  \"detection_rules\": [\n";
+
+        for (size_t i = 0; i < m_detectionRules.size(); ++i) {
+            const auto& rule = m_detectionRules[i];
+            file << "    {\n";
+            file << "      \"name\": \"" << rule.name << "\",\n";
+            file << "      \"pattern\": \"" << rule.pattern << "\",\n";
+            file << "      \"match_type\": " << static_cast<int>(rule.matchType) << ",\n";
+            file << "      \"confidence\": " << static_cast<int>(rule.confidence) << ",\n";
+            file << "      \"enabled\": " << (rule.enabled ? "true" : "false") << ",\n";
+            file << "      \"description\": \"" << rule.description << "\"\n";
+            file << "    }";
+            if (i < m_detectionRules.size() - 1) {
+                file << ",";
+            }
+            file << "\n";
+        }
+
+        file << "  ]\n";
+        file << "}\n";
+
+        file.close();
+        return true;
+    }
+
+    bool DetectionEngine::RemoveDetectionRule(const std::string& ruleName) {
+        auto it = std::find_if(m_detectionRules.begin(), m_detectionRules.end(),
+            [&ruleName](const DetectionRule& rule) {
+                return rule.name == ruleName;
+            });
+
+        if (it != m_detectionRules.end()) {
+            m_detectionRules.erase(it);
+            return true;
+        }
+        return false;
+    }
+
+    bool DetectionEngine::AddToWhitelist(const std::string& processName) {
+        if (processName.empty()) return false;
+        m_globalWhitelist.insert(processName);
+        return true;
+    }
+
+    bool DetectionEngine::RemoveFromWhitelist(const std::string& processName) {
+        if (processName.empty()) return false;
+        auto it = m_globalWhitelist.find(processName);
+        if (it != m_globalWhitelist.end()) {
+            m_globalWhitelist.erase(it);
+            return true;
+        }
+        return false;
+    }
+
+    bool DetectionEngine::AddTrustedPath(const std::string& path) {
+        if (path.empty()) return false;
+        m_trustedPaths.insert(path);
+        return true;
+    }
+
+    bool DetectionEngine::ValidateRules() const {
+        for (const auto& rule : m_detectionRules) {
+            if (rule.name.empty() || rule.pattern.empty()) {
+                return false;
+            }
+            if (rule.confidence < ConfidenceLevel::LOW || rule.confidence > ConfidenceLevel::CRITICAL) {
+                return false;
+            }
+        }
+        return true;
     }
 
 } // namespace GarudaHS

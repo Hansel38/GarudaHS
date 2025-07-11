@@ -842,7 +842,7 @@ namespace GarudaHS {
         ceSignature.patternString = "43 68 65 61 74 20 45 6E 67 69 6E 65"; // "Cheat Engine"
         ceSignature.algorithm = MatchingAlgorithm::EXACT_MATCH;
         ceSignature.targetRegion = MemoryRegionType::EXECUTABLE;
-        ceSignature.baseConfidence = ConfidenceLevel::HIGH;
+        ceSignature.baseConfidence = MemoryConfidenceLevel::HIGH;
         ceSignature.enabled = true;
         ceSignature.minSize = 12;
         ceSignature.maxSize = 1024;
@@ -870,7 +870,7 @@ namespace GarudaHS {
         phSignature.patternString = "50 72 6F 63 65 73 73 20 48 61 63 6B 65 72"; // "Process Hacker"
         phSignature.algorithm = MatchingAlgorithm::EXACT_MATCH;
         phSignature.targetRegion = MemoryRegionType::EXECUTABLE;
-        phSignature.baseConfidence = ConfidenceLevel::HIGH;
+        phSignature.baseConfidence = MemoryConfidenceLevel::HIGH;
         phSignature.enabled = true;
         phSignature.minSize = 14;
         phSignature.maxSize = 1024;
@@ -1353,7 +1353,7 @@ namespace GarudaHS {
             return false;
         }
 
-        if (result.confidence == ConfidenceLevel::LOW && !m_config.enableFalsePositiveReduction) {
+        if (result.confidence == MemoryConfidenceLevel::LOW && !m_config.enableFalsePositiveReduction) {
             return false;
         }
 
@@ -1404,16 +1404,16 @@ namespace GarudaHS {
         int confidenceValue = static_cast<int>(result.confidence);
         confidenceValue = static_cast<int>(confidenceValue * confidenceMultiplier);
 
-        if (confidenceValue > static_cast<int>(ConfidenceLevel::CRITICAL)) {
-            result.confidence = ConfidenceLevel::CRITICAL;
-        } else if (confidenceValue < static_cast<int>(ConfidenceLevel::LOW)) {
-            result.confidence = ConfidenceLevel::LOW;
+        if (confidenceValue > static_cast<int>(MemoryConfidenceLevel::CRITICAL)) {
+            result.confidence = MemoryConfidenceLevel::CRITICAL;
+        } else if (confidenceValue < static_cast<int>(MemoryConfidenceLevel::LOW)) {
+            result.confidence = MemoryConfidenceLevel::LOW;
         } else {
-            result.confidence = static_cast<ConfidenceLevel>(confidenceValue);
+            result.confidence = static_cast<MemoryConfidenceLevel>(confidenceValue);
         }
 
         // Calculate accuracy score
-        result.accuracyScore = static_cast<float>(confidenceValue) / static_cast<float>(ConfidenceLevel::CRITICAL);
+        result.accuracyScore = static_cast<float>(confidenceValue) / static_cast<float>(MemoryConfidenceLevel::CRITICAL);
     }
 
     void MemorySignatureScanner::AnalyzeDetectionContext(MemoryScanResult& result) {
@@ -1555,14 +1555,14 @@ namespace GarudaHS {
             << " with confidence " << ConfidenceLevelToString(result.confidence);
 
         switch (result.confidence) {
-            case ConfidenceLevel::CRITICAL:
-            case ConfidenceLevel::HIGH:
+            case MemoryConfidenceLevel::CRITICAL:
+            case MemoryConfidenceLevel::HIGH:
                 m_logger->Warning(oss.str());
                 break;
-            case ConfidenceLevel::MEDIUM:
+            case MemoryConfidenceLevel::MEDIUM:
                 m_logger->Info(oss.str());
                 break;
-            case ConfidenceLevel::LOW:
+            case MemoryConfidenceLevel::LOW:
                 m_logger->Debug(oss.str());
                 break;
         }
@@ -1608,12 +1608,12 @@ namespace GarudaHS {
         }
     }
 
-    std::string MemorySignatureScanner::ConfidenceLevelToString(ConfidenceLevel level) const {
+    std::string MemorySignatureScanner::ConfidenceLevelToString(MemoryConfidenceLevel level) const {
         switch (level) {
-            case ConfidenceLevel::LOW: return "Low";
-            case ConfidenceLevel::MEDIUM: return "Medium";
-            case ConfidenceLevel::HIGH: return "High";
-            case ConfidenceLevel::CRITICAL: return "Critical";
+            case MemoryConfidenceLevel::LOW: return "Low";
+            case MemoryConfidenceLevel::MEDIUM: return "Medium";
+            case MemoryConfidenceLevel::HIGH: return "High";
+            case MemoryConfidenceLevel::CRITICAL: return "Critical";
             default: return "Unknown";
         }
     }

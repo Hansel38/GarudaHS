@@ -8,6 +8,7 @@
   Exports.cpp
   InjectionDetectionLayer.cpp
   InjectionScanner.cpp
+  LayeredDetection.cpp
   Logger.cpp
   MemorySignatureScanner.cpp
   OverlayDetectionLayer.cpp

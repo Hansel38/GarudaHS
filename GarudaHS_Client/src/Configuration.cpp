@@ -479,7 +479,7 @@ namespace GarudaHS {
         return m_scanIntervalMs;
     }
 
-    bool Configuration::IsLoggingEnabled() const {
+    bool Configuration::GetLoggingEnabled() const {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_enableLogging;
     }

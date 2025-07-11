@@ -55,8 +55,8 @@ namespace GarudaHS {
         ENTROPY_ANALYSIS = 6        // Entropy-based detection
     };
 
-    // Confidence levels for detections
-    enum class ConfidenceLevel {
+    // Confidence levels for memory detections
+    enum class MemoryConfidenceLevel {
         LOW = 1,                    // 30% confidence - log only
         MEDIUM = 2,                 // 60% confidence - warn user
         HIGH = 3,                   // 85% confidence - take action
@@ -72,7 +72,7 @@ namespace GarudaHS {
         std::string patternString;          // String representation (for wildcards)
         MatchingAlgorithm algorithm;        // Matching algorithm to use
         MemoryRegionType targetRegion;      // Target memory region type
-        ConfidenceLevel baseConfidence;     // Base confidence level
+        MemoryConfidenceLevel baseConfidence;     // Base confidence level
         bool enabled;                       // Whether signature is enabled
         DWORD minSize;                      // Minimum size to match
         DWORD maxSize;                      // Maximum size to match
@@ -89,7 +89,7 @@ namespace GarudaHS {
         bool detected;                      // Whether signature was detected
         std::string signatureName;          // Name of detected signature
         SignatureType type;                 // Type of detection
-        ConfidenceLevel confidence;         // Confidence level
+        MemoryConfidenceLevel confidence;         // Confidence level
         DWORD processId;                    // Process ID where detected
         std::string processName;            // Process name
         LPVOID memoryAddress;               // Memory address of detection
@@ -297,7 +297,7 @@ namespace GarudaHS {
         void TriggerCallback(const MemoryScanResult& result);
         void HandleError(const std::string& error);
         std::string SignatureTypeToString(SignatureType type) const;
-        std::string ConfidenceLevelToString(ConfidenceLevel level) const;
+        std::string ConfidenceLevelToString(MemoryConfidenceLevel level) const;
         
         // Signature database management
         void IndexSignatures();

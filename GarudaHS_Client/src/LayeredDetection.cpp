@@ -464,4 +464,14 @@ namespace GarudaHS {
         m_trustedModules.push_back(moduleName);
     }
 
+    // LayeredDetection additional methods
+    std::vector<DetectionSignal> LayeredDetection::GetActiveSignals() const {
+        std::lock_guard<std::mutex> lock(m_signalMutex);
+        return m_activeSignals;
+    }
+
+    bool LayeredDetection::IsEnabled() const {
+        return m_enabled;
+    }
+
 } // namespace GarudaHS

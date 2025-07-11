@@ -143,7 +143,7 @@ namespace GarudaHS {
         DWORD GetScanInterval() const;
         void SetScanInterval(DWORD intervalMs);
         
-        bool IsLoggingEnabled() const;
+        bool GetLoggingEnabled() const;
         void SetLoggingEnabled(bool enabled);
         
         bool IsPopupWarningsEnabled() const;
