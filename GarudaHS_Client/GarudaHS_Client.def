@@ -1,37 +1,8 @@
+LIBRARY GarudaHS_Client
 EXPORTS
-    ; Core Functions (Short Names)
-    GHS_Init
-    GHS_Start
-    GHS_GetStatus
-    GHS_Shutdown
-
-    ; Configuration Functions
-    GHS_SetConfig
-    GHS_GetConfig
-    GHS_ReloadConfig
-
-    ; Detection Functions
-    GHS_Scan
-    GHS_GetHistory
-    GHS_ClearHistory
-
-    ; Utility Functions
-    GHS_IsInit
-    GHS_IsRunning
-    GHS_GetVersion
-    GHS_GetError
-
-    ; Injection Scanner Functions
-    GHS_InitInject
-    GHS_StartInject
-    GHS_StopInject
-    GHS_ScanInject
-    GHS_IsInjected
-    GHS_GetInjectScans
-    GHS_GetInjectCount
-    GHS_AddProcWhite
-    GHS_RemoveProcWhite
-    GHS_AddModWhite
-    GHS_IsInjectEnabled
-    GHS_SetInjectEnabled
-    GHS_GetInjectStatus
+    ; STATIC LINKING + MODULE DEFINITION SYSTEM
+    ; MINIMAL API SURFACE - Hanya 4 export untuk keamanan maksimal
+    GHS_InitializeSecure @1
+    GHS_PerformScan @2
+    GHS_GetStatus @3
+    GHS_GetVersion @4

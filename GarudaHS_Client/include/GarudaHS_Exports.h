@@ -7,6 +7,167 @@ extern "C" {
 #endif
 
 // ═══════════════════════════════════════════════════════════
+//                    UNIFIED DISPATCHER SYSTEM
+// ═══════════════════════════════════════════════════════════
+
+// Command IDs untuk dispatcher tunggal
+typedef enum _GHS_COMMAND_ID {
+    // Core Commands (0-99)
+    GHS_CMD_INIT = 0,
+    GHS_CMD_START = 1,
+    GHS_CMD_GET_STATUS = 2,
+    GHS_CMD_SHUTDOWN = 3,
+    GHS_CMD_SCAN = 4,
+    GHS_CMD_IS_INIT = 5,
+    GHS_CMD_IS_RUNNING = 6,
+    GHS_CMD_GET_VERSION = 7,
+    GHS_CMD_GET_ERROR = 8,
+
+    // Configuration Commands (100-199)
+    GHS_CMD_SET_CONFIG = 100,
+    GHS_CMD_GET_CONFIG = 101,
+    GHS_CMD_RELOAD_CONFIG = 102,
+    GHS_CMD_INIT_CONFIGURATION = 103,
+    GHS_CMD_GET_CONFIG_SCAN_INTERVAL = 104,
+    GHS_CMD_SET_CONFIG_SCAN_INTERVAL = 105,
+    GHS_CMD_IS_CONFIG_LOGGING_ENABLED = 106,
+    GHS_CMD_SET_CONFIG_LOGGING_ENABLED = 107,
+    GHS_CMD_ADD_CONFIG_BLACKLISTED_PROCESS = 108,
+    GHS_CMD_REMOVE_CONFIG_BLACKLISTED_PROCESS = 109,
+    GHS_CMD_ADD_CONFIG_GAME_WINDOW_TITLE = 110,
+    GHS_CMD_ADD_CONFIG_GAME_PROCESS_NAME = 111,
+
+    // Process Watcher Commands (200-299)
+    GHS_CMD_INIT_PROCESS_WATCHER = 200,
+    GHS_CMD_START_PROCESS_WATCHER = 201,
+    GHS_CMD_STOP_PROCESS_WATCHER = 202,
+    GHS_CMD_SCAN_PROCESS = 203,
+    GHS_CMD_GET_PROCESS_SCANS = 204,
+    GHS_CMD_GET_PROCESS_DETECTIONS = 205,
+    GHS_CMD_ADD_PROCESS_BLACKLIST = 206,
+    GHS_CMD_REMOVE_PROCESS_BLACKLIST = 207,
+    GHS_CMD_CLEAR_PROCESS_BLACKLIST = 208,
+    GHS_CMD_GET_PROCESS_BLACKLIST_COUNT = 209,
+
+    // Overlay Scanner Commands (300-399)
+    GHS_CMD_INIT_OVERLAY = 300,
+    GHS_CMD_START_OVERLAY = 301,
+    GHS_CMD_STOP_OVERLAY = 302,
+    GHS_CMD_SCAN_OVERLAY = 303,
+    GHS_CMD_GET_OVERLAY_SCANS = 304,
+    GHS_CMD_GET_OVERLAY_DETECTIONS = 305,
+    GHS_CMD_ADD_OVERLAY_WHITELIST = 306,
+    GHS_CMD_REMOVE_OVERLAY_WHITELIST = 307,
+
+    // Anti-Debug Commands (400-499)
+    GHS_CMD_INIT_ANTI_DEBUG = 400,
+    GHS_CMD_START_ANTI_DEBUG = 401,
+    GHS_CMD_STOP_ANTI_DEBUG = 402,
+    GHS_CMD_SCAN_ANTI_DEBUG = 403,
+    GHS_CMD_GET_ANTI_DEBUG_SCANS = 404,
+    GHS_CMD_GET_ANTI_DEBUG_DETECTIONS = 405,
+    GHS_CMD_IS_DEBUGGER_PRESENT = 406,
+
+    // Injection Scanner Commands (500-599)
+    GHS_CMD_INIT_INJECT = 500,
+    GHS_CMD_START_INJECT = 501,
+    GHS_CMD_STOP_INJECT = 502,
+    GHS_CMD_SCAN_INJECT = 503,
+    GHS_CMD_IS_INJECTED = 504,
+    GHS_CMD_GET_INJECT_SCANS = 505,
+    GHS_CMD_GET_INJECT_COUNT = 506,
+    GHS_CMD_ADD_PROC_WHITE = 507,
+    GHS_CMD_REMOVE_PROC_WHITE = 508,
+    GHS_CMD_ADD_MOD_WHITE = 509,
+    GHS_CMD_REMOVE_MOD_WHITE = 510,
+
+    // Memory Scanner Commands (600-699)
+    GHS_CMD_INIT_MEMORY = 600,
+    GHS_CMD_START_MEMORY = 601,
+    GHS_CMD_STOP_MEMORY = 602,
+    GHS_CMD_SCAN_MEMORY = 603,
+    GHS_CMD_GET_MEMORY_SCANS = 604,
+    GHS_CMD_GET_MEMORY_DETECTIONS = 605,
+    GHS_CMD_ADD_MEMORY_PATH_WHITE = 606,
+    GHS_CMD_REMOVE_MEMORY_PATH_WHITE = 607,
+    GHS_CMD_LOAD_MEMORY_SIGNATURES = 608,
+    GHS_CMD_SAVE_MEMORY_SIGNATURES = 609,
+    GHS_CMD_GET_MEMORY_SIGNATURE_COUNT = 610,
+    GHS_CMD_GET_MEMORY_ACCURACY = 611,
+    GHS_CMD_CLEAR_MEMORY_HISTORY = 612,
+    GHS_CMD_GET_MEMORY_HISTORY = 613,
+
+    // Logger Commands (700-799)
+    GHS_CMD_INIT_LOGGER = 700,
+    GHS_CMD_LOG_INFO = 701,
+    GHS_CMD_LOG_WARNING = 702,
+    GHS_CMD_LOG_ERROR = 703,
+    GHS_CMD_LOG_CRITICAL = 704,
+    GHS_CMD_LOG_SYSTEM_INFO = 705,
+    GHS_CMD_SET_LOG_LEVEL = 706,
+    GHS_CMD_SET_LOG_CONSOLE_OUTPUT = 707,
+    GHS_CMD_CLEAR_LOG_FILE = 708,
+    GHS_CMD_ROTATE_LOG_FILE = 709,
+
+    // Performance Monitor Commands (800-899)
+    GHS_CMD_INIT_PERFORMANCE = 800,
+    GHS_CMD_GET_PERFORMANCE_STATS = 801,
+    GHS_CMD_GET_TOTAL_PERFORMANCE_SCANS = 802,
+    GHS_CMD_GET_CACHE_HIT_RATIO = 803,
+    GHS_CMD_RESET_PERFORMANCE_STATS = 804,
+    GHS_CMD_OPTIMIZE_CACHE = 805,
+
+    // Detection Engine Commands (900-999)
+    GHS_CMD_INIT_DETECTION_ENGINE = 900,
+    GHS_CMD_GET_DETECTION_ENGINE_DETECTIONS = 901,
+    GHS_CMD_GET_DETECTION_ENGINE_ACCURACY = 902,
+    GHS_CMD_ADD_DETECTION_WHITELIST = 903,
+    GHS_CMD_REMOVE_DETECTION_WHITELIST = 904,
+
+    // Window Detector Commands (1000-1099)
+    GHS_CMD_INIT_WINDOW_DETECTOR = 1000,
+    GHS_CMD_START_WINDOW_DETECTOR = 1001,
+    GHS_CMD_STOP_WINDOW_DETECTOR = 1002,
+    GHS_CMD_SCAN_WINDOWS = 1003,
+    GHS_CMD_GET_WINDOW_SCANS = 1004,
+    GHS_CMD_GET_WINDOW_DETECTIONS = 1005,
+
+    // Anti-Suspend Threads Commands (1100-1199)
+    GHS_CMD_INIT_ANTI_SUSPEND = 1100,
+    GHS_CMD_START_ANTI_SUSPEND = 1101,
+    GHS_CMD_STOP_ANTI_SUSPEND = 1102,
+    GHS_CMD_GET_ANTI_SUSPEND_SCANS = 1103,
+    GHS_CMD_GET_ANTI_SUSPEND_DETECTIONS = 1104,
+
+    // Layered Detection Commands (1200-1299)
+    GHS_CMD_INIT_LAYERED_DETECTION = 1200,
+    GHS_CMD_START_LAYERED_DETECTION = 1201,
+    GHS_CMD_STOP_LAYERED_DETECTION = 1202,
+    GHS_CMD_GET_LAYERED_CONFIDENCE = 1203,
+    GHS_CMD_GET_LAYERED_DETECTIONS = 1204,
+    GHS_CMD_CLEAR_ACTIVE_SIGNALS = 1205,
+
+    // Utility Commands (9000+)
+    GHS_CMD_GET_HISTORY = 9000,
+    GHS_CMD_CLEAR_HISTORY = 9001,
+    GHS_CMD_GET_INJECT_HISTORY = 9002,
+    GHS_CMD_CLEAR_INJECT_HISTORY = 9003
+
+} GHS_COMMAND_ID;
+
+// Parameter structure untuk dispatcher
+typedef struct _GHS_DISPATCHER_PARAMS {
+    DWORD structSize;
+    GHS_COMMAND_ID commandId;
+    LPVOID inputData;
+    DWORD inputSize;
+    LPVOID outputData;
+    DWORD outputSize;
+    DWORD* bytesReturned;
+    DWORD reserved[4];
+} GHS_DISPATCHER_PARAMS;
+
+// ═══════════════════════════════════════════════════════════
 //                    STRUKTUR DATA EXPORT
 // ═══════════════════════════════════════════════════════════
 
@@ -111,10 +272,17 @@ typedef struct _GARUDAHS_MEMORY_RESULT {
 } GarudaHSMemoryResult;
 
 // ═══════════════════════════════════════════════════════════
-//                    FUNGSI EXPORT UTAMA (PENDEK)
+//                    UNIFIED DISPATCHER FUNCTION
 // ═══════════════════════════════════════════════════════════
 
-// Fungsi utama - 4 fungsi inti
+// FUNGSI DISPATCHER TUNGGAL - Satu-satunya export yang terlihat di PE analyzer
+__declspec(dllexport) BOOL GarudaAPI(GHS_DISPATCHER_PARAMS* params);
+
+// ═══════════════════════════════════════════════════════════
+//                    FUNGSI EXPORT UTAMA (PENDEK) - TETAP TERSEDIA
+// ═══════════════════════════════════════════════════════════
+
+// Fungsi utama - 4 fungsi inti (tetap tersedia untuk kompatibilitas)
 __declspec(dllexport) BOOL GHS_Init();                     // Initialize semua
 __declspec(dllexport) BOOL GHS_Start();                    // Start semua scanning
 __declspec(dllexport) GarudaHSStatus GHS_GetStatus();      // Get status lengkap
@@ -196,7 +364,29 @@ __declspec(dllexport) GarudaHSMemoryResult* GHS_GetMemoryHistory(DWORD* count); 
 // ═══════════════════════════════════════════════════════════
 
 /*
-PENGGUNAAN DASAR:
+PENGGUNAAN DISPATCHER TUNGGAL:
+
+1. Setup parameter:
+   GHS_DISPATCHER_PARAMS params = {};
+   params.structSize = sizeof(GHS_DISPATCHER_PARAMS);
+   params.commandId = GHS_CMD_INIT;
+   BOOL result = GarudaAPI(&params);
+
+2. Dengan input data:
+   DWORD scanInterval = 5000;
+   params.commandId = GHS_CMD_SET_CONFIG_SCAN_INTERVAL;
+   params.inputData = &scanInterval;
+   params.inputSize = sizeof(DWORD);
+   BOOL result = GarudaAPI(&params);
+
+3. Dengan output data:
+   GarudaHSStatus status = {};
+   params.commandId = GHS_CMD_GET_STATUS;
+   params.outputData = &status;
+   params.outputSize = sizeof(GarudaHSStatus);
+   BOOL result = GarudaAPI(&params);
+
+PENGGUNAAN DASAR (KOMPATIBILITAS):
 
 1. Inisialisasi:
    GHS_Init();
