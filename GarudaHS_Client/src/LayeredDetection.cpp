@@ -10,6 +10,7 @@
 #include "../include/LayeredDetection.h"
 #include "../include/OverlayDetectionLayer.h"
 #include "../include/AntiSuspendDetectionLayer.h"
+#include "../include/InjectionDetectionLayer.h"
 
 namespace GarudaHS {
 
@@ -39,15 +40,21 @@ namespace GarudaHS {
         AddDetectionLayer(std::make_unique<ModuleValidationLayer>());
 
         // Add overlay detection layer
-        auto overlayLayer = std::make_unique<OverlayDetectionLayer>();
+        std::unique_ptr<IDetectionLayer> overlayLayer = std::make_unique<OverlayDetectionLayer>();
         // Note: OverlayDetectionLayer will need to be initialized with logger and config
         // This would typically be done through dependency injection
         AddDetectionLayer(std::move(overlayLayer));
 
         // Add anti-suspend threads detection layer
-        auto antiSuspendLayer = std::make_unique<AntiSuspendDetectionLayer>();
+        std::unique_ptr<IDetectionLayer> antiSuspendLayer = std::make_unique<AntiSuspendDetectionLayer>();
         // Note: AntiSuspendDetectionLayer will be initialized automatically
         AddDetectionLayer(std::move(antiSuspendLayer));
+
+        // Add injection detection layer
+        std::unique_ptr<IDetectionLayer> injectionLayer = std::make_unique<InjectionDetectionLayer>();
+        // Note: InjectionDetectionLayer will need to be initialized with logger and config
+        // This would typically be done through dependency injection
+        AddDetectionLayer(std::move(injectionLayer));
 
         return true;
     }
@@ -70,6 +77,12 @@ namespace GarudaHS {
         m_signalWeights[SignalType::OVERLAY_DETECTION] = 0.75f;
         m_signalWeights[SignalType::GRAPHICS_HOOK] = 0.85f;
         m_signalWeights[SignalType::RENDERING_ANOMALY] = 0.65f;
+
+        // New injection detection signal types
+        m_signalWeights[SignalType::PROCESS_INJECTION] = 0.9f;
+        m_signalWeights[SignalType::MEMORY_MANIPULATION] = 0.85f;
+        m_signalWeights[SignalType::MODULE_TAMPERING] = 0.8f;
+        m_signalWeights[SignalType::SUSPICIOUS_BEHAVIOR] = 0.6f;
     }
 
     bool LayeredDetection::AddDetectionLayer(std::unique_ptr<IDetectionLayer> layer) {
@@ -171,7 +184,7 @@ namespace GarudaHS {
         
         // Boost confidence if multiple signal types are present
         if (HasMultipleSignalTypes(signals)) {
-            baseConfidence = std::min(1.0f, baseConfidence * 1.2f);
+            baseConfidence = (baseConfidence * 1.2f < 1.0f) ? baseConfidence * 1.2f : 1.0f;
         }
         
         return baseConfidence;
@@ -208,7 +221,9 @@ namespace GarudaHS {
     }
 
     void LayeredDetection::SetSignalWeight(SignalType type, float weight) {
-        m_signalWeights[type] = std::max(0.0f, std::min(1.0f, weight));
+        // Clamp weight between 0.0f and 1.0f
+        float clampedWeight = (weight < 0.0f) ? 0.0f : ((weight > 1.0f) ? 1.0f : weight);
+        m_signalWeights[type] = clampedWeight;
     }
 
     // ProcessDetectionLayer Implementation
@@ -261,29 +276,12 @@ namespace GarudaHS {
 
     bool DebuggerDetectionLayer::IsDebuggerPresent_Advanced() {
         // Multiple debugger detection methods
-        if (IsDebuggerPresent()) return true;
+        if (::IsDebuggerPresent()) return true;
 
         // Check for remote debugger
-        if (CheckRemoteDebugger()) return true;
-
-        // Check for kernel debugger (simplified)
-        if (CheckKernelDebugger()) return true;
-
-        // Check heap flags (simplified approach)
-        try {
-            PVOID heap = GetProcessHeap();
-            if (heap) {
-                // Basic heap flag check without accessing internal structures
-                PROCESS_HEAP_ENTRY entry;
-                entry.lpData = nullptr;
-                if (HeapWalk(heap, &entry)) {
-                    // If we can walk the heap, it might indicate debugging
-                    // This is a simplified check
-                }
-            }
-        } catch (...) {
-            // Ignore heap access errors
-        }
+        BOOL isRemoteDebuggerPresent = FALSE;
+        CheckRemoteDebuggerPresent(GetCurrentProcess(), &isRemoteDebuggerPresent);
+        if (isRemoteDebuggerPresent) return true;
 
         return false;
     }
@@ -296,18 +294,7 @@ namespace GarudaHS {
 
     bool DebuggerDetectionLayer::CheckKernelDebugger() {
         // Simplified kernel debugger check
-        // In a production environment, this would use more sophisticated methods
-        try {
-            // Check if we can access certain system information
-            SYSTEM_INFO sysInfo;
-            GetSystemInfo(&sysInfo);
-
-            // This is a placeholder - real kernel debugger detection
-            // would require more advanced techniques
-            return false;
-        } catch (...) {
-            return false;
-        }
+        return false;
     }
 
     // ThreadHijackDetectionLayer Implementation
@@ -316,7 +303,7 @@ namespace GarudaHS {
     std::vector<DetectionSignal> ThreadHijackDetectionLayer::Scan() {
         std::vector<DetectionSignal> signals;
         
-        if (CheckSuspiciousThreads()) {
+        if (CheckSuspiciousThreadsInternal()) {
             DetectionSignal signal;
             signal.type = SignalType::THREAD_HIJACK;
             signal.source = "Thread Analysis";
@@ -332,7 +319,7 @@ namespace GarudaHS {
         return signals;
     }
 
-    bool ThreadHijackDetectionLayer::CheckSuspiciousThreads() {
+    bool ThreadHijackDetectionLayer::CheckSuspiciousThreadsInternal() {
         // Enumerate threads and check for suspicious patterns
         HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
         if (hSnapshot == INVALID_HANDLE_VALUE) return false;
@@ -350,7 +337,7 @@ namespace GarudaHS {
                     auto it = std::find(m_knownThreads.begin(), m_knownThreads.end(), te.th32ThreadID);
                     if (it == m_knownThreads.end()) {
                         // New thread detected - could be injection
-                        if (CheckThreadContext(te.th32ThreadID)) {
+                        if (CheckThreadContextInternal(te.th32ThreadID)) {
                             suspicious = true;
                         }
                         m_knownThreads.push_back(te.th32ThreadID);
@@ -363,7 +350,7 @@ namespace GarudaHS {
         return suspicious;
     }
 
-    bool ThreadHijackDetectionLayer::CheckThreadContext(DWORD threadId) {
+    bool ThreadHijackDetectionLayer::CheckThreadContextInternal(DWORD threadId) {
         HANDLE hThread = OpenThread(THREAD_GET_CONTEXT, FALSE, threadId);
         if (hThread == nullptr) return false;
         
@@ -414,7 +401,7 @@ namespace GarudaHS {
         
         auto loadedModules = GetLoadedModules();
         for (const auto& module : loadedModules) {
-            if (!IsModuleTrusted(module)) {
+            if (!IsModuleTrustedInternal(module)) {
                 DetectionSignal signal;
                 signal.type = SignalType::MODULE_INJECTION;
                 signal.source = module;
@@ -431,7 +418,7 @@ namespace GarudaHS {
         return signals;
     }
 
-    bool ModuleValidationLayer::IsModuleTrusted(const std::string& moduleName) {
+    bool ModuleValidationLayer::IsModuleTrustedInternal(const std::string& moduleName) {
         std::string lowerName = moduleName;
         std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(), ::tolower);
         

@@ -1,11 +1,29 @@
 #include "../pch.h"
 #include <Windows.h>
+#undef max
+#undef min
 #include <fstream>
 #include <sstream>
 #include <algorithm>
 #include "../include/Configuration.h"
 
 namespace GarudaHS {
+
+    // Helper template functions to avoid macro conflicts
+    template<typename T>
+    constexpr const T& clamp_min(const T& value, const T& min_val) {
+        return (value < min_val) ? min_val : value;
+    }
+
+    template<typename T>
+    constexpr const T& clamp_max(const T& value, const T& max_val) {
+        return (value > max_val) ? max_val : value;
+    }
+
+    template<typename T>
+    constexpr const T& clamp_range(const T& value, const T& min_val, const T& max_val) {
+        return clamp_max(clamp_min(value, min_val), max_val);
+    }
 
     Configuration::Configuration()
         : m_scanIntervalMs(3000)
@@ -279,6 +297,67 @@ namespace GarudaHS {
             "lsass.exe",
             "svchost.exe",
             "system"
+        };
+
+        // Injection Scanner defaults
+        m_enableInjectionScanner = true;
+        m_enableSetWindowsHookDetection = true;
+        m_enableManualDllMappingDetection = true;
+        m_enableProcessHollowingDetection = true;
+        m_enableReflectiveDllDetection = true;
+        m_enableThreadHijackingDetection = true;
+        m_enableApcInjectionDetection = true;
+        m_enableAtomBombingDetection = false; // Advanced, can be noisy
+        m_enableProcessDoppelgangingDetection = false; // Advanced
+        m_enableManualSyscallDetection = false; // Advanced
+        m_enableModuleStompingDetection = true;
+
+        // Injection Scanner confidence scores
+        m_setWindowsHookConfidence = 0.8f;
+        m_manualDllMappingConfidence = 0.9f;
+        m_processHollowingConfidence = 0.95f;
+        m_reflectiveDllConfidence = 0.9f;
+        m_threadHijackingConfidence = 0.85f;
+        m_apcInjectionConfidence = 0.8f;
+        m_atomBombingConfidence = 0.7f;
+        m_processDoppelgangingConfidence = 0.9f;
+        m_manualSyscallConfidence = 0.85f;
+        m_moduleStompingConfidence = 0.9f;
+
+        // Injection Scanner settings
+        m_injectionScanInterval = 5000; // 5 seconds
+        m_enableInjectionRealTimeMonitoring = false;
+        m_enableInjectionDeepScan = true;
+        m_enableInjectionHeuristicAnalysis = true;
+        m_enableInjectionBehaviorAnalysis = false;
+        m_maxProcessesToScanForInjection = 100;
+        m_injectionScanTimeout = 30000; // 30 seconds
+        m_injectionConfidenceThreshold = 0.7f;
+
+        // Injection Scanner whitelist
+        m_injectionWhitelistedProcesses = {
+            "explorer.exe", "dwm.exe", "winlogon.exe", "csrss.exe",
+            "services.exe", "lsass.exe", "svchost.exe", "system",
+            "smss.exe", "wininit.exe", "spoolsv.exe"
+        };
+
+        m_injectionWhitelistedModules = {
+            "ntdll.dll", "kernel32.dll", "kernelbase.dll", "user32.dll",
+            "gdi32.dll", "advapi32.dll", "msvcrt.dll", "shell32.dll",
+            "ole32.dll", "oleaut32.dll", "comctl32.dll", "comdlg32.dll"
+        };
+
+        m_injectionWhitelistedPaths = {
+            "C:\\Windows\\System32\\",
+            "C:\\Windows\\SysWOW64\\",
+            "C:\\Program Files\\",
+            "C:\\Program Files (x86)\\"
+        };
+
+        m_injectionTrustedSigners = {
+            "Microsoft Corporation",
+            "Microsoft Windows",
+            "Microsoft Windows Publisher"
         };
     }
 
@@ -587,6 +666,340 @@ namespace GarudaHS {
     void Configuration::SetAntiSuspendWhitelistedProcesses(const std::vector<std::string>& processes) {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_antiSuspendWhitelistedProcesses = processes;
+    }
+
+    // Injection Scanner configuration getters and setters
+    bool Configuration::IsInjectionScannerEnabled() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_enableInjectionScanner;
+    }
+
+    void Configuration::SetInjectionScannerEnabled(bool enabled) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_enableInjectionScanner = enabled;
+    }
+
+    bool Configuration::IsSetWindowsHookDetectionEnabled() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_enableSetWindowsHookDetection;
+    }
+
+    void Configuration::SetSetWindowsHookDetectionEnabled(bool enabled) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_enableSetWindowsHookDetection = enabled;
+    }
+
+    bool Configuration::IsManualDllMappingDetectionEnabled() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_enableManualDllMappingDetection;
+    }
+
+    void Configuration::SetManualDllMappingDetectionEnabled(bool enabled) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_enableManualDllMappingDetection = enabled;
+    }
+
+    bool Configuration::IsProcessHollowingDetectionEnabled() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_enableProcessHollowingDetection;
+    }
+
+    void Configuration::SetProcessHollowingDetectionEnabled(bool enabled) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_enableProcessHollowingDetection = enabled;
+    }
+
+    bool Configuration::IsReflectiveDllDetectionEnabled() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_enableReflectiveDllDetection;
+    }
+
+    void Configuration::SetReflectiveDllDetectionEnabled(bool enabled) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_enableReflectiveDllDetection = enabled;
+    }
+
+    bool Configuration::IsThreadHijackingDetectionEnabled() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_enableThreadHijackingDetection;
+    }
+
+    void Configuration::SetThreadHijackingDetectionEnabled(bool enabled) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_enableThreadHijackingDetection = enabled;
+    }
+
+    bool Configuration::IsApcInjectionDetectionEnabled() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_enableApcInjectionDetection;
+    }
+
+    void Configuration::SetApcInjectionDetectionEnabled(bool enabled) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_enableApcInjectionDetection = enabled;
+    }
+
+    bool Configuration::IsAtomBombingDetectionEnabled() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_enableAtomBombingDetection;
+    }
+
+    void Configuration::SetAtomBombingDetectionEnabled(bool enabled) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_enableAtomBombingDetection = enabled;
+    }
+
+    bool Configuration::IsProcessDoppelgangingDetectionEnabled() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_enableProcessDoppelgangingDetection;
+    }
+
+    void Configuration::SetProcessDoppelgangingDetectionEnabled(bool enabled) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_enableProcessDoppelgangingDetection = enabled;
+    }
+
+    bool Configuration::IsManualSyscallDetectionEnabled() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_enableManualSyscallDetection;
+    }
+
+    void Configuration::SetManualSyscallDetectionEnabled(bool enabled) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_enableManualSyscallDetection = enabled;
+    }
+
+    bool Configuration::IsModuleStompingDetectionEnabled() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_enableModuleStompingDetection;
+    }
+
+    void Configuration::SetModuleStompingDetectionEnabled(bool enabled) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_enableModuleStompingDetection = enabled;
+    }
+
+    // Injection Scanner confidence scores
+    float Configuration::GetSetWindowsHookConfidence() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_setWindowsHookConfidence;
+    }
+
+    void Configuration::SetSetWindowsHookConfidence(float confidence) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_setWindowsHookConfidence = clamp_range(confidence, 0.0f, 1.0f);
+    }
+
+    float Configuration::GetManualDllMappingConfidence() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_manualDllMappingConfidence;
+    }
+
+    void Configuration::SetManualDllMappingConfidence(float confidence) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_manualDllMappingConfidence = clamp_range(confidence, 0.0f, 1.0f);
+    }
+
+    float Configuration::GetProcessHollowingConfidence() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_processHollowingConfidence;
+    }
+
+    void Configuration::SetProcessHollowingConfidence(float confidence) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_processHollowingConfidence = clamp_range(confidence, 0.0f, 1.0f);
+    }
+
+    float Configuration::GetReflectiveDllConfidence() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_reflectiveDllConfidence;
+    }
+
+    void Configuration::SetReflectiveDllConfidence(float confidence) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_reflectiveDllConfidence = clamp_range(confidence, 0.0f, 1.0f);
+    }
+
+    float Configuration::GetThreadHijackingConfidence() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_threadHijackingConfidence;
+    }
+
+    void Configuration::SetThreadHijackingConfidence(float confidence) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_threadHijackingConfidence = clamp_range(confidence, 0.0f, 1.0f);
+    }
+
+    float Configuration::GetApcInjectionConfidence() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_apcInjectionConfidence;
+    }
+
+    void Configuration::SetApcInjectionConfidence(float confidence) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_apcInjectionConfidence = clamp_range(confidence, 0.0f, 1.0f);
+    }
+
+    float Configuration::GetAtomBombingConfidence() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_atomBombingConfidence;
+    }
+
+    void Configuration::SetAtomBombingConfidence(float confidence) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_atomBombingConfidence = clamp_range(confidence, 0.0f, 1.0f);
+    }
+
+    float Configuration::GetProcessDoppelgangingConfidence() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_processDoppelgangingConfidence;
+    }
+
+    void Configuration::SetProcessDoppelgangingConfidence(float confidence) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_processDoppelgangingConfidence = clamp_range(confidence, 0.0f, 1.0f);
+    }
+
+    float Configuration::GetManualSyscallConfidence() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_manualSyscallConfidence;
+    }
+
+    void Configuration::SetManualSyscallConfidence(float confidence) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_manualSyscallConfidence = clamp_range(confidence, 0.0f, 1.0f);
+    }
+
+    float Configuration::GetModuleStompingConfidence() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_moduleStompingConfidence;
+    }
+
+    void Configuration::SetModuleStompingConfidence(float confidence) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_moduleStompingConfidence = clamp_range(confidence, 0.0f, 1.0f);
+    }
+
+    // Injection Scanner settings
+    DWORD Configuration::GetInjectionScanInterval() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_injectionScanInterval;
+    }
+
+    void Configuration::SetInjectionScanInterval(DWORD intervalMs) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_injectionScanInterval = clamp_range<DWORD>(intervalMs, 1000U, 60000U);
+    }
+
+    bool Configuration::IsInjectionRealTimeMonitoringEnabled() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_enableInjectionRealTimeMonitoring;
+    }
+
+    void Configuration::SetInjectionRealTimeMonitoringEnabled(bool enabled) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_enableInjectionRealTimeMonitoring = enabled;
+    }
+
+    bool Configuration::IsInjectionDeepScanEnabled() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_enableInjectionDeepScan;
+    }
+
+    void Configuration::SetInjectionDeepScanEnabled(bool enabled) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_enableInjectionDeepScan = enabled;
+    }
+
+    bool Configuration::IsInjectionHeuristicAnalysisEnabled() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_enableInjectionHeuristicAnalysis;
+    }
+
+    void Configuration::SetInjectionHeuristicAnalysisEnabled(bool enabled) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_enableInjectionHeuristicAnalysis = enabled;
+    }
+
+    bool Configuration::IsInjectionBehaviorAnalysisEnabled() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_enableInjectionBehaviorAnalysis;
+    }
+
+    void Configuration::SetInjectionBehaviorAnalysisEnabled(bool enabled) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_enableInjectionBehaviorAnalysis = enabled;
+    }
+
+    DWORD Configuration::GetMaxProcessesToScanForInjection() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_maxProcessesToScanForInjection;
+    }
+
+    void Configuration::SetMaxProcessesToScanForInjection(DWORD count) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_maxProcessesToScanForInjection = clamp_range<DWORD>(count, 1U, 1000U);
+    }
+
+    DWORD Configuration::GetInjectionScanTimeout() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_injectionScanTimeout;
+    }
+
+    void Configuration::SetInjectionScanTimeout(DWORD timeoutMs) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_injectionScanTimeout = clamp_range<DWORD>(timeoutMs, 5000U, 120000U);
+    }
+
+    float Configuration::GetInjectionConfidenceThreshold() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_injectionConfidenceThreshold;
+    }
+
+    void Configuration::SetInjectionConfidenceThreshold(float threshold) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_injectionConfidenceThreshold = clamp_range(threshold, 0.0f, 1.0f);
+    }
+
+    // Injection Scanner whitelist
+    std::vector<std::string> Configuration::GetInjectionWhitelistedProcesses() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_injectionWhitelistedProcesses;
+    }
+
+    void Configuration::SetInjectionWhitelistedProcesses(const std::vector<std::string>& processes) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_injectionWhitelistedProcesses = processes;
+    }
+
+    std::vector<std::string> Configuration::GetInjectionWhitelistedModules() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_injectionWhitelistedModules;
+    }
+
+    void Configuration::SetInjectionWhitelistedModules(const std::vector<std::string>& modules) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_injectionWhitelistedModules = modules;
+    }
+
+    std::vector<std::string> Configuration::GetInjectionWhitelistedPaths() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_injectionWhitelistedPaths;
+    }
+
+    void Configuration::SetInjectionWhitelistedPaths(const std::vector<std::string>& paths) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_injectionWhitelistedPaths = paths;
+    }
+
+    std::vector<std::string> Configuration::GetInjectionTrustedSigners() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_injectionTrustedSigners;
+    }
+
+    void Configuration::SetInjectionTrustedSigners(const std::vector<std::string>& signers) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_injectionTrustedSigners = signers;
     }
 
 } // namespace GarudaHS

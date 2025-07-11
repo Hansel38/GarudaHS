@@ -33,7 +33,11 @@ namespace GarudaHS {
         EXTERNAL_MANIPULATION = 14, // External manipulation detected
         CRITICAL_SYSTEM_THREAT = 15,// Critical system threat
         CODE_INJECTION = 16,        // Code injection detected
-        UNKNOWN_THREAT = 17         // Unknown threat type
+        PROCESS_INJECTION = 17,     // Process injection detected
+        MEMORY_MANIPULATION = 18,   // Memory manipulation detected
+        MODULE_TAMPERING = 19,      // Module tampering detected
+        SUSPICIOUS_BEHAVIOR = 20,   // General suspicious behavior
+        UNKNOWN_THREAT = 21         // Unknown threat type
     };
 
     // Threat severity levels
@@ -192,8 +196,8 @@ namespace GarudaHS {
         float m_weight;
         std::vector<DWORD> m_knownThreads;
         
-        bool CheckSuspiciousThreads();
-        bool CheckThreadContext(DWORD threadId);
+        bool CheckSuspiciousThreadsInternal();
+        bool CheckThreadContextInternal(DWORD threadId);
         
     public:
         ThreadHijackDetectionLayer();
@@ -210,7 +214,7 @@ namespace GarudaHS {
         float m_weight;
         std::vector<std::string> m_trustedModules;
         
-        bool IsModuleTrusted(const std::string& moduleName);
+        bool IsModuleTrustedInternal(const std::string& moduleName);
         std::vector<std::string> GetLoadedModules();
         
     public:

@@ -44,7 +44,48 @@ namespace GarudaHS {
         DWORD m_maxSuspendCount;
         float m_threadSuspensionConfidence;
         std::vector<std::string> m_antiSuspendWhitelistedProcesses;
-        
+
+        // Injection Scanner configuration
+        bool m_enableInjectionScanner;
+        bool m_enableSetWindowsHookDetection;
+        bool m_enableManualDllMappingDetection;
+        bool m_enableProcessHollowingDetection;
+        bool m_enableReflectiveDllDetection;
+        bool m_enableThreadHijackingDetection;
+        bool m_enableApcInjectionDetection;
+        bool m_enableAtomBombingDetection;
+        bool m_enableProcessDoppelgangingDetection;
+        bool m_enableManualSyscallDetection;
+        bool m_enableModuleStompingDetection;
+
+        // Injection Scanner confidence scores
+        float m_setWindowsHookConfidence;
+        float m_manualDllMappingConfidence;
+        float m_processHollowingConfidence;
+        float m_reflectiveDllConfidence;
+        float m_threadHijackingConfidence;
+        float m_apcInjectionConfidence;
+        float m_atomBombingConfidence;
+        float m_processDoppelgangingConfidence;
+        float m_manualSyscallConfidence;
+        float m_moduleStompingConfidence;
+
+        // Injection Scanner settings
+        DWORD m_injectionScanInterval;
+        bool m_enableInjectionRealTimeMonitoring;
+        bool m_enableInjectionDeepScan;
+        bool m_enableInjectionHeuristicAnalysis;
+        bool m_enableInjectionBehaviorAnalysis;
+        DWORD m_maxProcessesToScanForInjection;
+        DWORD m_injectionScanTimeout;
+        float m_injectionConfidenceThreshold;
+
+        // Injection Scanner whitelist
+        std::vector<std::string> m_injectionWhitelistedProcesses;
+        std::vector<std::string> m_injectionWhitelistedModules;
+        std::vector<std::string> m_injectionWhitelistedPaths;
+        std::vector<std::string> m_injectionTrustedSigners;
+
         // Private methods
         bool LoadFromFile();
         bool SaveToFile() const;
@@ -124,6 +165,109 @@ namespace GarudaHS {
 
         std::vector<std::string> GetAntiSuspendWhitelistedProcesses() const;
         void SetAntiSuspendWhitelistedProcesses(const std::vector<std::string>& processes);
+
+        // Injection Scanner configuration
+        bool IsInjectionScannerEnabled() const;
+        void SetInjectionScannerEnabled(bool enabled);
+
+        bool IsSetWindowsHookDetectionEnabled() const;
+        void SetSetWindowsHookDetectionEnabled(bool enabled);
+
+        bool IsManualDllMappingDetectionEnabled() const;
+        void SetManualDllMappingDetectionEnabled(bool enabled);
+
+        bool IsProcessHollowingDetectionEnabled() const;
+        void SetProcessHollowingDetectionEnabled(bool enabled);
+
+        bool IsReflectiveDllDetectionEnabled() const;
+        void SetReflectiveDllDetectionEnabled(bool enabled);
+
+        bool IsThreadHijackingDetectionEnabled() const;
+        void SetThreadHijackingDetectionEnabled(bool enabled);
+
+        bool IsApcInjectionDetectionEnabled() const;
+        void SetApcInjectionDetectionEnabled(bool enabled);
+
+        bool IsAtomBombingDetectionEnabled() const;
+        void SetAtomBombingDetectionEnabled(bool enabled);
+
+        bool IsProcessDoppelgangingDetectionEnabled() const;
+        void SetProcessDoppelgangingDetectionEnabled(bool enabled);
+
+        bool IsManualSyscallDetectionEnabled() const;
+        void SetManualSyscallDetectionEnabled(bool enabled);
+
+        bool IsModuleStompingDetectionEnabled() const;
+        void SetModuleStompingDetectionEnabled(bool enabled);
+
+        // Injection Scanner confidence scores
+        float GetSetWindowsHookConfidence() const;
+        void SetSetWindowsHookConfidence(float confidence);
+
+        float GetManualDllMappingConfidence() const;
+        void SetManualDllMappingConfidence(float confidence);
+
+        float GetProcessHollowingConfidence() const;
+        void SetProcessHollowingConfidence(float confidence);
+
+        float GetReflectiveDllConfidence() const;
+        void SetReflectiveDllConfidence(float confidence);
+
+        float GetThreadHijackingConfidence() const;
+        void SetThreadHijackingConfidence(float confidence);
+
+        float GetApcInjectionConfidence() const;
+        void SetApcInjectionConfidence(float confidence);
+
+        float GetAtomBombingConfidence() const;
+        void SetAtomBombingConfidence(float confidence);
+
+        float GetProcessDoppelgangingConfidence() const;
+        void SetProcessDoppelgangingConfidence(float confidence);
+
+        float GetManualSyscallConfidence() const;
+        void SetManualSyscallConfidence(float confidence);
+
+        float GetModuleStompingConfidence() const;
+        void SetModuleStompingConfidence(float confidence);
+
+        // Injection Scanner settings
+        DWORD GetInjectionScanInterval() const;
+        void SetInjectionScanInterval(DWORD intervalMs);
+
+        bool IsInjectionRealTimeMonitoringEnabled() const;
+        void SetInjectionRealTimeMonitoringEnabled(bool enabled);
+
+        bool IsInjectionDeepScanEnabled() const;
+        void SetInjectionDeepScanEnabled(bool enabled);
+
+        bool IsInjectionHeuristicAnalysisEnabled() const;
+        void SetInjectionHeuristicAnalysisEnabled(bool enabled);
+
+        bool IsInjectionBehaviorAnalysisEnabled() const;
+        void SetInjectionBehaviorAnalysisEnabled(bool enabled);
+
+        DWORD GetMaxProcessesToScanForInjection() const;
+        void SetMaxProcessesToScanForInjection(DWORD count);
+
+        DWORD GetInjectionScanTimeout() const;
+        void SetInjectionScanTimeout(DWORD timeoutMs);
+
+        float GetInjectionConfidenceThreshold() const;
+        void SetInjectionConfidenceThreshold(float threshold);
+
+        // Injection Scanner whitelist
+        std::vector<std::string> GetInjectionWhitelistedProcesses() const;
+        void SetInjectionWhitelistedProcesses(const std::vector<std::string>& processes);
+
+        std::vector<std::string> GetInjectionWhitelistedModules() const;
+        void SetInjectionWhitelistedModules(const std::vector<std::string>& modules);
+
+        std::vector<std::string> GetInjectionWhitelistedPaths() const;
+        void SetInjectionWhitelistedPaths(const std::vector<std::string>& paths);
+
+        std::vector<std::string> GetInjectionTrustedSigners() const;
+        void SetInjectionTrustedSigners(const std::vector<std::string>& signers);
 
         // File operations
         bool Save() const;

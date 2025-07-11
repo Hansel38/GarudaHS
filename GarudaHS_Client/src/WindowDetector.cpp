@@ -20,38 +20,47 @@ namespace GarudaHS {
     }
 
     void WindowDetector::LoadDefaults() {
+        // More specific window titles to reduce false positives
         m_gameWindowTitles = {
-            "Ragnarok",
             "Ragnarok Online",
-            "RRO",
-            "Ragnarok Online Client"
+            "Ragnarok Online Client",
+            "RRO - Ragnarok Online",
+            "Ragnarok: Renewal"
         };
 
+        // More specific process names - removed generic "client.exe"
         m_gameProcessNames = {
             "ragnarok.exe",
-            "rro.exe", 
+            "rro.exe",
             "ragexe.exe",
-            "client.exe"
+            "ragnarok_client.exe",
+            "ro_client.exe"
         };
 
+        // More specific class names
         m_gameClassNames = {
-            "Ragnarok",
             "RagnarokClass",
-            "RagnarokWindow"
+            "RagnarokWindow",
+            "RagnarokOnlineClass",
+            "ROClientWindow"
         };
 
-        // Add some regex patterns for flexible matching
+        // More restrictive regex patterns to prevent false positives
         try {
             m_titleRegexes.clear();
-            m_titleRegexes.push_back(std::regex(".*[Rr]agnarok.*", std::regex_constants::icase));
-            m_titleRegexes.push_back(std::regex(".*RRO.*", std::regex_constants::icase));
-            
+            // Require "Ragnarok" to be followed by "Online" or be standalone with specific context
+            m_titleRegexes.push_back(std::regex("^Ragnarok\\s+(Online|Renewal).*", std::regex_constants::icase));
+            m_titleRegexes.push_back(std::regex("^RRO\\s*-.*", std::regex_constants::icase));
+
             m_processRegexes.clear();
-            m_processRegexes.push_back(std::regex(".*rag.*\\.exe", std::regex_constants::icase));
-            m_processRegexes.push_back(std::regex(".*rro.*\\.exe", std::regex_constants::icase));
+            // More specific patterns - require "rag" to be at start or preceded by specific chars
+            m_processRegexes.push_back(std::regex("^rag(narok|exe|_client).*\\.exe$", std::regex_constants::icase));
+            m_processRegexes.push_back(std::regex("^rro(_client)?.*\\.exe$", std::regex_constants::icase));
+            m_processRegexes.push_back(std::regex("^ro_client.*\\.exe$", std::regex_constants::icase));
         }
         catch (const std::regex_error&) {
-            // Handle regex compilation errors
+            // Handle regex compilation errors - log but continue
+            // Could add logging here if logger is available
         }
     }
 
@@ -73,13 +82,19 @@ namespace GarudaHS {
             return "";
         }
 
+        // Use RAII for automatic handle cleanup
+        struct HandleGuard {
+            HANDLE handle;
+            HandleGuard(HANDLE h) : handle(h) {}
+            ~HandleGuard() { if (handle != INVALID_HANDLE_VALUE) CloseHandle(handle); }
+        } guard(hSnap);
+
         PROCESSENTRY32 pe;
         pe.dwSize = sizeof(PROCESSENTRY32);
 
         if (Process32First(hSnap, &pe)) {
             do {
                 if (pe.th32ProcessID == processId) {
-                    CloseHandle(hSnap);
                     // Convert WCHAR to string using WideCharToMultiByte
                     std::wstring wProcessName = pe.szExeFile;
                     int size = WideCharToMultiByte(CP_UTF8, 0, wProcessName.c_str(), -1, nullptr, 0, nullptr, nullptr);
@@ -92,7 +107,6 @@ namespace GarudaHS {
             } while (Process32Next(hSnap, &pe));
         }
 
-        CloseHandle(hSnap);
         return "";
     }
 
@@ -280,9 +294,15 @@ namespace GarudaHS {
         if (hProcess == nullptr) {
             return false;
         }
-        
+
+        // Use RAII for automatic handle cleanup
+        struct HandleGuard {
+            HANDLE handle;
+            HandleGuard(HANDLE h) : handle(h) {}
+            ~HandleGuard() { if (handle) CloseHandle(handle); }
+        } guard(hProcess);
+
         BOOL result = TerminateProcess(hProcess, 0);
-        CloseHandle(hProcess);
         return result != FALSE;
     }
 

@@ -15,13 +15,17 @@
 #include <atomic>
 #include <mutex>
 #include <functional>
-#include "LayeredDetection.h"
 
 namespace GarudaHS {
 
     // Forward declarations
     class Logger;
     class Configuration;
+
+    // Forward declarations from LayeredDetection.h
+    enum class SignalType;
+    struct DetectionSignal;
+    class IDetectionLayer;
 
     // Overlay detection types
     enum class OverlayType {

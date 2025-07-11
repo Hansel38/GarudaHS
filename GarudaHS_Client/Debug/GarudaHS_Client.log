@@ -6,6 +6,8 @@
   Configuration.cpp
   DetectionEngine.cpp
   Exports.cpp
+  InjectionDetectionLayer.cpp
+  InjectionScanner.cpp
   Logger.cpp
   OverlayDetectionLayer.cpp
   OverlayScanner.cpp

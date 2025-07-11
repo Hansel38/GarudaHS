@@ -1,9 +1,10 @@
-#include "../pch.h"
+#include <Windows.h>
 #include <string>
 #include <sstream>
 #include "../include/ProcessWatcher.h"
 #include "../include/OverlayScanner.h"
 #include "../include/AntiDebug.h"
+#include "../include/InjectionScanner.h"
 
 // Simple status structure for exports
 typedef struct _GARUDAHS_STATUS {
@@ -48,6 +49,7 @@ typedef struct _GARUDAHS_CONFIG {
     BOOL enableProcessWatcher;
     BOOL enableOverlayScanner;
     BOOL enableAntiDebug;
+    BOOL enableInjectionScanner;
     DWORD scanInterval;
     BOOL autoTerminate;
     BOOL enableLogging;
@@ -58,7 +60,7 @@ typedef struct _GARUDAHS_CONFIG {
     BOOL enableRandomization;
     DWORD maxDetectionHistory;
     float globalSensitivity;
-    DWORD reserved[8];
+    DWORD reserved[10];
 } GarudaHSConfig;
 
 // Detection result structure
@@ -72,9 +74,24 @@ typedef struct _GARUDAHS_DETECTION_RESULT {
     DWORD reserved[8];
 } GarudaHSDetectionResult;
 
+// Injection detection result structure
+typedef struct _GARUDAHS_INJECTION_RESULT {
+    DWORD timestamp;
+    DWORD injectionType;        // InjectionType enum value
+    char processName[64];
+    DWORD processId;
+    char modulePath[260];
+    char injectedDllName[128];
+    float confidence;
+    char reason[256];
+    BOOL isWhitelisted;
+    DWORD reserved[4];
+} GarudaHSInjectionResult;
+
 // Global instances
 static std::unique_ptr<GarudaHS::OverlayScanner> g_overlayScanner = nullptr;
 static std::unique_ptr<GarudaHS::AntiDebug> g_antiDebug = nullptr;
+static std::unique_ptr<GarudaHS::InjectionScanner> g_injectionScanner = nullptr;
 
 // Helper function to get or create overlay scanner
 GarudaHS::OverlayScanner& GetGlobalOverlayScanner() {
@@ -90,6 +107,14 @@ GarudaHS::AntiDebug& GetGlobalAntiDebug() {
         g_antiDebug = std::make_unique<GarudaHS::AntiDebug>();
     }
     return *g_antiDebug;
+}
+
+// Helper function to get or create injection scanner
+GarudaHS::InjectionScanner& GetGlobalInjectionScanner() {
+    if (!g_injectionScanner) {
+        g_injectionScanner = std::make_unique<GarudaHS::InjectionScanner>();
+    }
+    return *g_injectionScanner;
 }
 
 // Struct definition sudah ada di header file, tidak perlu duplikasi
@@ -264,9 +289,9 @@ extern "C" {
             config.scanInterval = 3000;
             config.autoTerminate = TRUE;
             config.enableLogging = TRUE;
-            strcpy_s(config.configPath, "garudahs_config.ini");
+            strcpy_s(config.configPath, sizeof(config.configPath), "garudahs_config.ini");
             config.enablePerformanceMonitoring = TRUE;
-            strcpy_s(config.logFilePath, "garudahs.log");
+            strcpy_s(config.logFilePath, sizeof(config.logFilePath), "garudahs.log");
 
             config.enableStealthMode = TRUE;
             config.enableRandomization = TRUE;
@@ -360,6 +385,157 @@ extern "C" {
     __declspec(dllexport) const char* GarudaHS_GetLastError() {
         // TODO: Implement global error tracking
         return "No error";
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    //                    INJECTION SCANNER EXPORTS
+    // ═══════════════════════════════════════════════════════════
+
+    __declspec(dllexport) BOOL GarudaHS_InitializeInjectionScanner() {
+        try {
+            auto& scanner = GetGlobalInjectionScanner();
+            // Initialize with default logger and config
+            // In a real implementation, you would pass proper instances
+            return TRUE;
+        } catch (...) {
+            return FALSE;
+        }
+    }
+
+    __declspec(dllexport) BOOL GarudaHS_StartInjectionScanner() {
+        try {
+            auto& scanner = GetGlobalInjectionScanner();
+            return scanner.Start() ? TRUE : FALSE;
+        } catch (...) {
+            return FALSE;
+        }
+    }
+
+    __declspec(dllexport) BOOL GarudaHS_StopInjectionScanner() {
+        try {
+            auto& scanner = GetGlobalInjectionScanner();
+            return scanner.Stop() ? TRUE : FALSE;
+        } catch (...) {
+            return FALSE;
+        }
+    }
+
+    __declspec(dllexport) BOOL GarudaHS_ScanProcessForInjection(DWORD processId, GarudaHSInjectionResult* result) {
+        if (!result) return FALSE;
+
+        try {
+            auto& scanner = GetGlobalInjectionScanner();
+            auto scanResult = scanner.ScanProcess(processId);
+
+            // Convert to export structure
+            result->timestamp = scanResult.detectionTime;
+            result->injectionType = static_cast<DWORD>(scanResult.injectionType);
+            result->processId = scanResult.processId;
+            result->confidence = scanResult.confidence;
+            result->isWhitelisted = scanResult.isWhitelisted ? TRUE : FALSE;
+
+            strncpy_s(result->processName, sizeof(result->processName),
+                     scanResult.processName.c_str(), _TRUNCATE);
+            strncpy_s(result->modulePath, sizeof(result->modulePath),
+                     scanResult.modulePath.c_str(), _TRUNCATE);
+            strncpy_s(result->injectedDllName, sizeof(result->injectedDllName),
+                     scanResult.injectedDllName.c_str(), _TRUNCATE);
+            strncpy_s(result->reason, sizeof(result->reason),
+                     scanResult.reason.c_str(), _TRUNCATE);
+
+            return scanResult.isDetected ? TRUE : FALSE;
+        } catch (...) {
+            return FALSE;
+        }
+    }
+
+    __declspec(dllexport) BOOL GarudaHS_IsProcessInjected(DWORD processId) {
+        try {
+            auto& scanner = GetGlobalInjectionScanner();
+            return scanner.IsProcessInjected(processId) ? TRUE : FALSE;
+        } catch (...) {
+            return FALSE;
+        }
+    }
+
+    __declspec(dllexport) DWORD GarudaHS_GetInjectionScanCount() {
+        try {
+            auto& scanner = GetGlobalInjectionScanner();
+            return scanner.GetTotalScans();
+        } catch (...) {
+            return 0;
+        }
+    }
+
+    __declspec(dllexport) DWORD GarudaHS_GetInjectionDetectionCount() {
+        try {
+            auto& scanner = GetGlobalInjectionScanner();
+            return scanner.GetDetectionCount();
+        } catch (...) {
+            return 0;
+        }
+    }
+
+    __declspec(dllexport) BOOL GarudaHS_AddInjectionProcessWhitelist(const char* processName) {
+        if (!processName) return FALSE;
+
+        try {
+            auto& scanner = GetGlobalInjectionScanner();
+            return scanner.AddToWhitelist(std::string(processName)) ? TRUE : FALSE;
+        } catch (...) {
+            return FALSE;
+        }
+    }
+
+    __declspec(dllexport) BOOL GarudaHS_RemoveInjectionProcessWhitelist(const char* processName) {
+        if (!processName) return FALSE;
+
+        try {
+            auto& scanner = GetGlobalInjectionScanner();
+            return scanner.RemoveFromWhitelist(std::string(processName)) ? TRUE : FALSE;
+        } catch (...) {
+            return FALSE;
+        }
+    }
+
+    __declspec(dllexport) BOOL GarudaHS_AddInjectionModuleWhitelist(const char* moduleName) {
+        if (!moduleName) return FALSE;
+
+        try {
+            auto& scanner = GetGlobalInjectionScanner();
+            return scanner.AddModuleToWhitelist(std::string(moduleName)) ? TRUE : FALSE;
+        } catch (...) {
+            return FALSE;
+        }
+    }
+
+    __declspec(dllexport) BOOL GarudaHS_IsInjectionScannerEnabled() {
+        try {
+            auto& scanner = GetGlobalInjectionScanner();
+            return scanner.IsEnabled() ? TRUE : FALSE;
+        } catch (...) {
+            return FALSE;
+        }
+    }
+
+    __declspec(dllexport) BOOL GarudaHS_SetInjectionScannerEnabled(BOOL enabled) {
+        try {
+            auto& scanner = GetGlobalInjectionScanner();
+            scanner.SetEnabled(enabled == TRUE);
+            return TRUE;
+        } catch (...) {
+            return FALSE;
+        }
+    }
+
+    __declspec(dllexport) const char* GarudaHS_GetInjectionScannerStatus() {
+        try {
+            auto& scanner = GetGlobalInjectionScanner();
+            static std::string status = scanner.GetStatusReport();
+            return status.c_str();
+        } catch (...) {
+            return "Error getting status";
+        }
     }
 
 }

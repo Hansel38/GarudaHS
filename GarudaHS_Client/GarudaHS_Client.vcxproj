@@ -150,14 +150,18 @@
     <ClInclude Include="include\AntiSuspendDetectionLayer.h" />
     <ClInclude Include="include\AntiSuspendThreads.h" />
     <ClInclude Include="include\Configuration.h" />
+    <ClInclude Include="include\Constants.h" />
     <ClInclude Include="include\DetectionEngine.h" />
     <ClInclude Include="include\GarudaHSSimpleAPI.h" />
     <ClInclude Include="include\GarudaHS_UnifiedAPI.h" />
+    <ClInclude Include="include\InjectionDetectionLayer.h" />
+    <ClInclude Include="include\InjectionScanner.h" />
     <ClInclude Include="include\Logger.h" />
     <ClInclude Include="include\OverlayDetectionLayer.h" />
     <ClInclude Include="include\OverlayScanner.h" />
     <ClInclude Include="include\PerformanceMonitor.h" />
     <ClInclude Include="include\ProcessWatcher.h" />
+    <ClInclude Include="include\ThreadSafetyUtils.h" />
     <ClInclude Include="include\WindowDetector.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
@@ -175,6 +179,8 @@
     <ClCompile Include="src\Configuration.cpp" />
     <ClCompile Include="src\DetectionEngine.cpp" />
     <ClCompile Include="src\Exports.cpp" />
+    <ClCompile Include="src\InjectionDetectionLayer.cpp" />
+    <ClCompile Include="src\InjectionScanner.cpp" />
     <ClCompile Include="src\Logger.cpp" />
     <ClCompile Include="src\OverlayDetectionLayer.cpp" />
     <ClCompile Include="src\OverlayScanner.cpp" />

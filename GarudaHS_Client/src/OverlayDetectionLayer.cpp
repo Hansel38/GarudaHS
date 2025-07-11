@@ -1,15 +1,16 @@
 #include "../pch.h"
 #define NOMINMAX
 #include <Windows.h>
-#include "../include/OverlayDetectionLayer.h"
 #include "../include/OverlayScanner.h"
+#include "../include/LayeredDetection.h"
+#include "../include/OverlayDetectionLayer.h"
 #include "../include/Logger.h"
 #include "../include/Configuration.h"
 
 namespace GarudaHS {
 
     // OverlayDetectionLayer Implementation
-    OverlayDetectionLayer::OverlayDetectionLayer() 
+    OverlayDetectionLayer::OverlayDetectionLayer()
         : m_enabled(true)
         , m_weight(0.75f)
         , m_scanner(std::make_unique<OverlayScanner>())
@@ -93,8 +94,11 @@ namespace GarudaHS {
         signal.confidence = result.confidence;
         signal.timestamp = result.timestamp;
         signal.details = result.details;
+        signal.description = "Overlay detection: " + result.details;
         signal.persistent = false; // Overlay detections are typically not persistent
         signal.processId = result.processId;
+        signal.threadId = 0; // Not applicable for overlay detection
+        signal.severity = ThreatSeverity::MEDIUM;
         
         return signal;
     }
