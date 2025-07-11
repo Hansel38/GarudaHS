@@ -7,6 +7,9 @@
 
 #pragma once
 
+#ifndef GARUDAHS_STATICCORE_H
+#define GARUDAHS_STATICCORE_H
+
 #include <Windows.h>
 #include <string>
 #include <vector>
@@ -18,6 +21,7 @@
 #define SECURE_CALL(func) SecureWrapper([&]() { return func; })
 #define VALIDATE_INPUT(input) if (!ValidateInput(input)) return false
 #define RUNTIME_CHECK() if (!RuntimeIntegrityCheck()) return false
+#define RUNTIME_CHECK_VOID() if (!RuntimeIntegrityCheck()) return
 
 // Forward declarations
 namespace GarudaHS {
@@ -57,12 +61,13 @@ typedef struct _SECURE_GARUDAHS_CONFIG {
     DWORD magic;                    // Magic number
     DWORD structSize;               // Size validation
     DWORD checksum;                 // Data integrity
+    DWORD apiVersion;               // API version
     BOOL enableRealTimeProtection;  // Real-time protection
     DWORD scanInterval;             // Scan interval in ms
     BOOL enableLogging;             // Logging enabled
     BOOL stealthMode;               // Stealth operation
     BYTE encryptedSettings[128];    // Encrypted additional settings
-    BYTE reserved[32];              // Reserved
+    BYTE reserved[28];              // Reserved (reduced by 4 bytes for apiVersion)
 } SecureGarudaHSConfig;
 
 // ═══════════════════════════════════════════════════════════
@@ -119,6 +124,8 @@ public:
     static const char* GetVersion();
     static DWORD GetLastError();
     static bool IsSystemSecure();
+
+
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -130,18 +137,21 @@ namespace SecurityUtils {
     bool ValidatePointer(const void* ptr);
     bool ValidateString(const char* str, size_t maxLen = 256);
     bool ValidateStructure(const void* data, size_t expectedSize, DWORD expectedMagic);
-    
+
     // Code obfuscation helpers
     void ObfuscateMemory(void* data, size_t size);
     std::string EncryptString(const std::string& input);
     std::string DecryptString(const std::string& encrypted);
-    
+
     // Runtime protection
     bool DetectDebugger();
     bool DetectVirtualMachine();
     bool CheckCodeIntegrity();
     void AntiTamperingCheck();
-    
+
+    // Checksum calculation
+    DWORD CalculateChecksum(const void* data, size_t size);
+
     // Error handling
     void SecureZeroMemory(void* ptr, size_t size);
     void LogSecurityEvent(const std::string& event);
@@ -205,3 +215,15 @@ namespace SecurityConstants {
     constexpr DWORD CHECKSUM_SEED = 0x12345678;
     constexpr int OBFUSCATION_KEY = 0xDEADBEEF;
 }
+
+// ═══════════════════════════════════════════════════════════
+//                    SECURITY INITIALIZER
+// ═══════════════════════════════════════════════════════════
+
+namespace SecurityInitializer {
+    // DLL lifecycle functions (called from main DllMain)
+    bool InitializeSecurityOnLoad();
+    void CleanupSecurityOnUnload();
+}
+
+#endif // GARUDAHS_STATICCORE_H

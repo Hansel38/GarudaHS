@@ -895,11 +895,11 @@ namespace GarudaHS {
 
     void MemorySignatureScanner::LoadDefaultConfiguration() {
         m_config.enableRealTimeScanning = true;
-        m_config.enableDeepScan = false;
+        m_config.enableDeepScan = true;
         m_config.enableHeuristicAnalysis = true;
-        m_config.enableEntropyAnalysis = false;
+        m_config.enableEntropyAnalysis = true;
         m_config.enableCrossReferenceCheck = true;
-        m_config.enableSignatureUpdates = false;
+        m_config.enableSignatureUpdates = true;
         m_config.enableWhitelistProtection = true;
         m_config.enableFalsePositiveReduction = true;
 
@@ -910,7 +910,7 @@ namespace GarudaHS {
         m_config.maxRegionSize = 10 * 1024 * 1024; // 10 MB
         m_config.minRegionSize = 1024; // 1 KB
 
-        m_config.confidenceThreshold = 0.7f; // 70%
+        m_config.confidenceThreshold = 0.8f; // 80% - increased for better false positive prevention
         m_config.maxDetectionHistory = 1000;
         m_config.falsePositiveThreshold = 5;
 

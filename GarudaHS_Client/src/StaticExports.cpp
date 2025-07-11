@@ -89,24 +89,24 @@ __declspec(dllexport) BOOL GHS_PerformScan() {
     // Perform comprehensive scan
     bool scanResult = false;
     
-    __try {
+    try {
         // Start protection if not running
         if (!GarudaHSStaticCore::Start()) {
             SecurityUtils::LogSecurityEvent("Failed to start protection modules");
             return FALSE;
         }
-        
+
         // Execute scan
         scanResult = GarudaHSStaticCore::PerformSecurityScan();
-        
+
         // Validate system integrity after scan
         if (!GarudaHSStaticCore::ValidateSystemIntegrity()) {
             SecurityUtils::HandleSecurityViolation("System integrity compromised during scan");
             return FALSE;
         }
-        
+
     }
-    __except(EXCEPTION_EXECUTE_HANDLER) {
+    catch (...) {
         SecurityUtils::HandleSecurityViolation("Exception during security scan");
         return FALSE;
     }
@@ -139,10 +139,10 @@ __declspec(dllexport) BOOL GHS_GetStatus(SecureGarudaHSStatus* status) {
         return FALSE;
     }
     
-    __try {
+    try {
         // Clear structure first
         SecurityUtils::SecureZeroMemory(status, sizeof(SecureGarudaHSStatus));
-        
+
         // Fill status structure
         status->magic = SecurityConstants::MAGIC_NUMBER;
         status->structSize = sizeof(SecureGarudaHSStatus);
@@ -151,16 +151,16 @@ __declspec(dllexport) BOOL GHS_GetStatus(SecureGarudaHSStatus* status) {
         status->threatsDetected = 0; // TODO: Get actual threat count
         status->lastScanTime = GetTickCount();
         status->systemHealth = 1.0f; // TODO: Calculate actual health
-        
-        // Calculate checksum
+
+        // Calculate checksum using SecurityUtils
         status->checksum = 0; // Reset checksum field
-        status->checksum = GarudaHSStaticCore::CalculateChecksum(status, sizeof(SecureGarudaHSStatus));
-        
+        status->checksum = SecurityUtils::CalculateChecksum(status, sizeof(SecureGarudaHSStatus));
+
         // Obfuscate sensitive data
         SecurityUtils::ObfuscateMemory(status->reserved, sizeof(status->reserved));
-        
+
     }
-    __except(EXCEPTION_EXECUTE_HANDLER) {
+    catch (...) {
         SecurityUtils::HandleSecurityViolation("Exception during status retrieval");
         return FALSE;
     }
@@ -211,39 +211,7 @@ __declspec(dllexport) const char* GHS_GetVersion() {
 //                    ADDITIONAL SECURITY FUNCTIONS
 // ═══════════════════════════════════════════════════════════
 
-// DLL entry point with security checks
-BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
-    switch (ul_reason_for_call) {
-    case DLL_PROCESS_ATTACH:
-        {
-            // Disable thread library calls for security
-            DisableThreadLibraryCalls(hModule);
-            
-            // Initial security checks
-            if (SecurityUtils::DetectDebugger()) {
-                SecurityUtils::HandleSecurityViolation("Debugger detected at DLL load");
-                return FALSE;
-            }
-            
-            // VM detection (log but don't fail)
-            if (SecurityUtils::DetectVirtualMachine()) {
-                SecurityUtils::LogSecurityEvent("Virtual machine detected");
-            }
-            
-            // Anti-tampering check
-            SecurityUtils::AntiTamperingCheck();
-            
-            break;
-        }
-    case DLL_PROCESS_DETACH:
-        {
-            // Secure cleanup
-            GarudaHSStaticCore::Shutdown();
-            break;
-        }
-    }
-    return TRUE;
-}
+// Note: SecurityInitializer functions are implemented in GarudaHS_StaticCore.cpp
 
 // ═══════════════════════════════════════════════════════════
 //                    COMPILE-TIME SECURITY VALIDATION

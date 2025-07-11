@@ -1065,8 +1065,8 @@ namespace GarudaHS {
             }
         }
 
-        // Check confidence threshold
-        if (result.confidence < 0.5f) {
+        // Check confidence threshold (increased for better false positive prevention)
+        if (result.confidence < 0.75f) {
             return true;
         }
 

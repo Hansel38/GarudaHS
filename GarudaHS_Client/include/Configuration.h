@@ -45,6 +45,64 @@ namespace GarudaHS {
         float m_threadSuspensionConfidence;
         std::vector<std::string> m_antiSuspendWhitelistedProcesses;
 
+        // Anti-Debug configuration
+        bool m_enableBasicAPIDetection;
+        bool m_enableNtQueryDetection;
+        bool m_enablePEBFlagsDetection;
+        bool m_enableHardwareBreakpointsDetection;
+        bool m_enableTimingAttacksDetection;
+        bool m_enableExceptionHandlingDetection;
+        bool m_enableMemoryProtectionDetection;
+        bool m_enableThreadContextDetection;
+        bool m_enableHeapFlagsDetection;
+        bool m_enableSystemCallsDetection;
+
+        // Anti-Debug confidence scores
+        float m_basicAPIConfidence;
+        float m_ntQueryConfidence;
+        float m_pebFlagsConfidence;
+        float m_hardwareBreakpointsConfidence;
+        float m_timingAttacksConfidence;
+        float m_exceptionHandlingConfidence;
+        float m_memoryProtectionConfidence;
+        float m_threadContextConfidence;
+        float m_heapFlagsConfidence;
+        float m_systemCallsConfidence;
+
+        // Anti-Debug timing configuration
+        DWORD m_timingThresholdMs;
+        DWORD m_maxTimingVariance;
+        DWORD m_timingBaselineSamples;
+        DWORD m_detectionWindowMs;
+        DWORD m_antiDebugScanIntervalMs;
+        DWORD m_continuousMonitoringInterval;
+        DWORD m_errorRecoverySleepMs;
+        DWORD m_threadWaitTimeoutMs;
+
+        // Anti-Debug memory addresses
+        DWORD m_pebOffsetX64;
+        DWORD m_pebOffsetX86;
+
+        // Anti-Debug magic numbers
+        DWORD m_ntGlobalFlagMask;
+        DWORD m_dr7RegisterMask;
+        DWORD m_heapDebugFlags1;
+        DWORD m_heapDebugFlags2;
+        DWORD m_heapForceFlags;
+
+        // Anti-Debug false positive prevention
+        bool m_enableContextualAnalysis;
+        bool m_enableBehaviorBaseline;
+        DWORD m_minimumDetectionCount;
+        DWORD m_falsePositiveThreshold;
+        float m_confidenceThreshold;
+
+        // Anti-Debug advanced options
+        bool m_enableStealthMode;
+        bool m_enableRandomization;
+        bool m_enableMultiThreading;
+        DWORD m_maxDetectionHistory;
+
         // Injection Scanner configuration
         bool m_enableInjectionScanner;
         bool m_enableSetWindowsHookDetection;
@@ -191,6 +249,113 @@ namespace GarudaHS {
 
         std::vector<std::string> GetAntiSuspendWhitelistedProcesses() const;
         void SetAntiSuspendWhitelistedProcesses(const std::vector<std::string>& processes);
+
+        // Anti-Debug configuration getters/setters
+        bool IsBasicAPIDetectionEnabled() const;
+        void SetBasicAPIDetectionEnabled(bool enabled);
+
+        bool IsNtQueryDetectionEnabled() const;
+        void SetNtQueryDetectionEnabled(bool enabled);
+
+        bool IsPEBFlagsDetectionEnabled() const;
+        void SetPEBFlagsDetectionEnabled(bool enabled);
+
+        bool IsHardwareBreakpointsDetectionEnabled() const;
+        void SetHardwareBreakpointsDetectionEnabled(bool enabled);
+
+        bool IsTimingAttacksDetectionEnabled() const;
+        void SetTimingAttacksDetectionEnabled(bool enabled);
+
+        bool IsExceptionHandlingDetectionEnabled() const;
+        void SetExceptionHandlingDetectionEnabled(bool enabled);
+
+        bool IsMemoryProtectionDetectionEnabled() const;
+        void SetMemoryProtectionDetectionEnabled(bool enabled);
+
+        bool IsThreadContextDetectionEnabled() const;
+        void SetThreadContextDetectionEnabled(bool enabled);
+
+        bool IsHeapFlagsDetectionEnabled() const;
+        void SetHeapFlagsDetectionEnabled(bool enabled);
+
+        bool IsSystemCallsDetectionEnabled() const;
+        void SetSystemCallsDetectionEnabled(bool enabled);
+
+        // Anti-Debug confidence getters/setters
+        float GetBasicAPIConfidence() const;
+        void SetBasicAPIConfidence(float confidence);
+
+        float GetNtQueryConfidence() const;
+        void SetNtQueryConfidence(float confidence);
+
+        float GetPEBFlagsConfidence() const;
+        void SetPEBFlagsConfidence(float confidence);
+
+        float GetHardwareBreakpointsConfidence() const;
+        void SetHardwareBreakpointsConfidence(float confidence);
+
+        float GetTimingAttacksConfidence() const;
+        void SetTimingAttacksConfidence(float confidence);
+
+        float GetExceptionHandlingConfidence() const;
+        void SetExceptionHandlingConfidence(float confidence);
+
+        float GetMemoryProtectionConfidence() const;
+        void SetMemoryProtectionConfidence(float confidence);
+
+        float GetThreadContextConfidence() const;
+        void SetThreadContextConfidence(float confidence);
+
+        float GetHeapFlagsConfidence() const;
+        void SetHeapFlagsConfidence(float confidence);
+
+        float GetSystemCallsConfidence() const;
+        void SetSystemCallsConfidence(float confidence);
+
+        // Anti-Debug timing getters/setters
+        DWORD GetTimingThresholdMs() const;
+        void SetTimingThresholdMs(DWORD threshold);
+
+        DWORD GetMaxTimingVariance() const;
+        void SetMaxTimingVariance(DWORD variance);
+
+        DWORD GetDetectionWindowMs() const;
+        void SetDetectionWindowMs(DWORD window);
+
+        DWORD GetAntiDebugScanIntervalMs() const;
+        void SetAntiDebugScanIntervalMs(DWORD interval);
+
+        // Anti-Debug magic numbers getters/setters
+        DWORD GetPebOffsetX64() const;
+        void SetPebOffsetX64(DWORD offset);
+
+        DWORD GetPebOffsetX86() const;
+        void SetPebOffsetX86(DWORD offset);
+
+        DWORD GetNtGlobalFlagMask() const;
+        void SetNtGlobalFlagMask(DWORD mask);
+
+        DWORD GetDr7RegisterMask() const;
+        void SetDr7RegisterMask(DWORD mask);
+
+        DWORD GetHeapDebugFlags1() const;
+        void SetHeapDebugFlags1(DWORD flags);
+
+        DWORD GetHeapDebugFlags2() const;
+        void SetHeapDebugFlags2(DWORD flags);
+
+        DWORD GetHeapForceFlags() const;
+        void SetHeapForceFlags(DWORD flags);
+
+        // Anti-Debug false positive prevention
+        bool IsContextualAnalysisEnabled() const;
+        void SetContextualAnalysisEnabled(bool enabled);
+
+        DWORD GetMinimumDetectionCount() const;
+        void SetMinimumDetectionCount(DWORD count);
+
+        float GetConfidenceThreshold() const;
+        void SetConfidenceThreshold(float threshold);
 
         // Injection Scanner configuration
         bool IsInjectionScannerEnabled() const;

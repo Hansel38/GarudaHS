@@ -30,26 +30,26 @@ bool SecurityUtils::ValidatePointer(const void* ptr) {
 
 bool SecurityUtils::ValidateString(const char* str, size_t maxLen) {
     if (!ValidatePointer(str)) return false;
-    
-    __try {
+
+    try {
         size_t len = strnlen_s(str, maxLen);
         return len < maxLen;
     }
-    __except(EXCEPTION_EXECUTE_HANDLER) {
+    catch (...) {
         return false;
     }
 }
 
 bool SecurityUtils::ValidateStructure(const void* data, size_t expectedSize, DWORD expectedMagic) {
     if (!ValidatePointer(data)) return false;
-    
-    __try {
+
+    try {
         const DWORD* magic = static_cast<const DWORD*>(data);
         const DWORD* size = reinterpret_cast<const DWORD*>(static_cast<const BYTE*>(data) + sizeof(DWORD));
-        
+
         return (*magic == expectedMagic) && (*size == expectedSize);
     }
-    __except(EXCEPTION_EXECUTE_HANDLER) {
+    catch (...) {
         return false;
     }
 }
@@ -99,13 +99,17 @@ bool SecurityUtils::DetectDebugger() {
     }
     
     // 2. PEB BeingDebugged flag
-    __try {
+    try {
+#ifdef _WIN64
         PPEB peb = reinterpret_cast<PPEB>(__readgsqword(0x60));
+#else
+        PPEB peb = reinterpret_cast<PPEB>(__readfsdword(0x30));
+#endif
         if (peb && peb->BeingDebugged) {
             return true;
         }
     }
-    __except(EXCEPTION_EXECUTE_HANDLER) {
+    catch (...) {
         // Exception might indicate debugging
         return true;
     }
@@ -221,12 +225,12 @@ bool SecurityUtils::CheckCodeIntegrity() {
     DWORD checksum = 0;
     BYTE* codeBase = static_cast<BYTE*>(modInfo.lpBaseOfDll);
     
-    __try {
+    try {
         for (size_t i = 0; i < modInfo.SizeOfImage; i += 4) {
             checksum ^= *reinterpret_cast<DWORD*>(codeBase + i);
         }
     }
-    __except(EXCEPTION_EXECUTE_HANDLER) {
+    catch (...) {
         return false;
     }
     
@@ -285,7 +289,7 @@ void SecurityUtils::LogSecurityEvent(const std::string& event) {
 void SecurityUtils::HandleSecurityViolation(const std::string& violation) {
     // Handle security violation
     LogSecurityEvent("VIOLATION: " + violation);
-    
+
     // In production, this might terminate the process or take other protective action
     #ifdef _DEBUG
     OutputDebugStringA(("[SECURITY VIOLATION] " + violation).c_str());
@@ -293,4 +297,22 @@ void SecurityUtils::HandleSecurityViolation(const std::string& violation) {
     // In release mode, silently handle or terminate
     ExitProcess(0xDEAD);
     #endif
+}
+
+// ═══════════════════════════════════════════════════════════
+//                    CHECKSUM CALCULATION
+// ═══════════════════════════════════════════════════════════
+
+DWORD SecurityUtils::CalculateChecksum(const void* data, size_t size) {
+    if (!data || size == 0) return 0;
+
+    DWORD checksum = SecurityConstants::CHECKSUM_SEED;
+    const BYTE* bytes = static_cast<const BYTE*>(data);
+
+    for (size_t i = 0; i < size; ++i) {
+        checksum = (checksum << 1) ^ bytes[i];
+        checksum ^= (checksum >> 16);
+    }
+
+    return checksum;
 }

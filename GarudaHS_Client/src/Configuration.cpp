@@ -41,14 +41,14 @@ namespace GarudaHS {
         , m_enableAutoResume(true)
         , m_antiSuspendScanInterval(3000)
         , m_maxSuspendCount(3)
-        , m_threadSuspensionConfidence(0.9f)
+        , m_threadSuspensionConfidence(0.85f)
         , m_enableMemorySignatureScanner(true)
         , m_enableMemoryRealTimeScanning(true)
-        , m_enableMemoryDeepScan(false)
+        , m_enableMemoryDeepScan(true)
         , m_enableMemoryHeuristicAnalysis(true)
-        , m_enableMemoryEntropyAnalysis(false)
+        , m_enableMemoryEntropyAnalysis(true)
         , m_enableMemoryCrossReferenceCheck(true)
-        , m_enableMemorySignatureUpdates(false)
+        , m_enableMemorySignatureUpdates(true)
         , m_enableMemoryWhitelistProtection(true)
         , m_enableMemoryFalsePositiveReduction(true)
         , m_memoryScanInterval(5000)
@@ -57,7 +57,7 @@ namespace GarudaHS {
         , m_maxMemoryRegionsPerProcess(100)
         , m_maxMemoryRegionSize(10 * 1024 * 1024)  // 10 MB
         , m_minMemoryRegionSize(1024)              // 1 KB
-        , m_memoryConfidenceThreshold(0.7f)
+        , m_memoryConfidenceThreshold(0.8f)
         , m_maxMemoryDetectionHistory(1000)
         , m_memoryFalsePositiveThreshold(5)
     {
@@ -304,7 +304,7 @@ namespace GarudaHS {
         m_enableAutoResume = true;
         m_antiSuspendScanInterval = 3000;
         m_maxSuspendCount = 3;
-        m_threadSuspensionConfidence = 0.9f;
+        m_threadSuspensionConfidence = 0.85f;
 
         m_antiSuspendWhitelistedProcesses = {
             "explorer.exe",
@@ -350,7 +350,7 @@ namespace GarudaHS {
         m_enableInjectionBehaviorAnalysis = false;
         m_maxProcessesToScanForInjection = 100;
         m_injectionScanTimeout = 30000; // 30 seconds
-        m_injectionConfidenceThreshold = 0.7f;
+        m_injectionConfidenceThreshold = 0.8f;
 
         // Injection Scanner whitelist
         m_injectionWhitelistedProcesses = {
@@ -381,11 +381,11 @@ namespace GarudaHS {
         // Memory Signature Scanner defaults
         m_enableMemorySignatureScanner = true;
         m_enableMemoryRealTimeScanning = true;
-        m_enableMemoryDeepScan = false;
+        m_enableMemoryDeepScan = true;
         m_enableMemoryHeuristicAnalysis = true;
-        m_enableMemoryEntropyAnalysis = false;
+        m_enableMemoryEntropyAnalysis = true;
         m_enableMemoryCrossReferenceCheck = true;
-        m_enableMemorySignatureUpdates = false;
+        m_enableMemorySignatureUpdates = true;
         m_enableMemoryWhitelistProtection = true;
         m_enableMemoryFalsePositiveReduction = true;
         m_memoryScanInterval = 5000;
@@ -394,7 +394,7 @@ namespace GarudaHS {
         m_maxMemoryRegionsPerProcess = 100;
         m_maxMemoryRegionSize = 10 * 1024 * 1024; // 10 MB
         m_minMemoryRegionSize = 1024; // 1 KB
-        m_memoryConfidenceThreshold = 0.7f;
+        m_memoryConfidenceThreshold = 0.8f;
         m_maxMemoryDetectionHistory = 1000;
         m_memoryFalsePositiveThreshold = 5;
 

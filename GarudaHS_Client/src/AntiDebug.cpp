@@ -527,11 +527,35 @@ namespace GarudaHS {
         bool detected = false;
 
         try {
+            // Create stop event for safe thread termination
+            HANDLE hStopEvent = CreateEvent(nullptr, TRUE, FALSE, nullptr);
+            if (!hStopEvent) {
+                return false;
+            }
+
+            // Thread data structure for safe communication
+            struct ThreadData {
+                HANDLE stopEvent;
+                volatile bool completed;
+                ThreadData(HANDLE event) : stopEvent(event), completed(false) {}
+            };
+
+            ThreadData threadData(hStopEvent);
+
             // Create a simple thread to test context manipulation
-            HANDLE hThread = CreateThread(nullptr, 0, [](LPVOID) -> DWORD {
-                Sleep(100);
+            HANDLE hThread = CreateThread(nullptr, 0, [](LPVOID param) -> DWORD {
+                ThreadData* data = static_cast<ThreadData*>(param);
+
+                // Wait for either stop signal or normal completion
+                DWORD waitResult = WaitForSingleObject(data->stopEvent, 100);
+
+                if (waitResult == WAIT_TIMEOUT) {
+                    // Normal completion
+                    data->completed = true;
+                }
+
                 return 0;
-            }, nullptr, CREATE_SUSPENDED, nullptr);
+            }, &threadData, CREATE_SUSPENDED, nullptr);
 
             if (hThread) {
                 CONTEXT context = {};
@@ -544,7 +568,9 @@ namespace GarudaHS {
                     // Resume and wait for thread to complete
                     ResumeThread(hThread);
 
-                    if (WaitForSingleObject(hThread, m_antiDebugConfig.threadWaitTimeoutMs) == WAIT_TIMEOUT) {
+                    DWORD waitResult = WaitForSingleObject(hThread, m_antiDebugConfig.threadWaitTimeoutMs);
+
+                    if (waitResult == WAIT_TIMEOUT) {
                         // Thread didn't complete in time - might indicate debugging
                         GarudaHS::DebugDetectionResult result = {};
                         result.detected = true;
@@ -558,12 +584,22 @@ namespace GarudaHS {
                         AddDetectionResult(result);
                         detected = true;
 
-                        // Force terminate the thread
-                        TerminateThread(hThread, 0);
+                        // Safe thread termination using event signaling
+                        SetEvent(hStopEvent);
+
+                        // Give thread a chance to exit gracefully
+                        if (WaitForSingleObject(hThread, 1000) == WAIT_TIMEOUT) {
+                            // Log warning but don't force terminate
+                            if (m_logger) {
+                                m_logger->Warning("AntiDebug: Thread failed to exit gracefully");
+                            }
+                        }
                     }
                 }
                 CloseHandle(hThread);
             }
+
+            CloseHandle(hStopEvent);
         } catch (...) {
             // Handle error silently
         }
@@ -880,8 +916,8 @@ namespace GarudaHS {
         m_antiDebugConfig.ntQueryConfidence = 0.95f;
         m_antiDebugConfig.pebFlagsConfidence = 0.9f;
         m_antiDebugConfig.hardwareBreakpointsConfidence = 0.85f;
-        m_antiDebugConfig.timingAttacksConfidence = 0.7f;
-        m_antiDebugConfig.exceptionHandlingConfidence = 0.75f;
+        m_antiDebugConfig.timingAttacksConfidence = 0.75f;
+        m_antiDebugConfig.exceptionHandlingConfidence = 0.8f;
         m_antiDebugConfig.memoryProtectionConfidence = 0.8f;
         m_antiDebugConfig.threadContextConfidence = 0.85f;
         m_antiDebugConfig.heapFlagsConfidence = 0.9f;
@@ -918,7 +954,7 @@ namespace GarudaHS {
         m_antiDebugConfig.enableAutoResponse = false;
         m_antiDebugConfig.enableLogging = true;
         m_antiDebugConfig.enableCallbacks = true;
-        m_antiDebugConfig.confidenceThreshold = 0.8f;
+        m_antiDebugConfig.confidenceThreshold = 0.85f;
 
         // Whitelist configuration
         m_antiDebugConfig.enableWhitelist = true;
@@ -953,7 +989,7 @@ namespace GarudaHS {
         // Advanced options
         m_antiDebugConfig.enableStealthMode = true;
         m_antiDebugConfig.enableRandomization = true;
-        m_antiDebugConfig.enableMultiThreading = false;
+        m_antiDebugConfig.enableMultiThreading = true;
         m_antiDebugConfig.maxDetectionHistory = 100;
     }
 

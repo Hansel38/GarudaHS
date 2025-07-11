@@ -144,9 +144,9 @@ namespace GarudaHS {
         m_config.enableReflectiveDllDetection = true;
         m_config.enableThreadHijackingDetection = true;
         m_config.enableApcInjectionDetection = true;
-        m_config.enableAtomBombingDetection = false; // Advanced, can be noisy
-        m_config.enableProcessDoppelgangingDetection = false; // Advanced
-        m_config.enableManualSyscallDetection = false; // Advanced
+        m_config.enableAtomBombingDetection = true; // Advanced detection enabled
+        m_config.enableProcessDoppelgangingDetection = true; // Advanced detection enabled
+        m_config.enableManualSyscallDetection = true; // Advanced detection enabled
         m_config.enableModuleStompingDetection = true;
 
         // Confidence scores
@@ -156,17 +156,17 @@ namespace GarudaHS {
         m_config.reflectiveDllConfidence = 0.9f;
         m_config.threadHijackingConfidence = 0.85f;
         m_config.apcInjectionConfidence = 0.8f;
-        m_config.atomBombingConfidence = 0.7f;
+        m_config.atomBombingConfidence = 0.8f;
         m_config.processDoppelgangingConfidence = 0.9f;
         m_config.manualSyscallConfidence = 0.85f;
         m_config.moduleStompingConfidence = 0.9f;
 
         // Scanning configuration
         m_config.scanIntervalMs = 5000; // 5 seconds
-        m_config.enableRealTimeMonitoring = false;
+        m_config.enableRealTimeMonitoring = true;
         m_config.enableDeepScan = true;
         m_config.enableHeuristicAnalysis = true;
-        m_config.enableBehaviorAnalysis = false;
+        m_config.enableBehaviorAnalysis = true;
         m_config.maxProcessesToScan = 100;
         m_config.scanTimeoutMs = 30000; // 30 seconds
 
