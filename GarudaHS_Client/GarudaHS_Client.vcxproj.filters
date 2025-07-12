@@ -13,6 +13,30 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Enhanced Systems">
+      <UniqueIdentifier>{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Enhanced Systems\Headers">
+      <UniqueIdentifier>{B2C3D4E5-F6A7-8901-BCDE-F12345678901}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Enhanced Systems\Source">
+      <UniqueIdentifier>{C3D4E5F6-A7B8-9012-CDEF-123456789012}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Configuration Files">
+      <UniqueIdentifier>{D4E5F6A7-B8C9-0123-DEFA-234567890123}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Documentation">
+      <UniqueIdentifier>{E5F6A7B8-C9D0-1234-EFAB-345678901234}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Examples">
+      <UniqueIdentifier>{F6A7B8C9-D0E1-2345-FABC-456789012345}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripts">
+      <UniqueIdentifier>{A7B8C9D0-E1F2-3456-ABCD-567890123456}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests">
+      <UniqueIdentifier>{B8C9D0E1-F2A3-4567-BCDE-678901234567}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -22,6 +46,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\ProcessWatcher.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SecurityUtils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Configuration.h">
@@ -77,6 +104,24 @@
     </ClInclude>
     <ClInclude Include="include\GarudaHS_StaticCore.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\EnhancedSignatureDetector.h">
+      <Filter>Enhanced Systems\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\HeuristicMemoryScanner.h">
+      <Filter>Enhanced Systems\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ThreadInjectionTracer.h">
+      <Filter>Enhanced Systems\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\EnhancedModuleBlacklist.h">
+      <Filter>Enhanced Systems\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DynamicBehaviorDetector.h">
+      <Filter>Enhanced Systems\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\EnhancedAntiCheatCore.h">
+      <Filter>Enhanced Systems\Headers</Filter>
     </ClInclude>
 
   </ItemGroup>
@@ -141,6 +186,62 @@
     <ClCompile Include="src\StaticExports.cpp">
       <Filter>Resource Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\EnhancedSignatureDetector.cpp">
+      <Filter>Enhanced Systems\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\HeuristicMemoryScanner.cpp">
+      <Filter>Enhanced Systems\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ThreadInjectionTracer.cpp">
+      <Filter>Enhanced Systems\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EnhancedModuleBlacklist.cpp">
+      <Filter>Enhanced Systems\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DynamicBehaviorDetector.cpp">
+      <Filter>Enhanced Systems\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EnhancedAntiCheatCore.cpp">
+      <Filter>Enhanced Systems\Source</Filter>
+    </ClCompile>
 
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="config\enhanced_config.json">
+      <Filter>Configuration Files</Filter>
+    </None>
+    <None Include="detection_rules.json">
+      <Filter>Configuration Files</Filter>
+    </None>
+    <None Include="garudahs_config.ini">
+      <Filter>Configuration Files</Filter>
+    </None>
+    <None Include="memory_scanner_config.ini">
+      <Filter>Configuration Files</Filter>
+    </None>
+    <None Include="memory_signatures.json">
+      <Filter>Configuration Files</Filter>
+    </None>
+    <None Include="messages.json">
+      <Filter>Configuration Files</Filter>
+    </None>
+    <None Include="docs\API_Reference_Enhanced.md">
+      <Filter>Documentation</Filter>
+    </None>
+    <None Include="examples\EnhancedAntiCheatExample.cpp">
+      <Filter>Examples</Filter>
+    </None>
+    <None Include="scripts\build_all_configurations.bat">
+      <Filter>Scripts</Filter>
+    </None>
+    <None Include="tests\test_enhanced_features.cpp">
+      <Filter>Tests</Filter>
+    </None>
+    <None Include="README_Enhanced.md">
+      <Filter>Documentation</Filter>
+    </None>
+    <None Include="CMakeLists.txt">
+      <Filter>Configuration Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

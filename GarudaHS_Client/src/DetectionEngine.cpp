@@ -326,6 +326,46 @@ namespace GarudaHS {
         return result;
     }
 
+    std::vector<DetectionResult> DetectionEngine::ScanAllProcesses() {
+        std::vector<DetectionResult> results;
+
+        // Get snapshot of all processes
+        HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+        if (hSnapshot == INVALID_HANDLE_VALUE) {
+            return results;
+        }
+
+        PROCESSENTRY32 pe32;
+        pe32.dwSize = sizeof(PROCESSENTRY32);
+
+        // Get first process
+        if (!Process32First(hSnapshot, &pe32)) {
+            CloseHandle(hSnapshot);
+            return results;
+        }
+
+        // Scan all processes
+        do {
+            std::string processName = pe32.szExeFile;
+            DWORD processId = pe32.th32ProcessID;
+
+            // Skip system processes
+            if (processId == 0 || processId == 4) {
+                continue;
+            }
+
+            // Scan this process
+            DetectionResult result = ScanProcess(processName, processId);
+            if (result.isDetected) {
+                results.push_back(result);
+            }
+
+        } while (Process32Next(hSnapshot, &pe32));
+
+        CloseHandle(hSnapshot);
+        return results;
+    }
+
     std::string DetectionEngine::GetProcessPath(DWORD processId) const {
         HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, processId);
         if (hProcess == nullptr) return "";

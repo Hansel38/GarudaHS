@@ -14,6 +14,12 @@
 
 namespace GarudaHS {
 
+    // Forward declarations
+    class Logger;
+    class Configuration;
+    class OverlayDetectionLayer;
+    class InjectionDetectionLayer;
+
     // Detection signal types
     enum class SignalType {
         PROCESS_DETECTION = 0,      // Blacklisted process found
@@ -120,6 +126,9 @@ namespace GarudaHS {
         // Lifecycle
         bool Initialize();
         void Shutdown();
+
+        // Initialize detection layers with dependency injection
+        void InitializeDetectionLayers(std::shared_ptr<Logger> logger, std::shared_ptr<Configuration> config);
         
         // Layer management
         bool AddDetectionLayer(std::unique_ptr<IDetectionLayer> layer);

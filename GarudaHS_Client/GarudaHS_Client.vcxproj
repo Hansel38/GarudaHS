@@ -89,7 +89,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalDependencies>d3d9.lib;d3d11.lib;dxgi.lib;opengl32.lib;psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d9.lib;d3d11.lib;dxgi.lib;opengl32.lib;psapi.lib;wintrust.lib;crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>GarudaHS_Client.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
@@ -114,7 +114,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalDependencies>d3d9.lib;d3d11.lib;dxgi.lib;opengl32.lib;psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d9.lib;d3d11.lib;dxgi.lib;opengl32.lib;psapi.lib;wintrust.lib;crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>GarudaHS_Client.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
@@ -137,7 +137,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalDependencies>d3d9.lib;d3d11.lib;dxgi.lib;opengl32.lib;psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d9.lib;d3d11.lib;dxgi.lib;opengl32.lib;psapi.lib;wintrust.lib;crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>GarudaHS_Client.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
@@ -162,7 +162,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalDependencies>d3d9.lib;d3d11.lib;dxgi.lib;opengl32.lib;psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d9.lib;d3d11.lib;dxgi.lib;opengl32.lib;psapi.lib;wintrust.lib;crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>GarudaHS_Client.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
@@ -174,9 +174,13 @@
     <ClInclude Include="include\Configuration.h" />
     <ClInclude Include="include\Constants.h" />
     <ClInclude Include="include\DetectionEngine.h" />
+    <ClInclude Include="include\DynamicBehaviorDetector.h" />
+    <ClInclude Include="include\EnhancedAntiCheatCore.h" />
+    <ClInclude Include="include\EnhancedModuleBlacklist.h" />
+    <ClInclude Include="include\EnhancedSignatureDetector.h" />
     <ClInclude Include="include\GarudaHS_Exports.h" />
-
     <ClInclude Include="include\GarudaHS_StaticCore.h" />
+    <ClInclude Include="include\HeuristicMemoryScanner.h" />
     <ClInclude Include="include\InjectionDetectionLayer.h" />
     <ClInclude Include="include\InjectionScanner.h" />
     <ClInclude Include="include\LayeredDetection.h" />
@@ -186,6 +190,8 @@
     <ClInclude Include="include\OverlayScanner.h" />
     <ClInclude Include="include\PerformanceMonitor.h" />
     <ClInclude Include="include\ProcessWatcher.h" />
+    <ClInclude Include="include\SecurityUtils.h" />
+    <ClInclude Include="include\ThreadInjectionTracer.h" />
     <ClInclude Include="include\ThreadSafetyUtils.h" />
     <ClInclude Include="include\WindowDetector.h" />
     <ClInclude Include="pch.h" />
@@ -203,8 +209,12 @@
     <ClCompile Include="src\AntiSuspendThreads.cpp" />
     <ClCompile Include="src\Configuration.cpp" />
     <ClCompile Include="src\DetectionEngine.cpp" />
-
+    <ClCompile Include="src\DynamicBehaviorDetector.cpp" />
+    <ClCompile Include="src\EnhancedAntiCheatCore.cpp" />
+    <ClCompile Include="src\EnhancedModuleBlacklist.cpp" />
+    <ClCompile Include="src\EnhancedSignatureDetector.cpp" />
     <ClCompile Include="src\GarudaHS_StaticCore.cpp" />
+    <ClCompile Include="src\HeuristicMemoryScanner.cpp" />
     <ClCompile Include="src\LayeredDetection.cpp" />
     <ClCompile Include="src\SecurityUtils.cpp" />
     <ClCompile Include="src\InjectionDetectionLayer.cpp" />
@@ -216,7 +226,22 @@
     <ClCompile Include="src\PerformanceMonitor.cpp" />
     <ClCompile Include="src\ProcessWatcher.cpp" />
     <ClCompile Include="src\StaticExports.cpp" />
+    <ClCompile Include="src\ThreadInjectionTracer.cpp" />
     <ClCompile Include="src\WindowDetector.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="config\enhanced_config.json" />
+    <None Include="detection_rules.json" />
+    <None Include="garudahs_config.ini" />
+    <None Include="memory_scanner_config.ini" />
+    <None Include="memory_signatures.json" />
+    <None Include="messages.json" />
+    <None Include="docs\API_Reference_Enhanced.md" />
+    <None Include="examples\EnhancedAntiCheatExample.cpp" />
+    <None Include="scripts\build_all_configurations.bat" />
+    <None Include="tests\test_enhanced_features.cpp" />
+    <None Include="README_Enhanced.md" />
+    <None Include="CMakeLists.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

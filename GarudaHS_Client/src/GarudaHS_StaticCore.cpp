@@ -219,6 +219,12 @@ bool GarudaHSStaticCore::Initialize() {
             return false;
         }
 
+        // Initialize detection layers with proper dependency injection
+        s_layeredDetection->InitializeDetectionLayers(
+            std::shared_ptr<GarudaHS::Logger>(s_logger.get(), [](GarudaHS::Logger*){}),
+            std::shared_ptr<GarudaHS::Configuration>(s_configuration.get(), [](GarudaHS::Configuration*){})
+        );
+
         // Calculate runtime checksum
         s_runtimeChecksum = CalculateChecksum(&s_initializationKey, sizeof(s_initializationKey));
 
@@ -256,6 +262,7 @@ bool GarudaHSStaticCore::Start() {
         if (s_antiDebug) allStarted &= s_antiDebug->Start();
         if (s_injectionScanner) allStarted &= s_injectionScanner->Start();
         if (s_memoryScanner) allStarted &= s_memoryScanner->Start();
+        // DetectionEngine doesn't have Start method - it's always ready after Initialize
         // WindowDetector doesn't have Start method - it's used for detection only
         if (s_antiSuspendThreads) allStarted &= s_antiSuspendThreads->Start();
         // LayeredDetection doesn't have Start method - it's used for assessment only
@@ -322,6 +329,26 @@ bool GarudaHSStaticCore::PerformSecurityScan() {
         if (s_antiSuspendThreads) {
             auto result = s_antiSuspendThreads->ScanCurrentProcess();
             scanResults &= (result.confidence < 0.5f); // Low confidence = no suspended threads
+        }
+        if (s_layeredDetection) {
+            auto assessment = s_layeredDetection->PerformAssessment();
+            scanResults &= (assessment.overallConfidence < 0.5f); // Low confidence = no threats
+            s_logger->InfoF(OBFUSCATED_STRING("Layered detection assessment: confidence=%.2f, action=%s").c_str(),
+                           assessment.overallConfidence, assessment.actionRequired ? "required" : "none");
+        }
+        if (s_detectionEngine) {
+            // DetectionEngine provides comprehensive threat analysis
+            auto engineResults = s_detectionEngine->ScanAllProcesses();
+            bool hasThreats = false;
+            for (const auto& result : engineResults) {
+                if (result.isDetected) {
+                    hasThreats = true;
+                    break;
+                }
+            }
+            scanResults &= !hasThreats; // No threats detected = good
+            s_logger->InfoF(OBFUSCATED_STRING("Detection engine scan result: %s (%zu processes scanned)").c_str(),
+                           hasThreats ? "threats detected" : "clean", engineResults.size());
         }
 
         s_logger->Info(OBFUSCATED_STRING("Security scan completed"));

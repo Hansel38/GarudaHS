@@ -1,0 +1,290 @@
+{
+  "enhanced_anti_cheat_config": {
+    "version": "3.5+",
+    "description": "GarudaHS Enhanced Anti-Cheat Configuration",
+    
+    "enhanced_systems": {
+      "enhanced_signature_detection": {
+        "enabled": true,
+        "process_name_detection": true,
+        "window_title_detection": true,
+        "export_function_detection": true,
+        "heuristic_behavior": true,
+        "minimum_confidence_threshold": 0.7,
+        "scan_interval_ms": 3000,
+        "max_concurrent_scans": 4,
+        "detection_history_size": 100
+      },
+      
+      "heuristic_memory_scanner": {
+        "enabled": true,
+        "entropy_analysis": true,
+        "pattern_deviation": true,
+        "code_injection_detection": true,
+        "protection_anomaly_detection": true,
+        "hook_detection": true,
+        "shellcode_detection": true,
+        "entropy_threshold": 7.5,
+        "suspicion_threshold": 0.6,
+        "max_scan_time_per_process": 1000,
+        "max_regions_to_scan": 1000,
+        "min_region_size_to_scan": 4096,
+        "enable_deep_scan": true
+      },
+      
+      "thread_injection_tracer": {
+        "enabled": true,
+        "create_remote_thread_detection": true,
+        "nt_create_thread_ex_detection": true,
+        "queue_user_apc_detection": true,
+        "set_windows_hook_detection": true,
+        "manual_dll_mapping_detection": true,
+        "process_hollowing_detection": true,
+        "thread_hijacking_detection": true,
+        "reflective_dll_detection": true,
+        "minimum_confidence_threshold": 0.7,
+        "max_thread_age": 30000,
+        "scan_interval_ms": 3000,
+        "enable_real_time_monitoring": true
+      },
+      
+      "enhanced_module_blacklist": {
+        "enabled": true,
+        "exact_name_matching": true,
+        "partial_name_matching": true,
+        "hash_signature_matching": true,
+        "export_signature_matching": true,
+        "version_info_matching": true,
+        "digital_signature_checking": true,
+        "memory_pattern_matching": true,
+        "hidden_module_detection": true,
+        "hollowed_module_detection": true,
+        "enable_deep_scan": true,
+        "minimum_confidence_threshold": 0.8,
+        "scan_interval_ms": 5000,
+        "calculate_md5": true,
+        "calculate_sha1": false,
+        "calculate_sha256": false
+      },
+      
+      "dynamic_behavior_detector": {
+        "enabled": true,
+        "cross_process_memory_monitoring": true,
+        "memory_protection_monitoring": true,
+        "remote_thread_monitoring": true,
+        "process_enumeration_monitoring": true,
+        "module_enumeration_monitoring": true,
+        "handle_manipulation_monitoring": true,
+        "privilege_escalation_monitoring": true,
+        "api_hooking_monitoring": true,
+        "memory_scanning_monitoring": true,
+        "injection_preparation_monitoring": true,
+        "anti_analysis_monitoring": true,
+        "minimum_suspicion_score": 0.6,
+        "behavior_time_window_ms": 30000,
+        "monitoring_interval_ms": 1000,
+        "enable_real_time_alerts": true,
+        "enable_api_hooking": false
+      }
+    },
+    
+    "legacy_systems": {
+      "process_watcher": {
+        "enabled": true,
+        "compatibility_mode": true
+      },
+      "anti_debug": {
+        "enabled": true,
+        "compatibility_mode": true
+      },
+      "injection_scanner": {
+        "enabled": true,
+        "compatibility_mode": true
+      },
+      "memory_signature_scanner": {
+        "enabled": true,
+        "compatibility_mode": true
+      },
+      "window_detector": {
+        "enabled": true,
+        "compatibility_mode": true
+      },
+      "anti_suspend_threads": {
+        "enabled": true,
+        "compatibility_mode": true
+      },
+      "overlay_scanner": {
+        "enabled": true,
+        "compatibility_mode": true
+      }
+    },
+    
+    "global_settings": {
+      "enable_real_time_monitoring": true,
+      "enable_comprehensive_scanning": true,
+      "scan_interval_ms": 3000,
+      "global_confidence_threshold": 0.7,
+      "max_concurrent_scans": 6,
+      "max_scan_time_per_cycle": 2000,
+      "enable_performance_optimization": true
+    },
+    
+    "response_settings": {
+      "enable_automatic_response": true,
+      "enable_popup_warnings": true,
+      "enable_game_termination": true,
+      "enable_logging": true,
+      "alert_cooldown_ms": 5000
+    },
+    
+    "false_positive_prevention": {
+      "enable_whitelist_protection": true,
+      "enable_contextual_analysis": true,
+      "false_positive_threshold": 0.3,
+      "whitelisted_processes": [
+        "steam.exe",
+        "discord.exe",
+        "obs64.exe",
+        "obs32.exe",
+        "streamlabs obs.exe",
+        "nvidia geforce experience.exe",
+        "msi afterburner.exe",
+        "rivatuner statistics server.exe",
+        "fraps.exe",
+        "bandicam.exe",
+        "teamspeak3.exe",
+        "skype.exe",
+        "chrome.exe",
+        "firefox.exe",
+        "edge.exe",
+        "notepad.exe",
+        "notepad++.exe",
+        "visual studio.exe",
+        "devenv.exe"
+      ],
+      "trusted_process_paths": [
+        "C:\\Program Files\\Steam\\",
+        "C:\\Program Files (x86)\\Steam\\",
+        "C:\\Program Files\\Discord\\",
+        "C:\\Program Files\\NVIDIA Corporation\\",
+        "C:\\Program Files (x86)\\NVIDIA Corporation\\",
+        "C:\\Windows\\System32\\",
+        "C:\\Windows\\SysWOW64\\"
+      ],
+      "trusted_signers": [
+        "Microsoft Corporation",
+        "NVIDIA Corporation",
+        "Steam",
+        "Discord Inc.",
+        "Google LLC",
+        "Mozilla Corporation"
+      ]
+    },
+    
+    "blacklist_signatures": {
+      "cheat_engine": {
+        "process_names": [
+          "cheatengine-x86_64.exe",
+          "cheatengine-i386.exe",
+          "cheatengine.exe",
+          "ceserver.exe"
+        ],
+        "dll_names": [
+          "cheatengine-x86_64.dll",
+          "cheatengine-i386.dll",
+          "speedhack-x86_64.dll",
+          "speedhack-i386.dll",
+          "vehdebug-x86_64.dll",
+          "vehdebug-i386.dll",
+          "vehdebug.dll"
+        ],
+        "driver_names": [
+          "dbk64.sys",
+          "dbk32.sys",
+          "dbvm.sys"
+        ],
+        "window_titles": [
+          "cheat engine",
+          "memory scanner",
+          "process list",
+          "ce tutorial"
+        ],
+        "export_functions": [
+          "speedhack_setspeed",
+          "injectdll",
+          "loaddbk32",
+          "loaddbk64",
+          "veh_debug",
+          "ce_",
+          "cheat_engine"
+        ],
+        "version_strings": [
+          "cheat engine",
+          "dark byte",
+          "eric heijnen"
+        ]
+      },
+      
+      "debuggers": {
+        "process_names": [
+          "ollydbg.exe",
+          "x64dbg.exe",
+          "x32dbg.exe",
+          "windbg.exe",
+          "ida.exe",
+          "ida64.exe",
+          "idaq.exe",
+          "idaq64.exe",
+          "immunitydebugger.exe"
+        ],
+        "window_titles": [
+          "ollydbg",
+          "x64dbg",
+          "x32dbg",
+          "windbg",
+          "ida pro",
+          "immunity debugger"
+        ]
+      },
+      
+      "injectors": {
+        "process_names": [
+          "injector.exe",
+          "dllinjector.exe",
+          "processinjector.exe",
+          "extreme_injector.exe",
+          "xenos_injector.exe",
+          "manual_map_injector.exe"
+        ],
+        "export_functions": [
+          "injectdll",
+          "manualmapinject",
+          "loadlibrarya",
+          "ntcreatethreadex"
+        ]
+      }
+    },
+    
+    "performance_settings": {
+      "cpu_usage_limit_percent": 0.5,
+      "memory_usage_limit_mb": 5,
+      "disk_io_limit_mbps": 1,
+      "scan_speed_processes_per_second": 1000,
+      "memory_analysis_speed_mbps": 100,
+      "thread_analysis_speed_per_second": 500,
+      "module_scanning_speed_per_second": 200
+    },
+    
+    "logging_settings": {
+      "log_level": "INFO",
+      "log_to_file": true,
+      "log_to_console": true,
+      "log_file_path": "logs/garudahs_enhanced.log",
+      "max_log_file_size_mb": 10,
+      "max_log_files": 5,
+      "log_detection_events": true,
+      "log_performance_metrics": true,
+      "log_system_health": true
+    }
+  }
+}

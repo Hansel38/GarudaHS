@@ -11,6 +11,8 @@
 #include "../include/OverlayDetectionLayer.h"
 #include "../include/AntiSuspendDetectionLayer.h"
 #include "../include/InjectionDetectionLayer.h"
+#include "../include/Logger.h"
+#include "../include/Configuration.h"
 
 namespace GarudaHS {
 
@@ -63,6 +65,36 @@ namespace GarudaHS {
         std::lock_guard<std::mutex> lock(m_signalMutex);
         m_layers.clear();
         m_activeSignals.clear();
+    }
+
+    void LayeredDetection::InitializeDetectionLayers(std::shared_ptr<Logger> logger, std::shared_ptr<Configuration> config) {
+        if (!logger || !config) {
+            return;
+        }
+
+        std::lock_guard<std::mutex> lock(m_signalMutex);
+
+        // Initialize detection layers that require dependency injection
+        for (auto& layer : m_layers) {
+            if (!layer) continue;
+
+            // Check if this is an OverlayDetectionLayer
+            if (layer->GetLayerName() == "OverlayDetection") {
+                auto* overlayLayer = dynamic_cast<OverlayDetectionLayer*>(layer.get());
+                if (overlayLayer) {
+                    overlayLayer->Initialize(logger, config);
+                }
+            }
+            // Check if this is an InjectionDetectionLayer
+            else if (layer->GetLayerName() == "InjectionDetection") {
+                auto* injectionLayer = dynamic_cast<InjectionDetectionLayer*>(layer.get());
+                if (injectionLayer) {
+                    injectionLayer->Initialize(logger, config);
+                }
+            }
+            // AntiSuspendDetectionLayer doesn't need explicit initialization with logger/config
+            // as it uses global instances
+        }
     }
 
     void LayeredDetection::LoadDefaultWeights() {
