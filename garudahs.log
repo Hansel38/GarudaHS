@@ -1,0 +1,12 @@
+[2025-07-12 14:41:03.838] [ERROR] Exception during initialization: resource deadlock would occur: resource deadlock would occur
+[2025-07-12 14:41:03.931] [INFO ] ProcessWatcher shutdown
+[2025-07-12 14:48:48.013] [ERROR] Exception during initialization: resource deadlock would occur: resource deadlock would occur
+[2025-07-12 14:48:48.032] [INFO ] ProcessWatcher shutdown
+[2025-07-12 14:49:16.001] [ERROR] Exception during initialization: resource deadlock would occur: resource deadlock would occur
+[2025-07-12 14:49:16.023] [INFO ] ProcessWatcher shutdown
+[2025-07-12 14:51:38.796] [ERROR] Exception during initialization: resource deadlock would occur: resource deadlock would occur
+[2025-07-12 14:51:38.812] [INFO ] ProcessWatcher shutdown
+[2025-07-12 14:52:39.828] [ERROR] Exception during initialization: resource deadlock would occur: resource deadlock would occur
+[2025-07-12 14:52:39.895] [INFO ] ProcessWatcher shutdown
+[2025-07-12 14:53:46.428] [ERROR] Exception during initialization: resource deadlock would occur: resource deadlock would occur
+[2025-07-12 14:53:46.450] [INFO ] ProcessWatcher shutdown

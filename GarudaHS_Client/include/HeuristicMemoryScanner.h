@@ -204,6 +204,7 @@ namespace GarudaHS {
         HANDLE m_monitoringThread;
         std::atomic<bool> m_shouldStop;
         std::atomic<bool> m_isMonitoring;
+        mutable std::mutex m_monitoringMutex;
         
         // Statistics
         std::atomic<DWORD> m_totalScans;

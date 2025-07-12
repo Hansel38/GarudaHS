@@ -103,6 +103,7 @@ namespace GarudaHS {
         // Utility
         void Clear();
         void LoadDefaults();
+        void Shutdown();
         
         // Getters
         std::vector<std::string> GetGameWindowTitles() const;

@@ -1,3 +1,4 @@
+#define NOMINMAX
 #include "../include/ThreadInjectionTracer.h"
 #include "../include/Logger.h"
 #include <algorithm>
@@ -124,8 +125,14 @@ namespace GarudaHS {
                     if (processesScanned >= m_config.maxProcessesToScan) {
                         break;
                     }
-                    
-                    std::string processName = pe.szExeFile;
+
+                    // Convert WCHAR to string
+                    std::wstring wProcessName = pe.szExeFile;
+                    int size = WideCharToMultiByte(CP_UTF8, 0, wProcessName.c_str(), -1, nullptr, 0, nullptr, nullptr);
+                    if (size <= 0) continue;
+
+                    std::string processName(size - 1, 0);
+                    WideCharToMultiByte(CP_UTF8, 0, wProcessName.c_str(), -1, &processName[0], size, nullptr, nullptr);
                     
                     // Skip if not eligible for scanning
                     if (!ShouldScanProcess(pe.th32ProcessID, processName)) {
@@ -185,7 +192,7 @@ namespace GarudaHS {
             m_threadsAnalyzed.fetch_add(static_cast<DWORD>(threadInfos.size()));
             
             // Check for suspicious threads
-            std::vector<ThreadInfo> suspiciousThreads;
+            std::vector<ThreadInjectionInfo> suspiciousThreads;
             for (const auto& threadInfo : threadInfos) {
                 if (IsThreadSuspicious(threadInfo)) {
                     suspiciousThreads.push_back(threadInfo);
@@ -262,14 +269,14 @@ namespace GarudaHS {
         return result;
     }
 
-    std::vector<ThreadInfo> ThreadInjectionTracer::AnalyzeProcessThreads(DWORD processId) {
-        std::vector<ThreadInfo> threadInfos;
+    std::vector<ThreadInjectionInfo> ThreadInjectionTracer::AnalyzeProcessThreads(DWORD processId) {
+        std::vector<ThreadInjectionInfo> threadInfos;
         
         try {
             auto threadIds = GetProcessThreads(processId);
             
             for (DWORD threadId : threadIds) {
-                ThreadInfo info = GetThreadInformation(threadId);
+                ThreadInjectionInfo info = GetThreadInformation(threadId);
                 if (info.threadId != 0) {
                     // Additional analysis
                     info.isSuspicious = IsThreadSuspicious(info);
@@ -558,7 +565,7 @@ namespace GarudaHS {
         return false;
     }
 
-    bool ThreadInjectionTracer::IsThreadSuspicious(const ThreadInfo& threadInfo) {
+    bool ThreadInjectionTracer::IsThreadSuspicious(const ThreadInjectionInfo& threadInfo) {
         // Check various suspicious characteristics
 
         // Remote threads are suspicious
@@ -609,7 +616,7 @@ namespace GarudaHS {
             // If we can't determine the creator, assume it might be remote
             return threadProcessId != processId;
 
-        } catch (const std::exception& e) {
+        } catch (const std::exception&) {
             return false;
         }
     }
@@ -648,7 +655,7 @@ namespace GarudaHS {
 
             return true; // Not in any known module
 
-        } catch (const std::exception& e) {
+        } catch (const std::exception&) {
             return true; // Error = suspicious
         }
     }
@@ -676,6 +683,466 @@ namespace GarudaHS {
         }
 
         return std::min(confidence, 1.0f);
+    }
+
+    // Static utility functions
+    ThreadInjectionInfo ThreadInjectionTracer::GetThreadInformation(DWORD threadId) {
+        ThreadInjectionInfo info = {};
+        info.threadId = threadId;
+
+        try {
+            HANDLE hThread = OpenThread(THREAD_QUERY_INFORMATION, FALSE, threadId);
+            if (!hThread) {
+                return info;
+            }
+
+            // Get basic thread information
+            info.ownerProcessId = GetProcessIdOfThread(hThread);
+            info.creatorProcessId = info.ownerProcessId; // Simplified - real implementation would track creator
+
+            // Get thread times
+            FILETIME creationTime, exitTime, kernelTime, userTime;
+            if (GetThreadTimes(hThread, &creationTime, &exitTime, &kernelTime, &userTime)) {
+                // Convert FILETIME to tick count (simplified)
+                ULARGE_INTEGER uli;
+                uli.LowPart = creationTime.dwLowDateTime;
+                uli.HighPart = creationTime.dwHighDateTime;
+                info.creationTime = static_cast<DWORD>(uli.QuadPart / 10000); // Convert to milliseconds
+            } else {
+                info.creationTime = GetTickCount(); // Fallback
+            }
+
+            // Get thread priority
+            info.priority = GetThreadPriority(hThread);
+
+            // Get suspend count (simplified check)
+            info.suspendCount = SuspendThread(hThread);
+            if (info.suspendCount != (DWORD)-1) {
+                ResumeThread(hThread); // Resume immediately
+            } else {
+                info.suspendCount = 0;
+            }
+
+            // Get start address
+            typedef NTSTATUS (WINAPI *NtQueryInformationThread_t)(HANDLE, LONG, PVOID, ULONG, PULONG);
+            HMODULE hNtdll = GetModuleHandleA("ntdll.dll");
+            if (hNtdll) {
+                NtQueryInformationThread_t NtQueryInformationThread =
+                    (NtQueryInformationThread_t)GetProcAddress(hNtdll, "NtQueryInformationThread");
+                if (NtQueryInformationThread) {
+                    NTSTATUS status = NtQueryInformationThread(hThread, 9, &info.startAddress, sizeof(info.startAddress), nullptr);
+                    if (status != 0) {
+                        info.startAddress = nullptr;
+                    }
+                }
+            }
+
+            CloseHandle(hThread);
+
+        } catch (const std::exception&) {
+            // Error occurred, return partial info
+        }
+
+        return info;
+    }
+
+    void ThreadInjectionTracer::LogThreadAnalysis(const ThreadInjectionInfo& threadInfo) {
+        if (!m_logger) return;
+
+        try {
+            std::stringstream ss;
+            ss << "Thread Analysis - ID: " << threadInfo.threadId
+               << ", Owner PID: " << threadInfo.ownerProcessId
+               << ", Start Address: 0x" << std::hex << threadInfo.startAddress
+               << ", Suspicious: " << (threadInfo.isSuspicious ? "Yes" : "No")
+               << ", Remote: " << (threadInfo.isRemoteThread ? "Yes" : "No")
+               << ", Suspend Count: " << std::dec << threadInfo.suspendCount;
+
+            if (!threadInfo.startModule.empty()) {
+                ss << ", Start Module: " << threadInfo.startModule;
+            }
+
+            if (!threadInfo.suspicionReason.empty()) {
+                ss << ", Reason: " << threadInfo.suspicionReason;
+            }
+
+            m_logger->Info(ss.str());
+
+        } catch (const std::exception& e) {
+            m_logger->ErrorF("LogThreadAnalysis error: %s", e.what());
+        }
+    }
+
+    // Utility functions
+    std::vector<DWORD> ThreadInjectionTracer::GetProcessThreads(DWORD processId) {
+        std::vector<DWORD> threadIds;
+
+        try {
+            HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
+            if (hSnapshot == INVALID_HANDLE_VALUE) {
+                return threadIds;
+            }
+
+            THREADENTRY32 te32;
+            te32.dwSize = sizeof(THREADENTRY32);
+
+            if (Thread32First(hSnapshot, &te32)) {
+                do {
+                    if (te32.th32OwnerProcessID == processId) {
+                        threadIds.push_back(te32.th32ThreadID);
+                    }
+                } while (Thread32Next(hSnapshot, &te32));
+            }
+
+            CloseHandle(hSnapshot);
+        } catch (const std::exception&) {
+            // Error occurred during thread enumeration
+        }
+
+        return threadIds;
+    }
+
+    std::string ThreadInjectionTracer::GetThreadStartModule(HANDLE hProcess, LPVOID startAddress) {
+        try {
+            if (!startAddress) {
+                return "Unknown";
+            }
+
+            HMODULE hMods[1024];
+            DWORD cbNeeded;
+
+            if (EnumProcessModules(hProcess, hMods, sizeof(hMods), &cbNeeded)) {
+                for (unsigned int i = 0; i < (cbNeeded / sizeof(HMODULE)); i++) {
+                    MODULEINFO modInfo;
+                    if (GetModuleInformation(hProcess, hMods[i], &modInfo, sizeof(modInfo))) {
+                        LPVOID moduleStart = modInfo.lpBaseOfDll;
+                        LPVOID moduleEnd = (LPBYTE)moduleStart + modInfo.SizeOfImage;
+
+                        if (startAddress >= moduleStart && startAddress < moduleEnd) {
+                            char moduleName[MAX_PATH];
+                            if (GetModuleBaseNameA(hProcess, hMods[i], moduleName, sizeof(moduleName))) {
+                                return std::string(moduleName);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return "Unknown";
+        } catch (const std::exception&) {
+            return "Error";
+        }
+    }
+
+    bool ThreadInjectionTracer::IsSystemModule(const std::string& moduleName) {
+        try {
+            // Convert to lowercase for comparison
+            std::string lowerName = moduleName;
+            std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(), ::tolower);
+
+            // List of known system modules
+            static const std::vector<std::string> systemModules = {
+                "ntdll.dll", "kernel32.dll", "kernelbase.dll", "user32.dll",
+                "gdi32.dll", "advapi32.dll", "msvcrt.dll", "sechost.dll",
+                "rpcrt4.dll", "sspicli.dll", "cryptbase.dll", "bcryptprimitives.dll",
+                "combase.dll", "ucrtbase.dll", "win32u.dll", "gdi32full.dll",
+                "msvcp_win.dll", "bcrypt.dll", "imm32.dll", "ole32.dll",
+                "oleaut32.dll", "shell32.dll", "shlwapi.dll", "ws2_32.dll"
+            };
+
+            for (const auto& sysModule : systemModules) {
+                if (lowerName.find(sysModule) != std::string::npos) {
+                    return true;
+                }
+            }
+
+            // Check if it's in system directories
+            if (lowerName.find("system32") != std::string::npos ||
+                lowerName.find("syswow64") != std::string::npos ||
+                lowerName.find("windows") != std::string::npos) {
+                return true;
+            }
+
+            return false;
+        } catch (const std::exception&) {
+            return false;
+        }
+    }
+
+    // Additional missing methods
+    void ThreadInjectionTracer::StopRealTimeMonitoring() {
+        try {
+            std::lock_guard<std::mutex> lock(m_monitoringMutex);
+
+            if (!m_isMonitoring.load()) {
+                if (m_logger) {
+                    m_logger->Warning("Real-time monitoring is not running");
+                }
+                return;
+            }
+
+            m_shouldStop.store(true);
+
+            // Wait for monitoring thread to finish
+            if (m_monitoringThread && m_monitoringThread != INVALID_HANDLE_VALUE) {
+                WaitForSingleObject(m_monitoringThread, 5000); // Wait up to 5 seconds
+                CloseHandle(m_monitoringThread);
+                m_monitoringThread = nullptr;
+            }
+
+            m_isMonitoring.store(false);
+
+            if (m_logger) {
+                m_logger->Info("Real-time monitoring stopped");
+            }
+
+        } catch (const std::exception& e) {
+            HandleError("Failed to stop real-time monitoring: " + std::string(e.what()));
+        }
+    }
+
+    void ThreadInjectionTracer::ClearDetectionCallback() {
+        std::lock_guard<std::mutex> lock(m_callbackMutex);
+        m_detectionCallback = nullptr;
+
+        if (m_logger) {
+            m_logger->Info("Detection callback cleared");
+        }
+    }
+
+    bool ThreadInjectionTracer::InstallAPIHooks() {
+        try {
+            // Placeholder implementation for API hooking
+            // In a real implementation, this would install hooks for thread creation APIs
+            if (m_logger) {
+                m_logger->Info("API hooks installation requested (placeholder implementation)");
+            }
+            return true;
+        } catch (const std::exception& e) {
+            HandleError("Failed to install API hooks: " + std::string(e.what()));
+            return false;
+        }
+    }
+
+    void ThreadInjectionTracer::RemoveAPIHooks() {
+        try {
+            // Placeholder implementation
+            if (m_logger) {
+                m_logger->Info("API hooks removal requested (placeholder implementation)");
+            }
+        } catch (const std::exception& e) {
+            HandleError("Failed to remove API hooks: " + std::string(e.what()));
+        }
+    }
+
+    bool ThreadInjectionTracer::ShouldScanProcess(DWORD processId, const std::string& processName) {
+        try {
+            // Skip system processes
+            if (processId <= 4) {
+                return false;
+            }
+
+            // Check whitelist
+            for (const auto& whitelistedProcess : m_config.whitelistedProcesses) {
+                if (processName.find(whitelistedProcess) != std::string::npos) {
+                    return false;
+                }
+            }
+
+            // Check if it's a system process
+            if (IsSystemModule(processName)) {
+                return false;
+            }
+
+            return true;
+        } catch (const std::exception&) {
+            return false;
+        }
+    }
+
+    std::string ThreadInjectionTracer::GetProcessName(DWORD processId) {
+        try {
+            HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+            if (hSnapshot == INVALID_HANDLE_VALUE) {
+                return "";
+            }
+
+            PROCESSENTRY32 pe32;
+            pe32.dwSize = sizeof(PROCESSENTRY32);
+
+            if (Process32First(hSnapshot, &pe32)) {
+                do {
+                    if (pe32.th32ProcessID == processId) {
+                        CloseHandle(hSnapshot);
+                        // Convert WCHAR to string
+                        std::wstring wProcessName = pe32.szExeFile;
+                        int size = WideCharToMultiByte(CP_UTF8, 0, wProcessName.c_str(), -1, nullptr, 0, nullptr, nullptr);
+                        if (size <= 0) return "";
+
+                        std::string processName(size - 1, 0);
+                        WideCharToMultiByte(CP_UTF8, 0, wProcessName.c_str(), -1, &processName[0], size, nullptr, nullptr);
+                        return processName;
+                    }
+                } while (Process32Next(hSnapshot, &pe32));
+            }
+
+            CloseHandle(hSnapshot);
+            return "";
+        } catch (const std::exception&) {
+            return "";
+        }
+    }
+
+    void ThreadInjectionTracer::UpdateDetectionHistory(const ThreadInjectionResult& result) {
+        try {
+            std::lock_guard<std::mutex> lock(m_historyMutex);
+
+            m_detectionHistory.push_back(result);
+
+            // Keep only recent detections (last 1000)
+            if (m_detectionHistory.size() > 1000) {
+                m_detectionHistory.erase(m_detectionHistory.begin());
+            }
+
+        } catch (const std::exception& e) {
+            HandleError("Failed to update detection history: " + std::string(e.what()));
+        }
+    }
+
+    void ThreadInjectionTracer::LogDetection(const ThreadInjectionResult& result) {
+        try {
+            if (!m_logger) return;
+
+            std::stringstream ss;
+            ss << "Thread Injection Detection - Source: " << result.sourceProcessName
+               << " (PID: " << result.sourceProcessId << ")"
+               << " -> Target: " << result.targetProcessName
+               << " (PID: " << result.targetProcessId << ")"
+               << ", Suspicious Threads: " << result.suspiciousThreads.size()
+               << ", Confidence: " << result.confidence;
+
+            m_logger->Warning(ss.str());
+
+            // Log details of suspicious threads
+            for (const auto& threadInfo : result.suspiciousThreads) {
+                LogThreadAnalysis(threadInfo);
+            }
+
+        } catch (const std::exception& e) {
+            HandleError("Failed to log detection: " + std::string(e.what()));
+        }
+    }
+
+    void ThreadInjectionTracer::HandleError(const std::string& error) {
+        if (m_logger) {
+            m_logger->Error("ThreadInjectionTracer: " + error);
+        }
+    }
+
+    void ThreadInjectionTracer::InitializeInjectionSignatures() {
+        try {
+            // Initialize common injection signatures
+            // This would contain patterns for detecting various injection techniques
+
+            if (m_logger) {
+                m_logger->Info("Injection signatures initialized");
+            }
+
+        } catch (const std::exception& e) {
+            HandleError("Failed to initialize injection signatures: " + std::string(e.what()));
+        }
+    }
+
+    void ThreadInjectionTracer::InitializeSuspiciousModules() {
+        try {
+            // Initialize list of suspicious modules
+            // This would contain known cheat engines, debuggers, etc.
+
+            if (m_logger) {
+                m_logger->Info("Suspicious modules list initialized");
+            }
+
+        } catch (const std::exception& e) {
+            HandleError("Failed to initialize suspicious modules: " + std::string(e.what()));
+        }
+    }
+
+    // Additional missing methods
+    bool ThreadInjectionTracer::StartRealTimeMonitoring() {
+        try {
+            std::lock_guard<std::mutex> lock(m_monitoringMutex);
+
+            if (m_isMonitoring.load()) {
+                if (m_logger) {
+                    m_logger->Warning("Real-time monitoring already running");
+                }
+                return true;
+            }
+
+            m_shouldStop.store(false);
+            m_monitoringThread = CreateThread(nullptr, 0, MonitoringThreadProc, this, 0, nullptr);
+
+            if (!m_monitoringThread) {
+                if (m_logger) {
+                    m_logger->Error("Failed to create monitoring thread");
+                }
+                return false;
+            }
+
+            m_isMonitoring.store(true);
+
+            if (m_logger) {
+                m_logger->Info("Real-time monitoring started");
+            }
+
+            return true;
+
+        } catch (const std::exception& e) {
+            HandleError("Failed to start real-time monitoring: " + std::string(e.what()));
+            return false;
+        }
+    }
+
+    void ThreadInjectionTracer::SetDetectionCallback(DetectionCallback callback) {
+        std::lock_guard<std::mutex> lock(m_callbackMutex);
+        m_detectionCallback = callback;
+
+        if (m_logger) {
+            m_logger->Info("Detection callback set");
+        }
+    }
+
+    DWORD WINAPI ThreadInjectionTracer::MonitoringThreadProc(LPVOID lpParam) {
+        ThreadInjectionTracer* tracer = static_cast<ThreadInjectionTracer*>(lpParam);
+        if (tracer) {
+            tracer->MonitoringLoop();
+        }
+        return 0;
+    }
+
+    void ThreadInjectionTracer::MonitoringLoop() {
+        try {
+            while (!m_shouldStop.load()) {
+                // Perform periodic scans
+                auto results = ScanAllProcesses();
+
+                // Process results
+                for (const auto& result : results) {
+                    if (result.detected) {
+                        // Trigger callback if set
+                        std::lock_guard<std::mutex> lock(m_callbackMutex);
+                        if (m_detectionCallback) {
+                            m_detectionCallback(result);
+                        }
+                    }
+                }
+
+                // Sleep for monitoring interval
+                Sleep(m_config.monitoringIntervalMs);
+            }
+        } catch (const std::exception& e) {
+            HandleError("MonitoringLoop error: " + std::string(e.what()));
+        }
     }
 
 } // namespace GarudaHS

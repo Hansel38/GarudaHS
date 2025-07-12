@@ -585,7 +585,7 @@ bool GarudaHSStaticCore::IsSystemSecure() {
 }
 
 const char* GarudaHSStaticCore::GetVersion() {
-    return OBFUSCATED_STRING("GarudaHS v4.0 Static Core").c_str();
+    return "GarudaHS V.1.1+ Static Core";
 }
 
 DWORD GarudaHSStaticCore::GetLastError() {

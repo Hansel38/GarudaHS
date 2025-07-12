@@ -190,7 +190,7 @@ namespace GarudaHS {
         float CalculateCombinedConfidence(const EnhancedSignatureResult& result, 
                                         const EnhancedSignaturePattern& pattern);
         bool MatchesPattern(const std::string& text, const std::string& pattern, bool isRegex = false);
-        std::vector<std::string> GetModuleExports(HANDLE hProcess, HMODULE hModule);
+        static std::vector<std::string> GetModuleExports(HANDLE hProcess, HMODULE hModule);
         bool IsProcessSuspicious(DWORD processId);
         
         // Thread procedures
@@ -201,6 +201,7 @@ namespace GarudaHS {
         bool ValidatePattern(const EnhancedSignaturePattern& pattern);
         void LogDetection(const EnhancedSignatureResult& result);
         void HandleError(const std::string& error);
+        void LoadDefaultPatterns();
         
         // Member variables
         std::shared_ptr<Logger> m_logger;

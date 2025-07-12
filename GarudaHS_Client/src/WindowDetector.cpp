@@ -373,4 +373,17 @@ namespace GarudaHS {
         return m_gameClassNames;
     }
 
+    void WindowDetector::Shutdown() {
+        // Clear all data structures
+        m_gameWindowTitles.clear();
+        m_gameProcessNames.clear();
+        m_gameClassNames.clear();
+        m_titleRegexes.clear();
+        m_processRegexes.clear();
+
+        // Reset to default state
+        m_enabledMethods = DetectionMethod::ALL;
+        m_caseSensitive = false;
+    }
+
 } // namespace GarudaHS

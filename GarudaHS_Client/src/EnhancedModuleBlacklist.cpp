@@ -1,3 +1,4 @@
+#define NOMINMAX
 #include "../include/EnhancedModuleBlacklist.h"
 #include "../include/Logger.h"
 #include <algorithm>
@@ -121,8 +122,14 @@ namespace GarudaHS {
                     if (processesScanned >= m_config.maxProcessesToScan) {
                         break;
                     }
-                    
-                    std::string processName = pe.szExeFile;
+
+                    // Convert WCHAR to string
+                    std::wstring wProcessName = pe.szExeFile;
+                    int size = WideCharToMultiByte(CP_UTF8, 0, wProcessName.c_str(), -1, nullptr, 0, nullptr, nullptr);
+                    if (size <= 0) continue;
+
+                    std::string processName(size - 1, 0);
+                    WideCharToMultiByte(CP_UTF8, 0, wProcessName.c_str(), -1, &processName[0], size, nullptr, nullptr);
                     
                     // Skip if not eligible for scanning
                     if (!ShouldScanProcess(pe.th32ProcessID, processName)) {
@@ -646,8 +653,8 @@ namespace GarudaHS {
 
             CloseHandle(hProcess);
 
-        } catch (const std::exception& e) {
-            m_logger->ErrorF("GetProcessModules error: %s", e.what());
+        } catch (const std::exception&) {
+            // Error occurred during module enumeration
         }
 
         return modules;
@@ -671,8 +678,8 @@ namespace GarudaHS {
 
             CloseHandle(hProcess);
 
-        } catch (const std::exception& e) {
-            m_logger->ErrorF("GetHiddenModules error: %s", e.what());
+        } catch (const std::exception&) {
+            // Error occurred during hidden module scanning
         }
 
         return hiddenModules;
@@ -708,8 +715,8 @@ namespace GarudaHS {
                 address = static_cast<LPBYTE>(mbi.BaseAddress) + mbi.RegionSize;
             }
 
-        } catch (const std::exception& e) {
-            m_logger->ErrorF("ScanForHiddenModules error: %s", e.what());
+        } catch (const std::exception&) {
+            // Error occurred during scanning - return partial results
         }
 
         return hiddenModules;
@@ -843,6 +850,455 @@ namespace GarudaHS {
     void EnhancedModuleBlacklist::HandleError(const std::string& error) {
         if (m_logger) {
             m_logger->Error("EnhancedModuleBlacklist: " + error);
+        }
+    }
+
+    // Missing method implementations
+    bool EnhancedModuleBlacklist::AddBlacklistedModule(const BlacklistedModule& module) {
+        try {
+            std::lock_guard<std::mutex> lock(m_blacklistMutex);
+
+            // Check if module already exists
+            for (const auto& existingModule : m_blacklistedModules) {
+                if (existingModule.name == module.name) {
+                    if (m_logger) {
+                        m_logger->Warning("Module '" + module.name + "' already blacklisted");
+                    }
+                    return false;
+                }
+            }
+
+            m_blacklistedModules.push_back(module);
+
+            if (m_logger) {
+                m_logger->Info("Added blacklisted module: " + module.name);
+            }
+
+            return true;
+
+        } catch (const std::exception& e) {
+            if (m_logger) {
+                m_logger->ErrorF("Failed to add blacklisted module: %s", e.what());
+            }
+            return false;
+        }
+    }
+
+    void EnhancedModuleBlacklist::ClearDetectionCallback() {
+        std::lock_guard<std::mutex> lock(m_callbackMutex);
+        m_detectionCallback = nullptr;
+
+        if (m_logger) {
+            m_logger->Info("Detection callback cleared");
+        }
+    }
+
+    void EnhancedModuleBlacklist::SetDetectionCallback(DetectionCallback callback) {
+        std::lock_guard<std::mutex> lock(m_callbackMutex);
+        m_detectionCallback = callback;
+
+        if (m_logger) {
+            m_logger->Info("Detection callback set");
+        }
+    }
+
+    std::string EnhancedModuleBlacklist::CalculateFileHash(const std::string& filePath, const std::string& algorithm) {
+        try {
+            HANDLE hFile = CreateFileA(filePath.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+            if (hFile == INVALID_HANDLE_VALUE) {
+                return "";
+            }
+
+            HCRYPTPROV hProv = 0;
+            HCRYPTHASH hHash = 0;
+
+            if (!CryptAcquireContext(&hProv, nullptr, nullptr, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT)) {
+                CloseHandle(hFile);
+                return "";
+            }
+
+            ALG_ID algId = CALG_MD5; // Default to MD5
+            if (algorithm == "SHA1") algId = CALG_SHA1;
+            else if (algorithm == "SHA256") algId = CALG_SHA_256;
+
+            if (!CryptCreateHash(hProv, algId, 0, 0, &hHash)) {
+                CryptReleaseContext(hProv, 0);
+                CloseHandle(hFile);
+                return "";
+            }
+
+            BYTE buffer[4096];
+            DWORD bytesRead;
+            while (ReadFile(hFile, buffer, sizeof(buffer), &bytesRead, nullptr) && bytesRead > 0) {
+                if (!CryptHashData(hHash, buffer, bytesRead, 0)) {
+                    break;
+                }
+            }
+
+            DWORD hashSize = 0;
+            DWORD hashSizeSize = sizeof(DWORD);
+            CryptGetHashParam(hHash, HP_HASHSIZE, (BYTE*)&hashSize, &hashSizeSize, 0);
+
+            std::vector<BYTE> hashData(hashSize);
+            if (CryptGetHashParam(hHash, HP_HASHVAL, hashData.data(), &hashSize, 0)) {
+                std::stringstream ss;
+                for (BYTE b : hashData) {
+                    ss << std::hex << std::setw(2) << std::setfill('0') << (int)b;
+                }
+
+                CryptDestroyHash(hHash);
+                CryptReleaseContext(hProv, 0);
+                CloseHandle(hFile);
+                return ss.str();
+            }
+
+            CryptDestroyHash(hHash);
+            CryptReleaseContext(hProv, 0);
+            CloseHandle(hFile);
+            return "";
+
+        } catch (const std::exception&) {
+            return "";
+        }
+    }
+
+    std::vector<std::string> EnhancedModuleBlacklist::GetModuleExports(HANDLE hProcess, HMODULE hModule) {
+        std::vector<std::string> exports;
+
+        try {
+            char modulePath[MAX_PATH];
+            if (!GetModuleFileNameExA(hProcess, hModule, modulePath, MAX_PATH)) {
+                return exports;
+            }
+
+            HANDLE hFile = CreateFileA(modulePath, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+            if (hFile == INVALID_HANDLE_VALUE) {
+                return exports;
+            }
+
+            HANDLE hMapping = CreateFileMappingA(hFile, nullptr, PAGE_READONLY, 0, 0, nullptr);
+            if (!hMapping) {
+                CloseHandle(hFile);
+                return exports;
+            }
+
+            LPVOID pBase = MapViewOfFile(hMapping, FILE_MAP_READ, 0, 0, 0);
+            if (!pBase) {
+                CloseHandle(hMapping);
+                CloseHandle(hFile);
+                return exports;
+            }
+
+            PIMAGE_DOS_HEADER pDosHeader = (PIMAGE_DOS_HEADER)pBase;
+            if (pDosHeader->e_magic != IMAGE_DOS_SIGNATURE) {
+                UnmapViewOfFile(pBase);
+                CloseHandle(hMapping);
+                CloseHandle(hFile);
+                return exports;
+            }
+
+            PIMAGE_NT_HEADERS pNtHeaders = (PIMAGE_NT_HEADERS)((BYTE*)pBase + pDosHeader->e_lfanew);
+            if (pNtHeaders->Signature != IMAGE_NT_SIGNATURE) {
+                UnmapViewOfFile(pBase);
+                CloseHandle(hMapping);
+                CloseHandle(hFile);
+                return exports;
+            }
+
+            DWORD exportRva = pNtHeaders->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress;
+            if (exportRva == 0) {
+                UnmapViewOfFile(pBase);
+                CloseHandle(hMapping);
+                CloseHandle(hFile);
+                return exports;
+            }
+
+            PIMAGE_EXPORT_DIRECTORY pExportDir = (PIMAGE_EXPORT_DIRECTORY)((BYTE*)pBase + exportRva);
+            DWORD* pNames = (DWORD*)((BYTE*)pBase + pExportDir->AddressOfNames);
+
+            for (DWORD i = 0; i < pExportDir->NumberOfNames; i++) {
+                char* pName = (char*)((BYTE*)pBase + pNames[i]);
+                exports.push_back(std::string(pName));
+            }
+
+            UnmapViewOfFile(pBase);
+            CloseHandle(hMapping);
+            CloseHandle(hFile);
+
+        } catch (const std::exception&) {
+            // Error occurred during export enumeration
+        }
+
+        return exports;
+    }
+
+    std::string EnhancedModuleBlacklist::GetModuleVersionInfo(const std::string& modulePath) {
+        try {
+            DWORD dwSize = GetFileVersionInfoSizeA(modulePath.c_str(), nullptr);
+            if (dwSize == 0) {
+                return "";
+            }
+
+            std::vector<BYTE> buffer(dwSize);
+            if (!GetFileVersionInfoA(modulePath.c_str(), 0, dwSize, buffer.data())) {
+                return "";
+            }
+
+            VS_FIXEDFILEINFO* pFileInfo = nullptr;
+            UINT uLen = 0;
+            if (VerQueryValueA(buffer.data(), "\\", (LPVOID*)&pFileInfo, &uLen)) {
+                std::stringstream ss;
+                ss << HIWORD(pFileInfo->dwFileVersionMS) << "."
+                   << LOWORD(pFileInfo->dwFileVersionMS) << "."
+                   << HIWORD(pFileInfo->dwFileVersionLS) << "."
+                   << LOWORD(pFileInfo->dwFileVersionLS);
+                return ss.str();
+            }
+
+            return "";
+        } catch (const std::exception&) {
+            return "";
+        }
+    }
+
+    bool EnhancedModuleBlacklist::IsModuleDigitallySigned(const std::string& modulePath) {
+        try {
+            WINTRUST_FILE_INFO fileData;
+            memset(&fileData, 0, sizeof(fileData));
+            fileData.cbStruct = sizeof(WINTRUST_FILE_INFO);
+
+            std::wstring wModulePath(modulePath.begin(), modulePath.end());
+            fileData.pcwszFilePath = wModulePath.c_str();
+            fileData.hFile = nullptr;
+            fileData.pgKnownSubject = nullptr;
+
+            GUID WVTPolicyGUID = WINTRUST_ACTION_GENERIC_VERIFY_V2;
+            WINTRUST_DATA winTrustData;
+            memset(&winTrustData, 0, sizeof(winTrustData));
+            winTrustData.cbStruct = sizeof(winTrustData);
+            winTrustData.pPolicyCallbackData = nullptr;
+            winTrustData.pSIPClientData = nullptr;
+            winTrustData.dwUIChoice = WTD_UI_NONE;
+            winTrustData.fdwRevocationChecks = WTD_REVOKE_NONE;
+            winTrustData.dwUnionChoice = WTD_CHOICE_FILE;
+            winTrustData.dwStateAction = WTD_STATEACTION_VERIFY;
+            winTrustData.hWVTStateData = nullptr;
+            winTrustData.pwszURLReference = nullptr;
+            winTrustData.dwUIContext = 0;
+            winTrustData.pFile = &fileData;
+
+            LONG lStatus = WinVerifyTrust(nullptr, &WVTPolicyGUID, &winTrustData);
+
+            winTrustData.dwStateAction = WTD_STATEACTION_CLOSE;
+            WinVerifyTrust(nullptr, &WVTPolicyGUID, &winTrustData);
+
+            return (lStatus == ERROR_SUCCESS);
+        } catch (const std::exception&) {
+            return false;
+        }
+    }
+
+    bool EnhancedModuleBlacklist::StartRealTimeMonitoring() {
+        try {
+            std::lock_guard<std::mutex> lock(m_monitoringMutex);
+
+            if (m_isMonitoring.load()) {
+                if (m_logger) {
+                    m_logger->Warning("Real-time monitoring already running");
+                }
+                return true;
+            }
+
+            m_shouldStop.store(false);
+            m_monitoringThread = CreateThread(nullptr, 0, MonitoringThreadProc, this, 0, nullptr);
+
+            if (!m_monitoringThread) {
+                if (m_logger) {
+                    m_logger->Error("Failed to create monitoring thread");
+                }
+                return false;
+            }
+
+            m_isMonitoring.store(true);
+
+            if (m_logger) {
+                m_logger->Info("Real-time monitoring started");
+            }
+
+            return true;
+
+        } catch (const std::exception& e) {
+            HandleError("Failed to start real-time monitoring: " + std::string(e.what()));
+            return false;
+        }
+    }
+
+    void EnhancedModuleBlacklist::StopRealTimeMonitoring() {
+        try {
+            std::lock_guard<std::mutex> lock(m_monitoringMutex);
+
+            if (!m_isMonitoring.load()) {
+                if (m_logger) {
+                    m_logger->Warning("Real-time monitoring is not running");
+                }
+                return;
+            }
+
+            m_shouldStop.store(true);
+
+            // Wait for monitoring thread to finish
+            if (m_monitoringThread && m_monitoringThread != INVALID_HANDLE_VALUE) {
+                WaitForSingleObject(m_monitoringThread, 5000); // Wait up to 5 seconds
+                CloseHandle(m_monitoringThread);
+                m_monitoringThread = nullptr;
+            }
+
+            m_isMonitoring.store(false);
+
+            if (m_logger) {
+                m_logger->Info("Real-time monitoring stopped");
+            }
+
+        } catch (const std::exception& e) {
+            HandleError("Failed to stop real-time monitoring: " + std::string(e.what()));
+        }
+    }
+
+    // Private helper methods
+    float EnhancedModuleBlacklist::CalculateDetectionConfidence(const ModuleDetectionResult& result, const BlacklistedModule& module) {
+        float confidence = 0.0f;
+
+        try {
+            // Base confidence based on detection type
+            switch (module.detectionType) {
+                case ModuleDetectionType::EXACT_NAME_MATCH:
+                    confidence += 0.9f;
+                    break;
+                case ModuleDetectionType::HASH_SIGNATURE_MATCH:
+                    confidence += 0.95f;
+                    break;
+                case ModuleDetectionType::EXPORT_SIGNATURE_MATCH:
+                    confidence += 0.8f;
+                    break;
+                case ModuleDetectionType::VERSION_INFO_MATCH:
+                    confidence += 0.7f;
+                    break;
+                case ModuleDetectionType::DIGITAL_SIGNATURE_MATCH:
+                    confidence += 0.85f;
+                    break;
+                default:
+                    confidence += 0.5f;
+                    break;
+            }
+
+            // Adjust based on severity
+            if (module.severity == "Critical") {
+                confidence += 0.05f;
+            } else if (module.severity == "High") {
+                confidence += 0.03f;
+            }
+
+            return std::min(confidence, 1.0f);
+
+        } catch (const std::exception&) {
+            return 0.5f; // Default confidence
+        }
+    }
+
+    bool EnhancedModuleBlacklist::ShouldScanProcess(DWORD processId, const std::string& processName) {
+        try {
+            // Skip system processes
+            if (processId <= 4) {
+                return false;
+            }
+
+            // Check whitelist
+            for (const auto& whitelistedProcess : m_config.whitelistedProcesses) {
+                if (processName.find(whitelistedProcess) != std::string::npos) {
+                    return false;
+                }
+            }
+
+            // Check if it's a system process
+            std::string lowerName = processName;
+            std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(), ::tolower);
+
+            if (lowerName.find("system") != std::string::npos ||
+                lowerName.find("winlogon") != std::string::npos ||
+                lowerName.find("csrss") != std::string::npos ||
+                lowerName.find("smss") != std::string::npos) {
+                return false;
+            }
+
+            return true;
+        } catch (const std::exception&) {
+            return false;
+        }
+    }
+
+    std::string EnhancedModuleBlacklist::GetProcessName(DWORD processId) {
+        try {
+            HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+            if (hSnapshot == INVALID_HANDLE_VALUE) {
+                return "";
+            }
+
+            PROCESSENTRY32 pe32;
+            pe32.dwSize = sizeof(PROCESSENTRY32);
+
+            if (Process32First(hSnapshot, &pe32)) {
+                do {
+                    if (pe32.th32ProcessID == processId) {
+                        CloseHandle(hSnapshot);
+                        // Convert WCHAR to string
+                        std::wstring wProcessName = pe32.szExeFile;
+                        int size = WideCharToMultiByte(CP_UTF8, 0, wProcessName.c_str(), -1, nullptr, 0, nullptr, nullptr);
+                        if (size <= 0) return "";
+
+                        std::string processName(size - 1, 0);
+                        WideCharToMultiByte(CP_UTF8, 0, wProcessName.c_str(), -1, &processName[0], size, nullptr, nullptr);
+                        return processName;
+                    }
+                } while (Process32Next(hSnapshot, &pe32));
+            }
+
+            CloseHandle(hSnapshot);
+            return "";
+        } catch (const std::exception&) {
+            return "";
+        }
+    }
+
+    DWORD WINAPI EnhancedModuleBlacklist::MonitoringThreadProc(LPVOID lpParam) {
+        EnhancedModuleBlacklist* detector = static_cast<EnhancedModuleBlacklist*>(lpParam);
+        if (detector) {
+            detector->MonitoringLoop();
+        }
+        return 0;
+    }
+
+    void EnhancedModuleBlacklist::MonitoringLoop() {
+        try {
+            while (!m_shouldStop.load()) {
+                // Perform periodic scans
+                auto results = ScanAllProcesses();
+
+                // Process results
+                for (const auto& result : results) {
+                    if (result.detected) {
+                        // Trigger callback if set
+                        std::lock_guard<std::mutex> lock(m_callbackMutex);
+                        if (m_detectionCallback) {
+                            m_detectionCallback(result);
+                        }
+                    }
+                }
+
+                // Sleep for monitoring interval
+                Sleep(m_config.monitoringIntervalMs);
+            }
+        } catch (const std::exception& e) {
+            HandleError("MonitoringLoop error: " + std::string(e.what()));
         }
     }
 

@@ -1,3 +1,4 @@
+#define NOMINMAX
 #include "../include/DynamicBehaviorDetector.h"
 #include "../include/Logger.h"
 #include <algorithm>
@@ -852,6 +853,366 @@ namespace GarudaHS {
     void DynamicBehaviorDetector::HandleError(const std::string& error) {
         if (m_logger) {
             m_logger->Error("DynamicBehaviorDetector: " + error);
+        }
+    }
+
+    // Pattern management methods
+    bool DynamicBehaviorDetector::AddBehaviorPattern(const BehaviorPattern& pattern) {
+        try {
+            std::lock_guard<std::mutex> lock(m_patternMutex);
+
+            // Check if pattern already exists
+            for (const auto& existingPattern : m_behaviorPatterns) {
+                if (existingPattern.patternId == pattern.patternId) {
+                    if (m_logger) {
+                        m_logger->Warning("Pattern with ID '" + pattern.patternId + "' already exists");
+                    }
+                    return false;
+                }
+            }
+
+            m_behaviorPatterns.push_back(pattern);
+
+            if (m_logger) {
+                m_logger->Info("Added behavior pattern: " + pattern.patternName);
+            }
+
+            return true;
+
+        } catch (const std::exception& e) {
+            HandleError("Failed to add behavior pattern: " + std::string(e.what()));
+            return false;
+        }
+    }
+
+    void DynamicBehaviorDetector::ClearDetectionCallback() {
+        std::lock_guard<std::mutex> lock(m_callbackMutex);
+        m_detectionCallback = nullptr;
+
+        if (m_logger) {
+            m_logger->Info("Detection callback cleared");
+        }
+    }
+
+    std::string DynamicBehaviorDetector::GetProcessPath(DWORD processId) {
+        try {
+            HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, processId);
+            if (!hProcess) {
+                return "";
+            }
+
+            char path[MAX_PATH];
+            DWORD size = MAX_PATH;
+
+            if (QueryFullProcessImageNameA(hProcess, 0, path, &size)) {
+                CloseHandle(hProcess);
+                return std::string(path);
+            }
+
+            CloseHandle(hProcess);
+            return "";
+
+        } catch (const std::exception&) {
+            return "";
+        }
+    }
+
+    // API Hooking methods
+    bool DynamicBehaviorDetector::InstallAPIHooks() {
+        try {
+            // For now, return true as API hooking requires advanced techniques
+            // In a real implementation, this would install hooks for ReadProcessMemory, etc.
+            if (m_logger) {
+                m_logger->Info("API hooks installation requested (placeholder implementation)");
+            }
+            return true;
+        } catch (const std::exception& e) {
+            HandleError("Failed to install API hooks: " + std::string(e.what()));
+            return false;
+        }
+    }
+
+    void DynamicBehaviorDetector::RemoveAPIHooks() {
+        try {
+            // Placeholder implementation
+            if (m_logger) {
+                m_logger->Info("API hooks removal requested (placeholder implementation)");
+            }
+        } catch (const std::exception& e) {
+            HandleError("Failed to remove API hooks: " + std::string(e.what()));
+        }
+    }
+
+    DWORD WINAPI DynamicBehaviorDetector::MonitoringThreadProc(LPVOID lpParam) {
+        DynamicBehaviorDetector* detector = static_cast<DynamicBehaviorDetector*>(lpParam);
+        if (detector) {
+            detector->MonitoringLoop();
+        }
+        return 0;
+    }
+
+    std::string DynamicBehaviorDetector::GetProcessName(DWORD processId) {
+        try {
+            HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+            if (hSnapshot == INVALID_HANDLE_VALUE) {
+                return "";
+            }
+
+            PROCESSENTRY32 pe32;
+            pe32.dwSize = sizeof(PROCESSENTRY32);
+
+            if (Process32First(hSnapshot, &pe32)) {
+                do {
+                    if (pe32.th32ProcessID == processId) {
+                        CloseHandle(hSnapshot);
+                        // Convert WCHAR to string
+                        std::wstring wProcessName = pe32.szExeFile;
+                        int size = WideCharToMultiByte(CP_UTF8, 0, wProcessName.c_str(), -1, nullptr, 0, nullptr, nullptr);
+                        if (size <= 0) return "";
+
+                        std::string processName(size - 1, 0);
+                        WideCharToMultiByte(CP_UTF8, 0, wProcessName.c_str(), -1, &processName[0], size, nullptr, nullptr);
+                        return processName;
+                    }
+                } while (Process32Next(hSnapshot, &pe32));
+            }
+
+            CloseHandle(hSnapshot);
+            return "";
+        } catch (const std::exception&) {
+            return "";
+        }
+    }
+
+    bool DynamicBehaviorDetector::IsEventWhitelisted(const BehaviorEvent& event) {
+        try {
+            // Check if source or target process is whitelisted
+            for (const auto& whitelistedProcess : m_config.whitelistedProcesses) {
+                if (event.sourceProcessName.find(whitelistedProcess) != std::string::npos ||
+                    event.targetProcessName.find(whitelistedProcess) != std::string::npos) {
+                    return true;
+                }
+            }
+
+            // Check if it's a system process
+            if (event.sourceProcessId <= 4 || event.targetProcessId <= 4) {
+                return true;
+            }
+
+            return false;
+        } catch (const std::exception&) {
+            return false;
+        }
+    }
+
+    void DynamicBehaviorDetector::UpdateProcessStatistics(DWORD processId) {
+        try {
+            std::lock_guard<std::mutex> lock(m_processStatsMutex);
+            m_processStatistics[processId]++;
+        } catch (const std::exception& e) {
+            HandleError("Failed to update process statistics: " + std::string(e.what()));
+        }
+    }
+
+    // Additional missing methods
+    void DynamicBehaviorDetector::MonitoringLoop() {
+        try {
+            while (!m_shouldStop.load()) {
+                // Perform periodic scans
+                auto results = ScanAllProcesses();
+
+                // Process results
+                for (const auto& result : results) {
+                    if (result.detected) {
+                        // Trigger callback if set
+                        std::lock_guard<std::mutex> lock(m_callbackMutex);
+                        if (m_detectionCallback) {
+                            m_detectionCallback(result);
+                        }
+                    }
+                }
+
+                // Sleep for monitoring interval
+                Sleep(m_config.monitoringIntervalMs);
+            }
+        } catch (const std::exception& e) {
+            HandleError("MonitoringLoop error: " + std::string(e.what()));
+        }
+    }
+
+    std::vector<BehaviorDetectionResult> DynamicBehaviorDetector::ScanAllProcesses() {
+        std::vector<BehaviorDetectionResult> results;
+
+        try {
+            HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+            if (hSnapshot == INVALID_HANDLE_VALUE) {
+                return results;
+            }
+
+            PROCESSENTRY32 pe32;
+            pe32.dwSize = sizeof(PROCESSENTRY32);
+
+            if (Process32First(hSnapshot, &pe32)) {
+                do {
+                    // Convert WCHAR to string
+                    std::wstring wProcessName = pe32.szExeFile;
+                    int size = WideCharToMultiByte(CP_UTF8, 0, wProcessName.c_str(), -1, nullptr, 0, nullptr, nullptr);
+                    if (size <= 0) continue;
+
+                    std::string processName(size - 1, 0);
+                    WideCharToMultiByte(CP_UTF8, 0, wProcessName.c_str(), -1, &processName[0], size, nullptr, nullptr);
+
+                    if (ShouldMonitorProcess(pe32.th32ProcessID, processName)) {
+                        auto result = ScanProcess(pe32.th32ProcessID);
+                        if (result.detected) {
+                            results.push_back(result);
+                        }
+                    }
+                } while (Process32Next(hSnapshot, &pe32));
+            }
+
+            CloseHandle(hSnapshot);
+        } catch (const std::exception& e) {
+            HandleError("ScanAllProcesses error: " + std::string(e.what()));
+        }
+
+        return results;
+    }
+
+    void DynamicBehaviorDetector::SetDetectionCallback(DetectionCallback callback) {
+        std::lock_guard<std::mutex> lock(m_callbackMutex);
+        m_detectionCallback = callback;
+
+        if (m_logger) {
+            m_logger->Info("Detection callback set");
+        }
+    }
+
+    BehaviorDetectionResult DynamicBehaviorDetector::ScanProcess(DWORD processId) {
+        BehaviorDetectionResult result = {};
+        result.suspiciousProcessId = processId;
+        result.detected = false;
+        result.overallConfidence = 0.0f;
+        result.detectionTimeSpan = GetTickCount();
+
+        try {
+            if (!m_initialized) {
+                return result;
+            }
+
+            // Get process name
+            std::string processName = GetProcessName(processId);
+            if (processName.empty()) {
+                return result;
+            }
+
+            result.suspiciousProcessName = processName;
+
+            // Check if process should be monitored
+            if (!ShouldMonitorProcess(processId, processName)) {
+                return result;
+            }
+
+            // Get recent events for this process
+            auto recentEvents = GetRecentEvents(processId, m_config.behaviorTimeWindowMs);
+
+            if (recentEvents.empty()) {
+                return result;
+            }
+
+            // Analyze behavior patterns
+            std::lock_guard<std::mutex> lock(m_patternMutex);
+            float maxConfidence = 0.0f;
+            std::string detectedPattern;
+
+            for (const auto& pattern : m_behaviorPatterns) {
+                if (!pattern.enabled) {
+                    continue;
+                }
+
+                if (MatchesBehaviorPattern(recentEvents, pattern)) {
+                    BehaviorDetectionResult patternResult = CreateDetectionResult(recentEvents, pattern);
+
+                    if (patternResult.overallConfidence > maxConfidence) {
+                        maxConfidence = patternResult.overallConfidence;
+                        detectedPattern = pattern.patternName;
+                        result = patternResult;
+                    }
+                }
+            }
+
+            // Set detection status
+            if (maxConfidence >= m_config.minimumSuspicionScore) {
+                result.detected = true;
+                result.overallConfidence = maxConfidence;
+                result.patternName = detectedPattern;
+
+                // Log detection
+                if (m_logger) {
+                    m_logger->WarningF("Behavior detection: Process %s (PID: %lu) - Pattern: %s, Confidence: %.2f",
+                                     processName.c_str(), processId, detectedPattern.c_str(), maxConfidence);
+                }
+            }
+
+        } catch (const std::exception& e) {
+            HandleError("ScanProcess error: " + std::string(e.what()));
+        }
+
+        return result;
+    }
+
+    bool DynamicBehaviorDetector::ShouldMonitorProcess(DWORD processId, const std::string& processName) {
+        try {
+            if (!m_initialized) {
+                return false;
+            }
+
+            // Skip system processes
+            if (processId <= 4) {
+                return false;
+            }
+
+            // Check if process name matches monitoring criteria
+            std::string lowerProcessName = processName;
+            std::transform(lowerProcessName.begin(), lowerProcessName.end(), lowerProcessName.begin(), ::tolower);
+
+            // Monitor processes that commonly inject or modify memory
+            std::vector<std::string> suspiciousNames = {
+                "cheat", "hack", "trainer", "injector", "dll", "mod", "bypass",
+                "crack", "patch", "loader", "bot", "auto", "macro", "script"
+            };
+
+            for (const auto& suspicious : suspiciousNames) {
+                if (lowerProcessName.find(suspicious) != std::string::npos) {
+                    return true;
+                }
+            }
+
+            // Monitor processes with suspicious extensions
+            if (lowerProcessName.find(".tmp") != std::string::npos ||
+                lowerProcessName.find(".scr") != std::string::npos ||
+                lowerProcessName.find(".pif") != std::string::npos) {
+                return true;
+            }
+
+            // Default: monitor most processes except known system processes
+            std::vector<std::string> systemProcesses = {
+                "system", "smss.exe", "csrss.exe", "wininit.exe", "winlogon.exe",
+                "services.exe", "lsass.exe", "svchost.exe", "explorer.exe",
+                "dwm.exe", "audiodg.exe", "conhost.exe"
+            };
+
+            for (const auto& systemProcess : systemProcesses) {
+                if (lowerProcessName == systemProcess) {
+                    return false;
+                }
+            }
+
+            return true;
+
+        } catch (const std::exception& e) {
+            HandleError("ShouldMonitorProcess error: " + std::string(e.what()));
+            return false;
         }
     }
 

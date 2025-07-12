@@ -27,8 +27,8 @@ namespace GarudaHS {
         UNKNOWN_INJECTION           // Unknown injection method
     };
 
-    // Thread information structure
-    struct ThreadInfo {
+    // Thread injection information structure
+    struct ThreadInjectionInfo {
         DWORD threadId;
         DWORD ownerProcessId;
         DWORD creatorProcessId;
@@ -36,7 +36,7 @@ namespace GarudaHS {
         DWORD creationTime;
         DWORD priority;
         DWORD suspendCount;
-        
+
         // Analysis results
         bool isSuspicious;
         bool isRemoteThread;
@@ -56,7 +56,7 @@ namespace GarudaHS {
         std::string targetProcessName;
         
         // Thread details
-        std::vector<ThreadInfo> suspiciousThreads;
+        std::vector<ThreadInjectionInfo> suspiciousThreads;
         DWORD injectedThreadId;
         LPVOID injectionAddress;
         
@@ -91,6 +91,7 @@ namespace GarudaHS {
         
         // Performance settings
         DWORD scanIntervalMs = 3000;
+        DWORD monitoringIntervalMs = 2000;
         DWORD maxProcessesToScan = 200;
         DWORD maxThreadsPerProcess = 100;
         DWORD maxScanTimePerProcess = 500;         // ms
@@ -126,7 +127,7 @@ namespace GarudaHS {
         std::vector<ThreadInjectionResult> ScanAllProcesses();
         ThreadInjectionResult ScanProcess(DWORD processId);
         ThreadInjectionResult ScanProcessByName(const std::string& processName);
-        std::vector<ThreadInfo> AnalyzeProcessThreads(DWORD processId);
+        std::vector<ThreadInjectionInfo> AnalyzeProcessThreads(DWORD processId);
         
         // Specific injection detection methods
         bool DetectCreateRemoteThread(DWORD processId, ThreadInjectionResult& result);
@@ -161,14 +162,14 @@ namespace GarudaHS {
         
         // Utility functions
         static std::vector<DWORD> GetProcessThreads(DWORD processId);
-        static ThreadInfo GetThreadInformation(DWORD threadId);
+        static ThreadInjectionInfo GetThreadInformation(DWORD threadId);
         static std::string GetThreadStartModule(HANDLE hProcess, LPVOID startAddress);
         static bool IsSystemModule(const std::string& moduleName);
         static std::string GetInjectionTypeString(ThreadInjectionType type);
 
     private:
         // Core analysis methods
-        bool IsThreadSuspicious(const ThreadInfo& threadInfo);
+        bool IsThreadSuspicious(const ThreadInjectionInfo& threadInfo);
         bool IsRemoteThread(DWORD threadId, DWORD processId);
         bool HasUnusualStartAddress(HANDLE hProcess, LPVOID startAddress);
         float CalculateInjectionConfidence(const ThreadInjectionResult& result);
@@ -198,7 +199,7 @@ namespace GarudaHS {
         
         // Logging and error handling
         void LogDetection(const ThreadInjectionResult& result);
-        void LogThreadAnalysis(const ThreadInfo& threadInfo);
+        void LogThreadAnalysis(const ThreadInjectionInfo& threadInfo);
         void HandleError(const std::string& error);
         
         // Member variables
@@ -222,6 +223,7 @@ namespace GarudaHS {
         HANDLE m_monitoringThread;
         std::atomic<bool> m_shouldStop;
         std::atomic<bool> m_isMonitoring;
+        mutable std::mutex m_monitoringMutex;
         
         // API hooking (if enabled)
         bool m_apiHooksInstalled;

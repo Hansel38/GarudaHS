@@ -116,6 +116,7 @@ namespace GarudaHS {
         
         // Performance settings
         DWORD scanIntervalMs = 5000;
+        DWORD monitoringIntervalMs = 3000;
         DWORD maxProcessesToScan = 150;
         DWORD maxModulesPerProcess = 200;
         DWORD maxScanTimePerProcess = 800;     // ms
@@ -212,7 +213,7 @@ namespace GarudaHS {
         float CalculateDetectionConfidence(const ModuleDetectionResult& result, const BlacklistedModule& blacklisted);
         
         // Advanced detection techniques
-        std::vector<LPVOID> ScanForHiddenModules(HANDLE hProcess);
+        static std::vector<LPVOID> ScanForHiddenModules(HANDLE hProcess);
         bool IsModuleHollowed(HANDLE hProcess, HMODULE hModule);
         bool ContainsMemoryPattern(HANDLE hProcess, LPVOID baseAddress, DWORD size, const std::vector<BYTE>& pattern);
         
@@ -250,17 +251,18 @@ namespace GarudaHS {
         HANDLE m_monitoringThread;
         std::atomic<bool> m_shouldStop;
         std::atomic<bool> m_isMonitoring;
-        
+        mutable std::mutex m_monitoringMutex;
+
         // Statistics
         std::atomic<DWORD> m_totalScans;
         std::atomic<DWORD> m_detectionCount;
         std::atomic<DWORD> m_modulesScanned;
-        
+
         // Caching
         std::unordered_map<std::string, std::string> m_hashCache;
         std::unordered_map<std::string, std::string> m_versionInfoCache;
         mutable std::mutex m_cacheMutex;
-        
+
         // State
         std::atomic<bool> m_initialized;
         

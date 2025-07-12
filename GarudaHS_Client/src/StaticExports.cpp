@@ -5,14 +5,22 @@
 
 #include "../pch.h"
 #include "../include/GarudaHS_StaticCore.h"
+#include <intrin.h>
 
 // ═══════════════════════════════════════════════════════════
 //                    ANTI-ANALYSIS PROTECTION
 // ═══════════════════════════════════════════════════════════
 
-// Anti-disassembly techniques
-#define ANTI_DISASM_1 __asm { __asm _emit 0xEB __asm _emit 0x03 __asm _emit 0xD6 __asm _emit 0xD7 __asm _emit 0xD8 }
-#define ANTI_DISASM_2 __asm { __asm _emit 0xEB __asm _emit 0x04 __asm _emit 0x40 __asm _emit 0x30 __asm _emit 0x3F __asm _emit 0x90 }
+// Anti-disassembly techniques (x64 compatible)
+#ifdef _M_X64
+    // x64 doesn't support inline assembly, use intrinsics or simple obfuscation
+    #define ANTI_DISASM_1 __nop(); __nop(); __nop();
+    #define ANTI_DISASM_2 __nop(); __nop(); __nop();
+#else
+    // x86 inline assembly
+    #define ANTI_DISASM_1 __asm { __asm _emit 0xEB __asm _emit 0x03 __asm _emit 0xD6 __asm _emit 0xD7 __asm _emit 0xD8 }
+    #define ANTI_DISASM_2 __asm { __asm _emit 0xEB __asm _emit 0x04 __asm _emit 0x40 __asm _emit 0x30 __asm _emit 0x3F __asm _emit 0x90 }
+#endif
 
 // Function call obfuscation
 #define OBFUSCATED_CALL(func) \
@@ -188,7 +196,7 @@ __declspec(dllexport) const char* GHS_GetVersion() {
     
     if (!versionInitialized) {
         // Obfuscate version string
-        const char* version = "GarudaHS v4.0 Static Core";
+        const char* version = "GarudaHS V.1.1+ Static Core";
         for (size_t i = 0; i < strlen(version) && i < sizeof(versionString) - 1; ++i) {
             versionString[i] = version[i] ^ 0xAA;
         }

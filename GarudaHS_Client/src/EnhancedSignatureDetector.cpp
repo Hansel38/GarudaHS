@@ -1,10 +1,10 @@
+#define NOMINMAX
 #include "../include/EnhancedSignatureDetector.h"
 #include "../include/Logger.h"
 #include <algorithm>
 #include <regex>
 #include <sstream>
 #include <fstream>
-#include <json/json.h>
 
 namespace GarudaHS {
 
@@ -644,7 +644,9 @@ namespace GarudaHS {
 
                         // Get exports from this module
                         auto moduleExports = GetModuleExports(hProcess, hMods[i]);
-                        exports.insert(exports.end(), moduleExports.begin(), moduleExports.end());
+                        for (const auto& exportName : moduleExports) {
+                            exports.push_back(exportName);
+                        }
 
                         // If specific module was requested and found, break
                         if (!moduleName.empty()) {
@@ -656,8 +658,9 @@ namespace GarudaHS {
 
             CloseHandle(hProcess);
 
-        } catch (const std::exception& e) {
+        } catch (const std::exception&) {
             // Log error but don't throw - this is a utility function
+            // Cannot use m_logger in static method
         }
 
         return exports;
@@ -722,8 +725,9 @@ namespace GarudaHS {
                 }
             }
 
-        } catch (const std::exception& e) {
+        } catch (const std::exception&) {
             // Log error but don't throw
+            // Cannot use m_logger in static method
         }
 
         return exports;
@@ -801,6 +805,9 @@ namespace GarudaHS {
             return suspicious;
 
         } catch (const std::exception& e) {
+            if (m_logger) {
+                m_logger->ErrorF("IsProcessSuspicious error: %s", e.what());
+            }
             return false;
         }
     }
@@ -866,5 +873,26 @@ namespace GarudaHS {
             m_logger->Error("EnhancedSignatureDetector: " + error);
         }
     }
+
+    // Callback management
+    void EnhancedSignatureDetector::SetDetectionCallback(DetectionCallback callback) {
+        std::lock_guard<std::mutex> lock(m_callbackMutex);
+        m_detectionCallback = callback;
+
+        if (m_logger) {
+            m_logger->Info("Detection callback set");
+        }
+    }
+
+    void EnhancedSignatureDetector::ClearDetectionCallback() {
+        std::lock_guard<std::mutex> lock(m_callbackMutex);
+        m_detectionCallback = nullptr;
+
+        if (m_logger) {
+            m_logger->Info("Detection callback cleared");
+        }
+    }
+
+
 
 } // namespace GarudaHS

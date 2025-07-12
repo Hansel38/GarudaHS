@@ -1,6 +1,8 @@
+#define NOMINMAX
 #include "../include/HeuristicMemoryScanner.h"
 #include "../include/Logger.h"
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <sstream>
 #include <psapi.h>
@@ -303,7 +305,7 @@ namespace GarudaHS {
             }
             
             // Read memory content for analysis
-            auto data = ReadMemoryRegion(hProcess, address, std::min(size, static_cast<SIZE_T>(64 * 1024))); // Limit to 64KB for analysis
+            auto data = HeuristicMemoryScanner::ReadMemoryRegion(hProcess, address, std::min(size, static_cast<SIZE_T>(64 * 1024))); // Limit to 64KB for analysis
             
             if (!data.empty()) {
                 // Perform entropy analysis
@@ -700,6 +702,124 @@ namespace GarudaHS {
     void HeuristicMemoryScanner::HandleError(const std::string& error) {
         if (m_logger) {
             m_logger->Error("HeuristicMemoryScanner: " + error);
+        }
+    }
+
+    // Missing method implementations
+    bool HeuristicMemoryScanner::StartRealTimeMonitoring() {
+        try {
+            std::lock_guard<std::mutex> lock(m_monitoringMutex);
+
+            if (m_isMonitoring.load()) {
+                if (m_logger) {
+                    m_logger->Warning("Real-time monitoring already running");
+                }
+                return true;
+            }
+
+            m_shouldStop.store(false);
+            m_monitoringThread = CreateThread(nullptr, 0, MonitoringThreadProc, this, 0, nullptr);
+
+            if (!m_monitoringThread) {
+                if (m_logger) {
+                    m_logger->Error("Failed to create monitoring thread");
+                }
+                return false;
+            }
+
+            m_isMonitoring.store(true);
+
+            if (m_logger) {
+                m_logger->Info("Real-time monitoring started");
+            }
+
+            return true;
+
+        } catch (const std::exception& e) {
+            HandleError("Failed to start real-time monitoring: " + std::string(e.what()));
+            return false;
+        }
+    }
+
+    void HeuristicMemoryScanner::StopRealTimeMonitoring() {
+        try {
+            std::lock_guard<std::mutex> lock(m_monitoringMutex);
+
+            if (!m_isMonitoring.load()) {
+                if (m_logger) {
+                    m_logger->Warning("Real-time monitoring is not running");
+                }
+                return;
+            }
+
+            m_shouldStop.store(true);
+
+            // Wait for monitoring thread to finish
+            if (m_monitoringThread && m_monitoringThread != INVALID_HANDLE_VALUE) {
+                WaitForSingleObject(m_monitoringThread, 5000); // Wait up to 5 seconds
+                CloseHandle(m_monitoringThread);
+                m_monitoringThread = nullptr;
+            }
+
+            m_isMonitoring.store(false);
+
+            if (m_logger) {
+                m_logger->Info("Real-time monitoring stopped");
+            }
+
+        } catch (const std::exception& e) {
+            HandleError("Failed to stop real-time monitoring: " + std::string(e.what()));
+        }
+    }
+
+    void HeuristicMemoryScanner::SetDetectionCallback(DetectionCallback callback) {
+        std::lock_guard<std::mutex> lock(m_callbackMutex);
+        m_detectionCallback = callback;
+
+        if (m_logger) {
+            m_logger->Info("Detection callback set");
+        }
+    }
+
+    void HeuristicMemoryScanner::ClearDetectionCallback() {
+        std::lock_guard<std::mutex> lock(m_callbackMutex);
+        m_detectionCallback = nullptr;
+
+        if (m_logger) {
+            m_logger->Info("Detection callback cleared");
+        }
+    }
+
+    DWORD WINAPI HeuristicMemoryScanner::MonitoringThreadProc(LPVOID lpParam) {
+        HeuristicMemoryScanner* scanner = static_cast<HeuristicMemoryScanner*>(lpParam);
+        if (scanner) {
+            scanner->MonitoringLoop();
+        }
+        return 0;
+    }
+
+    void HeuristicMemoryScanner::MonitoringLoop() {
+        try {
+            while (!m_shouldStop.load()) {
+                // Perform periodic scans
+                auto results = ScanAllProcesses();
+
+                // Process results
+                for (const auto& result : results) {
+                    if (result.detected) {
+                        // Trigger callback if set
+                        std::lock_guard<std::mutex> lock(m_callbackMutex);
+                        if (m_detectionCallback) {
+                            m_detectionCallback(result);
+                        }
+                    }
+                }
+
+                // Sleep for monitoring interval
+                Sleep(m_config.monitoringIntervalMs);
+            }
+        } catch (const std::exception& e) {
+            HandleError("MonitoringLoop error: " + std::string(e.what()));
         }
     }
 

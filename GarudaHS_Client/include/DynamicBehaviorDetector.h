@@ -294,6 +294,8 @@ namespace GarudaHS {
         std::atomic<DWORD> m_totalEvents;
         std::atomic<DWORD> m_detectionCount;
         std::atomic<DWORD> m_processesMonitored;
+        std::unordered_map<DWORD, DWORD> m_processStatistics;
+        mutable std::mutex m_processStatsMutex;
         
         // State
         std::atomic<bool> m_initialized;

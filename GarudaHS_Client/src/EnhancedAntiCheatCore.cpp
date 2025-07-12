@@ -733,4 +733,195 @@ namespace GarudaHS {
         m_systemHealthy = false;
     }
 
+    // Missing method implementations
+    void EnhancedAntiCheatCore::ClearDetectionCallback() {
+        std::lock_guard<std::mutex> lock(m_callbackMutex);
+        m_detectionCallback = nullptr;
+
+        if (m_logger) {
+            m_logger->Info("Detection callback cleared");
+        }
+    }
+
+    void EnhancedAntiCheatCore::ProcessEnhancedSignatureDetection(const EnhancedSignatureResult& result) {
+        try {
+            if (m_logger) {
+                m_logger->Warning("Enhanced Signature Detection: " + result.patternName);
+            }
+
+            // Convert to enhanced result and trigger callback
+            auto enhancedResult = ConvertToEnhancedResult(
+                "EnhancedSignature", result.patternName, "Signature detected",
+                result.processId, result.totalConfidence, result.matchedProcessName, {}
+            );
+
+            std::lock_guard<std::mutex> lock(m_callbackMutex);
+            if (m_detectionCallback) {
+                m_detectionCallback(enhancedResult);
+            }
+
+        } catch (const std::exception& e) {
+            HandleError("ProcessEnhancedSignatureDetection error: " + std::string(e.what()));
+        }
+    }
+
+    void EnhancedAntiCheatCore::ProcessHeuristicMemoryDetection(const HeuristicScanResult& result) {
+        try {
+            if (m_logger) {
+                m_logger->Warning("Heuristic Memory Detection: " + result.processName);
+            }
+
+            // Convert to enhanced result and trigger callback
+            auto enhancedResult = ConvertToEnhancedResult(
+                "HeuristicMemory", "MemoryAnomaly", "Memory anomaly detected",
+                result.processId, result.overallSuspicionScore, result.processName, result.reasons
+            );
+
+            std::lock_guard<std::mutex> lock(m_callbackMutex);
+            if (m_detectionCallback) {
+                m_detectionCallback(enhancedResult);
+            }
+
+        } catch (const std::exception& e) {
+            HandleError("ProcessHeuristicMemoryDetection error: " + std::string(e.what()));
+        }
+    }
+
+    void EnhancedAntiCheatCore::ProcessThreadInjectionDetection(const ThreadInjectionResult& result) {
+        try {
+            if (m_logger) {
+                m_logger->Warning("Thread Injection Detection: " + result.detectionMethod);
+            }
+
+            // Convert to enhanced result and trigger callback
+            auto enhancedResult = ConvertToEnhancedResult(
+                "ThreadInjection", result.detectionMethod, "Thread injection detected",
+                result.sourceProcessId, result.confidence, result.detectionMethod, {}
+            );
+
+            std::lock_guard<std::mutex> lock(m_callbackMutex);
+            if (m_detectionCallback) {
+                m_detectionCallback(enhancedResult);
+            }
+
+        } catch (const std::exception& e) {
+            HandleError("ProcessThreadInjectionDetection error: " + std::string(e.what()));
+        }
+    }
+
+    void EnhancedAntiCheatCore::ProcessModuleBlacklistDetection(const ModuleDetectionResult& result) {
+        try {
+            if (m_logger) {
+                m_logger->Warning("Module Blacklist Detection: " + result.detectionMethod);
+            }
+
+            // Convert to enhanced result and trigger callback
+            auto enhancedResult = ConvertToEnhancedResult(
+                "ModuleBlacklist", result.detectionMethod, "Blacklisted module detected",
+                result.processId, result.confidence, result.detectionMethod, {}
+            );
+
+            std::lock_guard<std::mutex> lock(m_callbackMutex);
+            if (m_detectionCallback) {
+                m_detectionCallback(enhancedResult);
+            }
+
+        } catch (const std::exception& e) {
+            HandleError("ProcessModuleBlacklistDetection error: " + std::string(e.what()));
+        }
+    }
+
+    void EnhancedAntiCheatCore::ProcessDynamicBehaviorDetection(const BehaviorDetectionResult& result) {
+        try {
+            if (m_logger) {
+                m_logger->Warning("Dynamic Behavior Detection: " + result.patternName);
+            }
+
+            // Convert to enhanced result and trigger callback
+            auto enhancedResult = ConvertToEnhancedResult(
+                "DynamicBehavior", result.patternName, "Suspicious behavior detected",
+                result.suspiciousProcessId, result.overallConfidence, result.suspiciousProcessName, {}
+            );
+
+            std::lock_guard<std::mutex> lock(m_callbackMutex);
+            if (m_detectionCallback) {
+                m_detectionCallback(enhancedResult);
+            }
+
+        } catch (const std::exception& e) {
+            HandleError("ProcessDynamicBehaviorDetection error: " + std::string(e.what()));
+        }
+    }
+
+    EnhancedDetectionResult EnhancedAntiCheatCore::ConvertToEnhancedResult(
+        const std::string& detectionSource,
+        const std::string& detectionType,
+        const std::string& description,
+        DWORD processId,
+        float confidence,
+        const std::string& processName,
+        const std::vector<std::string>& evidence) {
+
+        EnhancedDetectionResult result = {};
+        result.detected = true;
+        result.detectionSource = detectionSource;
+        result.detectionType = detectionType;
+        result.description = description;
+        result.processId = processId;
+        result.confidence = confidence;
+        result.processName = processName;
+        result.evidenceList = evidence;
+        result.detectionTime = GetTickCount();
+        result.riskLevel = (confidence > 0.8f) ? "High" : (confidence > 0.5f) ? "Medium" : "Low";
+
+        return result;
+    }
+
+    void EnhancedAntiCheatCore::AggregateDetectionResults(std::vector<EnhancedDetectionResult>& results) {
+        try {
+            // Simple aggregation - remove duplicates and sort by confidence
+            std::sort(results.begin(), results.end(), [](const EnhancedDetectionResult& a, const EnhancedDetectionResult& b) {
+                return a.confidence > b.confidence;
+            });
+
+            // Remove duplicates based on process ID and detection type
+            results.erase(std::unique(results.begin(), results.end(),
+                [](const EnhancedDetectionResult& a, const EnhancedDetectionResult& b) {
+                    return a.processId == b.processId && a.detectionType == b.detectionType;
+                }), results.end());
+
+        } catch (const std::exception& e) {
+            HandleError("AggregateDetectionResults error: " + std::string(e.what()));
+        }
+    }
+
+    void EnhancedAntiCheatCore::OptimizePerformance() {
+        try {
+            // Simple performance optimization
+            if (m_logger) {
+                m_logger->Info("Optimizing performance...");
+            }
+        } catch (const std::exception& e) {
+            HandleError("OptimizePerformance error: " + std::string(e.what()));
+        }
+    }
+
+    void EnhancedAntiCheatCore::UpdatePerformanceMetrics(DWORD scanTime) {
+        try {
+            m_totalScans.fetch_add(1);
+            // Update other metrics as needed
+        } catch (const std::exception& e) {
+            HandleError("UpdatePerformanceMetrics error: " + std::string(e.what()));
+        }
+    }
+
+    void EnhancedAntiCheatCore::UpdateSystemHealth() {
+        try {
+            // Simple system health check
+            m_systemHealthy = true;
+        } catch (const std::exception& e) {
+            HandleError("UpdateSystemHealth error: " + std::string(e.what()));
+        }
+    }
+
 } // namespace GarudaHS

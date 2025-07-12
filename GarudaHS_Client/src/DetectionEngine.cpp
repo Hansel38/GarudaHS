@@ -346,7 +346,13 @@ namespace GarudaHS {
 
         // Scan all processes
         do {
-            std::string processName = pe32.szExeFile;
+            // Convert WCHAR to string
+            std::wstring wProcessName = pe32.szExeFile;
+            int size = WideCharToMultiByte(CP_UTF8, 0, wProcessName.c_str(), -1, nullptr, 0, nullptr, nullptr);
+            if (size <= 0) continue;
+
+            std::string processName(size - 1, 0);
+            WideCharToMultiByte(CP_UTF8, 0, wProcessName.c_str(), -1, &processName[0], size, nullptr, nullptr);
             DWORD processId = pe32.th32ProcessID;
 
             // Skip system processes
