@@ -1,0 +1,124 @@
+{
+  "version": "1.0",
+  "description": "GarudaHS File Integrity Database",
+  "last_updated": "2024-01-01T00:00:00Z",
+  "files": [
+    {
+      "filePath": "game.exe",
+      "expectedHash": "a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456",
+      "algorithm": 4,
+      "expectedSize": 1048576,
+      "isCritical": true,
+      "isProtected": true,
+      "version": "1.0",
+      "description": "Main game executable",
+      "lastUpdated": "2024-01-01T00:00:00Z",
+      "allowedHashes": [
+        "a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456",
+        "b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456a1"
+      ]
+    },
+    {
+      "filePath": "GarudaHS_Client.dll",
+      "expectedHash": "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+      "algorithm": 4,
+      "expectedSize": 524288,
+      "isCritical": true,
+      "isProtected": true,
+      "version": "1.1",
+      "description": "GarudaHS Anti-Cheat Client DLL",
+      "lastUpdated": "2024-01-01T00:00:00Z",
+      "allowedHashes": [
+        "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+      ]
+    },
+    {
+      "filePath": "garudahs_config.ini",
+      "expectedHash": "5d41402abc4b2a76b9719d911017c592",
+      "algorithm": 1,
+      "expectedSize": 4096,
+      "isCritical": false,
+      "isProtected": false,
+      "version": "1.0",
+      "description": "GarudaHS Configuration File",
+      "lastUpdated": "2024-01-01T00:00:00Z",
+      "allowedHashes": [
+        "5d41402abc4b2a76b9719d911017c592",
+        "098f6bcd4621d373cade4e832627b4f6"
+      ]
+    },
+    {
+      "filePath": "memory_signatures.json",
+      "expectedHash": "e3b0c44298fc1c149afbf4c8996fb924",
+      "algorithm": 1,
+      "expectedSize": 8192,
+      "isCritical": false,
+      "isProtected": true,
+      "version": "1.0",
+      "description": "Memory Signature Database",
+      "lastUpdated": "2024-01-01T00:00:00Z",
+      "allowedHashes": [
+        "e3b0c44298fc1c149afbf4c8996fb924"
+      ]
+    },
+    {
+      "filePath": "detection_rules.json",
+      "expectedHash": "27d4860e7b68c6b7b6b6b6b6b6b6b6b6",
+      "algorithm": 1,
+      "expectedSize": 16384,
+      "isCritical": false,
+      "isProtected": true,
+      "version": "1.0",
+      "description": "Detection Rules Configuration",
+      "lastUpdated": "2024-01-01T00:00:00Z",
+      "allowedHashes": [
+        "27d4860e7b68c6b7b6b6b6b6b6b6b6b6"
+      ]
+    },
+    {
+      "filePath": "kernel32.dll",
+      "expectedHash": "system_file_hash_placeholder",
+      "algorithm": 4,
+      "expectedSize": 0,
+      "isCritical": true,
+      "isProtected": true,
+      "version": "system",
+      "description": "Windows Kernel32 DLL",
+      "lastUpdated": "2024-01-01T00:00:00Z",
+      "allowedHashes": [
+        "system_file_hash_placeholder"
+      ]
+    },
+    {
+      "filePath": "ntdll.dll",
+      "expectedHash": "system_file_hash_placeholder_2",
+      "algorithm": 4,
+      "expectedSize": 0,
+      "isCritical": true,
+      "isProtected": true,
+      "version": "system",
+      "description": "Windows NT DLL",
+      "lastUpdated": "2024-01-01T00:00:00Z",
+      "allowedHashes": [
+        "system_file_hash_placeholder_2"
+      ]
+    }
+  ],
+  "metadata": {
+    "total_files": 7,
+    "critical_files": 4,
+    "protected_files": 6,
+    "hash_algorithms": {
+      "1": "MD5",
+      "2": "CRC32", 
+      "3": "SHA1",
+      "4": "SHA256",
+      "5": "SHA512"
+    },
+    "update_policy": {
+      "auto_update": true,
+      "update_interval_hours": 24,
+      "backup_count": 5
+    }
+  }
+}

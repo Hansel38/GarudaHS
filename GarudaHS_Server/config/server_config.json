@@ -1,0 +1,178 @@
+{
+  "server": {
+    "name": "GarudaHS File Integrity Validation Server",
+    "version": "1.0.0",
+    "description": "Server-side validation untuk File Integrity Check System",
+    "bind_address": "0.0.0.0",
+    "port": 8443,
+    "max_connections": 1000,
+    "enable_ssl": true,
+    "ssl_certificate": "certs/server.crt",
+    "ssl_private_key": "certs/server.key"
+  },
+  "security": {
+    "enable_signature_validation": true,
+    "enable_hwid_validation": true,
+    "enable_rate_limiting": true,
+    "max_requests_per_minute": 100,
+    "session_timeout_minutes": 30,
+    "hmac_key": "your_secret_hmac_key_here_change_this_in_production",
+    "encryption_key": "your_encryption_key_here_change_this_in_production",
+    "blacklist_enabled": true,
+    "whitelist_enabled": true
+  },
+  "database": {
+    "type": "json",
+    "path": "data/integrity_database.json",
+    "enable_encryption": true,
+    "backup_enabled": true,
+    "backup_interval_hours": 6,
+    "max_backups": 10
+  },
+  "validation": {
+    "confidence_threshold": 0.8,
+    "enable_heuristic_validation": true,
+    "enable_cross_validation": true,
+    "supported_algorithms": [
+      {
+        "id": 1,
+        "name": "MD5",
+        "enabled": true
+      },
+      {
+        "id": 2,
+        "name": "CRC32",
+        "enabled": true
+      },
+      {
+        "id": 3,
+        "name": "SHA1",
+        "enabled": true
+      },
+      {
+        "id": 4,
+        "name": "SHA256",
+        "enabled": true,
+        "preferred": true
+      },
+      {
+        "id": 5,
+        "name": "SHA512",
+        "enabled": true
+      }
+    ]
+  },
+  "logging": {
+    "enable_detailed_logging": true,
+    "enable_audit_log": true,
+    "log_level": "INFO",
+    "log_path": "logs/",
+    "max_log_size_mb": 100,
+    "max_log_files": 10,
+    "log_rotation": true,
+    "log_format": "[%timestamp%] [%level%] [%source%] %message%"
+  },
+  "performance": {
+    "max_concurrent_validations": 50,
+    "validation_timeout_seconds": 30,
+    "cache_enabled": true,
+    "cache_size_mb": 64,
+    "cache_ttl_minutes": 60,
+    "worker_threads": 4
+  },
+  "monitoring": {
+    "enable_metrics": true,
+    "metrics_port": 9090,
+    "health_check_enabled": true,
+    "health_check_interval_seconds": 30,
+    "alert_thresholds": {
+      "cpu_usage_percent": 80,
+      "memory_usage_percent": 85,
+      "disk_usage_percent": 90,
+      "error_rate_percent": 5
+    }
+  },
+  "api": {
+    "version": "v1",
+    "base_path": "/api/v1",
+    "endpoints": {
+      "validate": "/validate",
+      "health": "/health",
+      "metrics": "/metrics",
+      "status": "/status"
+    },
+    "request_size_limit_mb": 10,
+    "response_compression": true
+  },
+  "client_management": {
+    "auto_registration": false,
+    "require_authentication": true,
+    "session_management": true,
+    "client_timeout_minutes": 60,
+    "max_clients_per_ip": 5
+  },
+  "file_categories": {
+    "critical": {
+      "description": "Critical system files that must not be modified",
+      "extensions": [".exe", ".dll", ".sys"],
+      "immediate_action": true,
+      "alert_level": "CRITICAL"
+    },
+    "protected": {
+      "description": "Protected files with high security importance",
+      "extensions": [".dll", ".so", ".dylib"],
+      "immediate_action": false,
+      "alert_level": "HIGH"
+    },
+    "config": {
+      "description": "Configuration files",
+      "extensions": [".ini", ".cfg", ".conf", ".json"],
+      "immediate_action": false,
+      "alert_level": "MEDIUM"
+    },
+    "script": {
+      "description": "Script files",
+      "extensions": [".lua", ".js", ".py", ".vbs"],
+      "immediate_action": false,
+      "alert_level": "MEDIUM"
+    },
+    "asset": {
+      "description": "Game asset files",
+      "extensions": [".pak", ".dat", ".res", ".bin"],
+      "immediate_action": false,
+      "alert_level": "LOW"
+    }
+  },
+  "response_actions": {
+    "critical_violation": {
+      "log_event": true,
+      "send_alert": true,
+      "blacklist_client": false,
+      "terminate_session": true
+    },
+    "high_violation": {
+      "log_event": true,
+      "send_alert": true,
+      "blacklist_client": false,
+      "terminate_session": false
+    },
+    "medium_violation": {
+      "log_event": true,
+      "send_alert": false,
+      "blacklist_client": false,
+      "terminate_session": false
+    },
+    "low_violation": {
+      "log_event": true,
+      "send_alert": false,
+      "blacklist_client": false,
+      "terminate_session": false
+    }
+  },
+  "development": {
+    "debug_mode": false,
+    "verbose_logging": false,
+    "test_mode": false,
+    "mock_validation": false
+  }
+}

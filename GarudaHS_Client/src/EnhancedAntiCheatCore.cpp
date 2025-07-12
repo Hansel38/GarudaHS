@@ -283,7 +283,37 @@ namespace GarudaHS {
                 
                 m_logger->Info("Dynamic Behavior Detector initialized");
             }
-            
+
+            // Initialize File Integrity Checker
+            if (m_enhancedConfig.enableFileIntegrityChecking) {
+                m_fileIntegrityChecker = std::make_unique<FileIntegrityChecker>(m_logger);
+
+                FileIntegrityConfig integrityConfig = {};
+                integrityConfig.enableRealTimeMonitoring = m_enhancedConfig.enableRealTimeMonitoring;
+                integrityConfig.enablePeriodicScanning = true;
+                integrityConfig.scanIntervalMs = m_enhancedConfig.scanIntervalMs;
+                integrityConfig.confidenceThreshold = m_enhancedConfig.globalConfidenceThreshold;
+                integrityConfig.enableHeuristicAnalysis = true;
+                integrityConfig.enableSizeValidation = true;
+                integrityConfig.enableCaching = true;
+                integrityConfig.enableMultiThreading = true;
+                integrityConfig.maxWorkerThreads = 2;
+                integrityConfig.monitorExecutables = true;
+                integrityConfig.monitorLibraries = true;
+                integrityConfig.monitorConfigs = true;
+                integrityConfig.monitorScripts = true;
+
+                if (!m_fileIntegrityChecker->Initialize(integrityConfig)) {
+                    m_logger->Error("Failed to initialize File Integrity Checker");
+                    return false;
+                }
+
+                // Add critical files to monitor
+                AddCriticalFilesToMonitor();
+
+                m_logger->Info("File Integrity Checker initialized");
+            }
+
             return true;
             
         } catch (const std::exception& e) {
@@ -378,6 +408,13 @@ namespace GarudaHS {
                     });
             }
 
+            if (m_fileIntegrityChecker) {
+                m_fileIntegrityChecker->SetViolationCallback(
+                    [this](const FileIntegrityResult& result) {
+                        ProcessFileIntegrityDetection(result);
+                    });
+            }
+
             m_logger->Info("Detection callbacks configured successfully");
 
         } catch (const std::exception& e) {
@@ -427,6 +464,12 @@ namespace GarudaHS {
             if (m_dynamicBehaviorDetector && m_enhancedConfig.enableRealTimeMonitoring) {
                 if (!m_dynamicBehaviorDetector->StartRealTimeMonitoring()) {
                     m_logger->Warning("Failed to start Dynamic Behavior Detector monitoring");
+                }
+            }
+
+            if (m_fileIntegrityChecker && m_enhancedConfig.enableRealTimeMonitoring) {
+                if (!m_fileIntegrityChecker->StartRealTimeMonitoring()) {
+                    m_logger->Warning("Failed to start File Integrity Checker monitoring");
                 }
             }
 
@@ -921,6 +964,153 @@ namespace GarudaHS {
             m_systemHealthy = true;
         } catch (const std::exception& e) {
             HandleError("UpdateSystemHealth error: " + std::string(e.what()));
+        }
+    }
+
+    void EnhancedAntiCheatCore::AddCriticalFilesToMonitor() {
+        try {
+            if (!m_fileIntegrityChecker) {
+                return;
+            }
+
+            // Add game executable
+            char exePath[MAX_PATH];
+            if (GetModuleFileNameA(nullptr, exePath, MAX_PATH)) {
+                FileEntry gameExe = {};
+                gameExe.filePath = exePath;
+                gameExe.expectedHash = ""; // Would be calculated during deployment
+                gameExe.algorithm = HashAlgorithm::SHA256;
+                gameExe.isCritical = true;
+                gameExe.isProtected = true;
+                gameExe.expectedSize = 0;
+                gameExe.description = "Main game executable";
+                gameExe.category = "executable";
+
+                m_fileIntegrityChecker->AddFileToMonitor(gameExe);
+            }
+
+            // Add anti-cheat DLL
+            HMODULE hModule = GetModuleHandleA("GarudaHS_Client.dll");
+            if (hModule) {
+                char dllPath[MAX_PATH];
+                if (GetModuleFileNameA(hModule, dllPath, MAX_PATH)) {
+                    FileEntry antiCheatDll = {};
+                    antiCheatDll.filePath = dllPath;
+                    antiCheatDll.expectedHash = ""; // Would be calculated during deployment
+                    antiCheatDll.algorithm = HashAlgorithm::SHA256;
+                    antiCheatDll.isCritical = true;
+                    antiCheatDll.isProtected = true;
+                    antiCheatDll.expectedSize = 0;
+                    antiCheatDll.description = "GarudaHS Anti-Cheat DLL";
+                    antiCheatDll.category = "executable";
+
+                    m_fileIntegrityChecker->AddFileToMonitor(antiCheatDll);
+                }
+            }
+
+            // Add configuration files
+            FileEntry configFile = {};
+            configFile.filePath = "garudahs_config.ini";
+            configFile.expectedHash = ""; // Would be calculated during deployment
+            configFile.algorithm = HashAlgorithm::MD5;
+            configFile.isCritical = false;
+            configFile.isProtected = false;
+            configFile.expectedSize = 0;
+            configFile.description = "GarudaHS Configuration File";
+            configFile.category = "config";
+
+            m_fileIntegrityChecker->AddFileToMonitor(configFile);
+
+            m_logger->Info("Added critical files to integrity monitoring");
+
+        } catch (const std::exception& e) {
+            HandleError("AddCriticalFilesToMonitor failed: " + std::string(e.what()));
+        }
+    }
+
+    void EnhancedAntiCheatCore::ProcessFileIntegrityDetection(const FileIntegrityResult& result) {
+        try {
+            if (result.status == IntegrityStatus::VALID) {
+                // File is valid, no action needed
+                return;
+            }
+
+            EnhancedDetectionResult detection = {};
+            detection.detected = true;
+            detection.detectionSource = "FileIntegrityChecker";
+            detection.detectionType = "File Integrity Violation";
+            detection.processName = "N/A";
+            detection.processId = GetCurrentProcessId();
+            detection.confidence = result.confidence;
+            detection.detectionTime = result.scanTime;
+
+            switch (result.status) {
+                case IntegrityStatus::MODIFIED:
+                    detection.description = "File has been modified: " + result.filePath;
+                    detection.riskLevel = result.isCritical ? "CRITICAL" : "HIGH";
+                    break;
+                case IntegrityStatus::MISSING:
+                    detection.description = "File is missing: " + result.filePath;
+                    detection.riskLevel = result.isCritical ? "CRITICAL" : "MEDIUM";
+                    break;
+                case IntegrityStatus::SUSPICIOUS:
+                    detection.description = "File appears suspicious: " + result.filePath;
+                    detection.riskLevel = "MEDIUM";
+                    break;
+                case IntegrityStatus::ACCESS_DENIED:
+                    detection.description = "Cannot access file: " + result.filePath;
+                    detection.riskLevel = "LOW";
+                    break;
+                default:
+                    detection.description = "Unknown file integrity issue: " + result.filePath;
+                    detection.riskLevel = "MEDIUM";
+                    break;
+            }
+
+            detection.evidenceList.push_back("Expected hash: " + result.expectedHash);
+            detection.evidenceList.push_back("Actual hash: " + result.actualHash);
+            detection.evidenceList.push_back("File size: " + std::to_string(result.fileSize));
+            detection.evidenceList.push_back("Reason: " + result.reason);
+
+            // Add to detection history
+            {
+                std::lock_guard<std::mutex> lock(m_historyMutex);
+                m_detectionHistory.push_back(detection);
+
+                // Limit history size
+                if (m_detectionHistory.size() > 1000) {
+                    m_detectionHistory.erase(m_detectionHistory.begin());
+                }
+            }
+
+            // Update statistics
+            m_totalDetections.fetch_add(1);
+            if (result.isCritical) {
+                m_truePositives.fetch_add(1);
+            }
+
+            // Log detection
+            m_logger->WarningF("File integrity violation detected: %s - %s",
+                             result.filePath.c_str(), result.reason.c_str());
+
+            // Trigger callback
+            {
+                std::lock_guard<std::mutex> lock(m_callbackMutex);
+                if (m_detectionCallback) {
+                    m_detectionCallback(detection);
+                }
+            }
+
+            // Take action based on severity
+            if (result.isCritical && m_enhancedConfig.enableAutomaticResponse) {
+                if (m_enhancedConfig.enableGameTermination) {
+                    m_logger->Error("Critical file integrity violation - terminating application");
+                    ExitProcess(1);
+                }
+            }
+
+        } catch (const std::exception& e) {
+            HandleError("ProcessFileIntegrityDetection failed: " + std::string(e.what()));
         }
     }
 

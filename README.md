@@ -34,6 +34,27 @@
 
 **GarudaHS V.1.1+** adalah sistem anti-cheat profesional yang menggunakan **Static Linking + Module Definition** dengan **security obfuscation** untuk memberikan perlindungan maksimal dengan minimal exports dan maksimal keamanan.
 
+## 🆕 **Update V.1.2+ - File Integrity Check System**
+
+### 🔐 **New Feature: File Integrity Check**
+- **Client-Side Scanning**: Multi-algorithm hashing (MD5, CRC32, SHA-1, SHA-256, SHA-512)
+- **Server-Side Validation**: Secure hash validation dengan anti-spoofing protection
+- **Real-time Monitoring**: Pemantauan file critical secara real-time
+- **Database Encryption**: Encrypted integrity database untuk keamanan
+- **HMAC Signatures**: Secure communication dengan HMAC validation
+- **Session Management**: Secure client session management dengan timeout
+- **Rate Limiting**: Protection terhadap abuse dan flooding
+- **Audit Logging**: Comprehensive logging untuk monitoring dan forensik
+- **Cache Optimization**: Performance optimization dengan intelligent caching
+- **Multi-threading Support**: Parallel processing untuk scanning optimal
+
+### 🛡️ **Security Enhancements**
+- **Anti-Tampering**: Protection terhadap file modification dan patching
+- **Critical File Protection**: Special protection untuk executable dan DLL penting
+- **Heuristic Analysis**: Advanced analysis untuk deteksi anomali
+- **Cross-Validation**: Multiple validation layers untuk accuracy
+- **Hardware ID Integration**: HWID validation untuk additional security
+
 ## 🆕 **Update V.1.1+ - Build Fix & Enhanced Stability**
 
 ### ✅ **Perbaikan Build Issues**
@@ -244,6 +265,19 @@ Real-time monitoring behavior mencurigakan:
 - **Module Enumeration**: Deteksi module enumeration activities
 - **Handle Manipulation**: Monitoring suspicious handle operations
 - **API Hooking Detection**: Deteksi API hooking attempts
+
+#### 🔐 File Integrity Check System
+Comprehensive file integrity validation dengan client-server architecture:
+- **Multi-Algorithm Hashing**: MD5, CRC32, SHA-1, SHA-256, SHA-512 support
+- **Real-time File Monitoring**: Pemantauan file critical secara real-time
+- **Server-Side Validation**: Validasi hash di server untuk anti-spoofing
+- **Critical File Protection**: Proteksi khusus untuk executable dan DLL penting
+- **Cache Optimization**: Sistem cache untuk performa optimal
+- **HMAC Signatures**: Tanda tangan HMAC untuk keamanan komunikasi
+- **Database Encryption**: Enkripsi database integrity untuk keamanan
+- **Session Management**: Manajemen sesi client yang aman dengan timeout
+- **Rate Limiting**: Pembatasan request untuk mencegah abuse
+- **Audit Logging**: Logging komprehensif untuk monitoring dan forensik
 
 ### 🎯 **Target Detection Spesifik**
 
@@ -1301,6 +1335,75 @@ struct EnhancedDetectionResult {
 };
 ```
 
+### 🔐 **File Integrity Checker**
+
+```cpp
+#include "FileIntegrityChecker.h"
+
+// Create checker
+FileIntegrityChecker checker;
+
+// Configure
+FileIntegrityConfig config = {};
+config.enableRealTimeMonitoring = true;
+config.enablePeriodicScanning = true;
+config.scanIntervalMs = 30000;
+config.confidenceThreshold = 0.8f;
+config.enableCaching = true;
+config.enableMultiThreading = true;
+config.monitorExecutables = true;
+config.monitorLibraries = true;
+config.monitorConfigs = true;
+
+// Initialize
+checker.Initialize(config);
+
+// Add file to monitor
+FileEntry entry = {};
+entry.filePath = "game.exe";
+entry.expectedHash = "a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456";
+entry.algorithm = HashAlgorithm::SHA256;
+entry.isCritical = true;
+entry.isProtected = true;
+entry.description = "Main game executable";
+
+checker.AddFileToMonitor(entry);
+
+// Check file integrity
+FileIntegrityResult result = checker.CheckFile("game.exe");
+if (result.status == IntegrityStatus::VALID) {
+    std::cout << "File integrity verified" << std::endl;
+} else {
+    std::cout << "File integrity violation detected!" << std::endl;
+    std::cout << "Status: " << static_cast<int>(result.status) << std::endl;
+    std::cout << "Reason: " << result.reason << std::endl;
+    std::cout << "Expected: " << result.expectedHash << std::endl;
+    std::cout << "Actual: " << result.actualHash << std::endl;
+}
+
+// Set violation callback
+checker.SetViolationCallback([](const FileIntegrityResult& violation) {
+    std::cout << "VIOLATION: " << violation.filePath << std::endl;
+    std::cout << "Reason: " << violation.reason << std::endl;
+
+    if (violation.isCritical) {
+        std::cout << "CRITICAL FILE MODIFIED - TERMINATING" << std::endl;
+        ExitProcess(1);
+    }
+});
+
+// Start real-time monitoring
+checker.StartRealTimeMonitoring();
+
+// Perform full scan
+auto results = checker.PerformFullScan();
+for (const auto& result : results) {
+    if (result.status != IntegrityStatus::VALID) {
+        std::cout << "Violation: " << result.filePath << std::endl;
+    }
+}
+```
+
 ### 🎮 **Enhanced Integration Example**
 
 ```cpp
@@ -1877,6 +1980,7 @@ void CollectDiagnostics() {
 | **Memory Signature Scanner** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ **Full** | ✅ **Enhanced** |
 | **Thread Injection Tracer** | ❌ | ❌ | ❌ | ❌ | ✅ **8 Methods** | ❌ | ❌ | ✅ **10+ Methods** |
 | **Enhanced Module Blacklist** | ❌ | ❌ | ❌ | ❌ | ✅ **Advanced** | ❌ | ❌ | ✅ **Ultimate** |
+| **File Integrity Check** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ **Client-Server** |
 | **Code Protection** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ **Obfuscation** |
 | **Runtime Protection** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ **Advanced** |
 | **Input Validation** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ **Comprehensive** |

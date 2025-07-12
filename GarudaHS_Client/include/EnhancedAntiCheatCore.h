@@ -15,6 +15,7 @@
 #include "ThreadInjectionTracer.h"
 #include "EnhancedModuleBlacklist.h"
 #include "DynamicBehaviorDetector.h"
+#include "FileIntegrityChecker.h"
 
 // Include existing systems
 #include "ProcessWatcher.h"
@@ -49,6 +50,7 @@ namespace GarudaHS {
         bool enableThreadInjectionTracing = true;
         bool enableEnhancedModuleBlacklist = true;
         bool enableDynamicBehaviorDetection = true;
+        bool enableFileIntegrityChecking = true;
         
         // Existing systems (keep compatibility)
         bool enableProcessWatcher = true;
@@ -145,6 +147,7 @@ namespace GarudaHS {
         std::unique_ptr<ThreadInjectionTracer> m_threadInjectionTracer;
         std::unique_ptr<EnhancedModuleBlacklist> m_enhancedModuleBlacklist;
         std::unique_ptr<DynamicBehaviorDetector> m_dynamicBehaviorDetector;
+        std::unique_ptr<FileIntegrityChecker> m_fileIntegrityChecker;
         
         // Existing detection systems (for compatibility)
         std::unique_ptr<ProcessWatcher> m_processWatcher;
@@ -196,6 +199,10 @@ namespace GarudaHS {
         // Detection processing
         void ProcessEnhancedSignatureDetection(const EnhancedSignatureResult& result);
         void ProcessHeuristicMemoryDetection(const HeuristicScanResult& result);
+        void ProcessFileIntegrityDetection(const FileIntegrityResult& result);
+
+        // File integrity management
+        void AddCriticalFilesToMonitor();
         void ProcessThreadInjectionDetection(const ThreadInjectionResult& result);
         void ProcessModuleBlacklistDetection(const ModuleDetectionResult& result);
         void ProcessDynamicBehaviorDetection(const BehaviorDetectionResult& result);
